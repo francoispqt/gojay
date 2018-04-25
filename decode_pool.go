@@ -21,7 +21,6 @@ func newDecoder(r io.Reader, bufSize int) *Decoder {
 		dec.length = 0
 		if bufSize > 0 {
 			dec.data = make([]byte, bufSize)
-			dec.length = 0
 		}
 		return dec
 	default:
