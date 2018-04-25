@@ -30,7 +30,7 @@ type user struct {
     email string
 }
 // implement UnmarshalerObject
-func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) {
+func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) error {
     switch k {
     case "id":
         return dec.AddInt(&u.id)
@@ -39,6 +39,7 @@ func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) {
     case "email":
         return dec.AddString(&u.email)
     }
+    return nil
 }
 func (u *user) NKeys() int {
     return 3
@@ -76,7 +77,7 @@ type user struct {
     email string
 }
 // implement UnmarshalerObject
-func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) {
+func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) error {
     switch k {
     case "id":
         return dec.AddInt(&u.id)
@@ -85,6 +86,7 @@ func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) {
     case "email":
         return dec.AddString(&u.email)
     }
+    return nil
 }
 func (u *user) NKeys() int {
     return 3
@@ -105,7 +107,7 @@ UnmarshalArray method takes one argument, a pointer to the Decoder (*gojay.Decod
 Example of implementation with a slice: 
 ```go
 type testSlice []string
-
+// implement UnmarshalerArray
 func (t *testStringArr) UnmarshalArray(dec *gojay.Decoder) error {
 	str := ""
 	if err := dec.AddString(&str); err != nil {
@@ -119,7 +121,7 @@ func (t *testStringArr) UnmarshalArray(dec *gojay.Decoder) error {
 Example of implementation with a channel: 
 ```go
 type ChannelString chan string
-
+// implement UnmarshalerArray
 func (c *ChannelArray) UnmarshalArray(dec *gojay.Decoder) error {
 	str := ""
 	if err := dec.AddString(&str); err != nil {
@@ -140,7 +142,7 @@ When using the Stream API, the Decoder implements context.Context to provide gra
 Example: 
 ```go
 type ChannelStream chan *TestObj
-
+// implement UnmarshalerStream
 func (c *ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
 	obj := &TestObj{}
 	if err := dec.AddObject(obj); err != nil {
@@ -170,6 +172,20 @@ func main() {
 ```
 
 ### Other types
+To decode other types (string, int, int32, int64, uint32, uint64, float, booleans), you don't need to implement any interface. 
+
+Example of encoding strings:
+```go
+func main() {
+    json := []byte(`"Jay"`)
+    var v string
+    err := Unmarshal(json, &v)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(v) // Jay
+}
+```
 
 ## Encoding
 
@@ -182,7 +198,7 @@ type user struct {
     name string
     email string
 }
-// implement UnmarshalerObject
+// implement MarshalerObject
 func (u *user) MarshalObject(dec *gojay.Decoder, key string) {
     dec.AddIntKey("id", u.id)
     dec.AddStringKey("name", u.name)
@@ -219,7 +235,7 @@ type user struct {
     name string
     email string
 }
-// implement UnmarshalerObject
+// implement MarshalerObject
 func (u *user) MarshalObject(dec *gojay.Decoder, key string) {
     dec.AddIntKey("id", u.id)
     dec.AddStringKey("name", u.name)
@@ -242,7 +258,7 @@ MarshalArray method takes one argument, a pointer to the Encoder (*gojay.Encoder
 Example of implementation: 
 ```go
 type users []*user
-
+// implement MarshalerArray
 func (u *users) MarshalArray(dec *Decoder) error {
 	for _, e := range u {
         err := enc.AddObject(e)
@@ -255,6 +271,20 @@ func (u *users) MarshalArray(dec *Decoder) error {
 ```
 
 ### Other types
+To encode other types (string, int, float, booleans), you don't need to implement any interface. 
+
+Example of encoding strings:
+```go
+func main() {
+    name := "Jay"
+    b, err := gojay.Marshal(&name)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(string(b)) // "Jay"
+}
+```
+
 
 # Benchmarks
 
