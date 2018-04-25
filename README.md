@@ -200,7 +200,60 @@ func main() {
 ```
 
 ### Structs
+
+To encode a structure, the structure must implement the MarshalerObject interface:
+```go
+type MarshalerObject interface {
+	MarshalObject(enc *Encoder)
+	IsNil() bool
+}
+```
+MarshalObject method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all the keys in the JSON Object by calling Decoder's methods. 
+
+IsNil method returns a boolean indicating if the interface underlying value is nil or not. It is used to safely ensure that the underlying value is not nil without using Reflection. 
+
+Example of implementation: 
+```go 
+type user struct {
+    id int
+    name string
+    email string
+}
+// implement UnmarshalerObject
+func (u *user) MarshalObject(dec *gojay.Decoder, key string) {
+    dec.AddIntKey("id", u.id)
+    dec.AddStringKey("name", u.name)
+    dec.AddStringKey("email", u.email)
+}
+func (u *user) IsNil() bool {
+    return u == nil
+}
+```
+
 ### Arrays and Slices
+To encode an array or a slice, the slice/array must implement the MarshalerArray interface:
+```go
+type MarshalerArray interface {
+	MarshalArray(enc *Encoder)
+}
+```
+MarshalArray method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
+
+Example of implementation: 
+```go
+type users []*user
+
+func (u *users) MarshalArray(dec *Decoder) error {
+	for _, e := range u {
+        err := enc.AddObject(e)
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+```
+
 ### Other types
 
 # Benchmarks
