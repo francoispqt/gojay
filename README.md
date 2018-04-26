@@ -214,10 +214,10 @@ type user struct {
     email string
 }
 // implement MarshalerObject
-func (u *user) MarshalObject(dec *gojay.Decoder, key string) {
-    dec.AddIntKey("id", u.id)
-    dec.AddStringKey("name", u.name)
-    dec.AddStringKey("email", u.email)
+func (u *user) MarshalObject(enc *gojay.Encoder) {
+    enc.AddIntKey("id", u.id)
+    enc.AddStringKey("name", u.name)
+    enc.AddStringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
     return u == nil
