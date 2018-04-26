@@ -128,6 +128,7 @@ func (m *LargePayload) NKeys() int {
 	return 2
 }
 
+//easyjson:json
 func (m *LargePayload) MarshalObject(enc *gojay.Encoder) {
 	enc.AddArrayKey("users", &m.Users)
 	enc.AddObjectKey("topics", m.Topics)
