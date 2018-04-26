@@ -13,6 +13,41 @@ func TestDecoderIntBasic(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, 124, v, "v must be equal to 124")
 }
+func TestDecoderIntExponent(t *testing.T) {
+	json := []byte(`1E+2`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 100, v, "v must be equal to 100")
+}
+func TestDecoderIntExponent1(t *testing.T) {
+	json := []byte(`4E+2`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 400, v, "v must be equal to 100")
+}
+func TestDecoderIntExponentComplex(t *testing.T) {
+	json := []byte(`-3E-004`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 0, v, "v must be equal to 0")
+}
+func TestDecoderIntExponentComplex1(t *testing.T) {
+	json := []byte(`-3.12E+005`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, -312000, v, "v must be equal to -312000")
+}
+func TestDecoderIntExponentComplex2(t *testing.T) {
+	json := []byte(`3.12E+005`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 312000, v, "v must be equal to 312000")
+}
 func TestDecoderIntNegative(t *testing.T) {
 	json := []byte(`-124`)
 	var v int
@@ -185,6 +220,7 @@ func TestDecoderInt64Negative(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, int64(-124), v, "v must be equal to -124")
 }
+
 func TestDecoderInt64Null(t *testing.T) {
 	json := []byte(`null`)
 	var v int64

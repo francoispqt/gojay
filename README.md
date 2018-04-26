@@ -6,6 +6,9 @@
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 
 # GoJay
+
+**Package is currently at version 0.9 and still under development**
+
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
 It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices.

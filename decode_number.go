@@ -61,6 +61,7 @@ func (dec *Decoder) DecodeInt(v *int) error {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			val, err := dec.getInt64(c)
 			if err != nil {
@@ -350,16 +351,71 @@ func (dec *Decoder) getInt64(b byte) (int64, error) {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			end = j
 			continue
-		case ' ', '\n', '\t', '\r':
-			continue
-		case '.', ',', '}', ']':
+		case ',', '}', ']':
 			dec.cursor = j
 			return dec.atoi64(start, end), nil
+		case '.':
+			// if dot is found
+			// look for exponent (e,E) as exponent can change the
+			// way number should be parsed to int.
+			// if no exponent found, just unmarshal the number before decimal point
+			for ; j < dec.length || dec.read(); j++ {
+				switch dec.data[j] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					continue
+				case 'e', 'E':
+					// can try unmarshalling to int as Exponent might change decimal number to non decimal
+				default:
+					dec.cursor = j
+					return dec.atoi64(start, end), nil
+				}
+			}
+			return dec.atoi64(start, end), nil
+		case 'e', 'E':
+			// get init n
+			return dec.getInt64WithExp(dec.atoi64(start, end), j+1)
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
 		return 0, InvalidJSONError("Invalid JSON while parsing number")
 	}
 	return dec.atoi64(start, end), nil
+}
+
+func (dec *Decoder) getInt64WithExp(init int64, cursor int) (int64, error) {
+	var exp uint64
+	var sign = int64(1)
+	for ; cursor < dec.length || dec.read(); cursor++ {
+		switch dec.data[cursor] {
+		case '+':
+			continue
+		case '-':
+			sign = -1
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			uintv := uint64(digits[dec.data[cursor]])
+			exp = (exp << 3) + (exp << 1) + uintv
+			cursor++
+			for ; cursor < dec.length || dec.read(); cursor++ {
+				switch dec.data[cursor] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					uintv := uint64(digits[dec.data[cursor]])
+					exp = (exp << 3) + (exp << 1) + uintv
+				default:
+					if sign == -1 {
+						return init * (1 / int64(pow10uint64[exp+1])), nil
+					}
+					return init * int64(pow10uint64[exp+1]), nil
+				}
+			}
+			if sign == -1 {
+				return init * (1 / int64(pow10uint64[exp+1])), nil
+			}
+			return init * int64(pow10uint64[exp+1]), nil
+		default:
+			dec.err = InvalidJSONError("Invalid JSON")
+			return 0, dec.err
+		}
+	}
+	return 0, InvalidJSONError("Invalid JSON")
 }
 
 func (dec *Decoder) getUint64(b byte) (uint64, error) {
