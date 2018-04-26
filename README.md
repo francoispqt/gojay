@@ -31,7 +31,7 @@ type user struct {
 }
 // implement UnmarshalerObject
 func (u *user) UnmarshalObject(dec *gojay.Decoder, key string) error {
-    switch k {
+    switch key {
     case "id":
         return dec.AddInt(&u.id)
     case "name":
