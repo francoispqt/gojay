@@ -496,3 +496,110 @@ func TestDecodeAllTypes(t *testing.T) {
 		})
 	}
 }
+
+func TestUnmarshalObjects(t *testing.T) {
+	testCases := []struct {
+		name         string
+		v            UnmarshalerObject
+		d            []byte
+		expectations func(err error, v interface{}, t *testing.T)
+	}{
+		{
+			v:    new(testDecodeObj),
+			d:    []byte(`{"test":"test"}`),
+			name: "test decode object",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*testDecodeObj)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, "test", vt.test, "v.test must be equal to 'test'")
+			},
+		},
+		{
+			v:    new(testDecodeObj),
+			d:    []byte(`{"test":null}`),
+			name: "test decode object null key",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*testDecodeObj)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, "", vt.test, "v.test must be equal to 'test'")
+			},
+		},
+		{
+			v:    new(testDecodeObj),
+			d:    []byte(`null`),
+			name: "test decode object null",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*testDecodeObj)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, "", vt.test, "v.test must be equal to 'test'")
+			},
+		},
+		{
+			v:    new(testDecodeObj),
+			d:    []byte(`invalid json`),
+			name: "test decode object null",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must not be nil")
+				assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		testCase := testCase
+		t.Run(testCase.name, func(*testing.T) {
+			err := UnmarshalObject(testCase.d, testCase.v)
+			testCase.expectations(err, testCase.v, t)
+		})
+	}
+}
+
+func TestUnmarshalArrays(t *testing.T) {
+	testCases := []struct {
+		name         string
+		v            UnmarshalerArray
+		d            []byte
+		expectations func(err error, v interface{}, t *testing.T)
+	}{
+		{
+			v:    new(testDecodeSlice),
+			d:    []byte(`[{"test":"test"}]`),
+			name: "test decode slice",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vtPtr := v.(*testDecodeSlice)
+				vt := *vtPtr
+				assert.Nil(t, err, "err must be nil")
+				assert.Len(t, vt, 1, "len of vt must be 1")
+				assert.Equal(t, "test", vt[0].test, "vt[0].test must be equal to 'test'")
+			},
+		},
+		{
+			v:    new(testDecodeSlice),
+			d:    []byte(`[{"test":"test"},{"test":"test2"}]`),
+			name: "test decode slice",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vtPtr := v.(*testDecodeSlice)
+				vt := *vtPtr
+				assert.Nil(t, err, "err must be nil")
+				assert.Len(t, vt, 2, "len of vt must be 2")
+				assert.Equal(t, "test", vt[0].test, "vt[0].test must be equal to 'test'")
+				assert.Equal(t, "test2", vt[1].test, "vt[1].test must be equal to 'test2'")
+			},
+		},
+		{
+			v:    new(testDecodeSlice),
+			d:    []byte(`invalid json`),
+			name: "test decode object null",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must not be nil")
+				assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		testCase := testCase
+		t.Run(testCase.name, func(*testing.T) {
+			err := UnmarshalArray(testCase.d, testCase.v)
+			testCase.expectations(err, testCase.v, t)
+		})
+	}
+}
