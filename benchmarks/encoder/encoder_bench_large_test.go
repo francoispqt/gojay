@@ -29,7 +29,7 @@ func BenchmarkJsonIterEncodeLargeStruct(b *testing.B) {
 	}
 }
 
-func BenchmarkEasyJsonDecodeObjLarge(b *testing.B) {
+func BenchmarkEasyJsonEncodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		if _, err := easyjson.Marshal(benchmarks.NewLargePayload()); err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/francoispqt/gojay"
 	"github.com/francoispqt/gojay/benchmarks"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/mailru/easyjson"
 )
 
 func BenchmarkEncodingJsonEncodeMediumStruct(b *testing.B) {
@@ -24,6 +25,15 @@ func BenchmarkJsonIterEncodeMediumStruct(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		if _, err := json.Marshal(benchmarks.NewMediumPayload()); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkEasyJsonEncodeObjMedium(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		if _, err := easyjson.Marshal(benchmarks.NewMediumPayload()); err != nil {
 			b.Fatal(err)
 		}
 	}

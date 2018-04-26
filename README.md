@@ -315,6 +315,7 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 | Std Library | 4661  | 496          | 12        |
 | JsonParser  | 1313  | 0            | 0         |
 | JsonIter    | 899   | 192          | 5         |
+| EasyJson    | 929   | 240          | 2         |
 | GoJay       | 662   | 112          | 1         |
 
 ### Medium Payload
@@ -326,8 +327,9 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 |-------------|-------|--------------|-----------|
 | Std Library | 30148 | 2152         | 496       |
 | JsonParser  | 7793  | 0            | 0         |
+| EasyJson    | 7957  | 232          | 6         |
 | JsonIter    | 5967  | 496          | 44        |
-| GoJay       | 3914  | 128          | 12        |
+| GoJay       | 3914  | 128          | 7         |
 
 ### Large Payload
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/decoder/decoder_bench_large_test.go)
@@ -336,6 +338,7 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 
 |             | ns/op | bytes/op     | allocs/op |
 |-------------|-------|--------------|-----------|
+| EasyJson    | 106626| 160          | 2         |
 | JsonParser  | 66813 | 0            | 0         |
 | JsonIter    | 87994 | 6738         | 329       |
 | GoJay       | 43402 | 1408         | 76        |
@@ -352,8 +355,10 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 |             | ns/op | bytes/op     | allocs/op |
 |-------------|-------|--------------|-----------|
 | Std Library | 1280  | 464          | 3         |
+| EasyJson    | 871   | 944          | 6         |
 | JsonIter    | 866   | 272          | 3         |
 | GoJay       | 484   | 320          | 2         |
+
 ### Medium Struct
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/encoder/encoder_bench_medium_test.go)
 
@@ -362,6 +367,7 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 |             | ns/op | bytes/op     | allocs/op |
 |-------------|-------|--------------|-----------|
 | Std Library | 3325  | 1496         | 18        |
+| EasyJson    | 1997  | 1320         | 19        |
 | JsonIter    | 1939  | 648          | 16        |
 | GoJay       | 1196  | 936          | 16        |
 
@@ -374,6 +380,7 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 |-------------|-------|--------------|-----------|
 | Std Library | 51317 | 28704        | 326       |
 | JsonIter    | 35247 | 14608        | 320       |
+| EasyJson    | 32053 | 15474        | 327       |
 | GoJay       | 27847 | 27888        | 326       |
 
 # Contributing
