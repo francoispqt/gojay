@@ -9,6 +9,7 @@ import (
 	"github.com/francoispqt/gojay"
 	"github.com/francoispqt/gojay/benchmarks"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/mailru/easyjson"
 )
 
 func BenchmarkJSONDecodeObjSmall(b *testing.B) {
@@ -40,6 +41,14 @@ func BenchmarkJsonIterDecodeObjSmall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		result := benchmarks.SmallPayload{}
 		jsoniter.Unmarshal(benchmarks.SmallFixture, &result)
+	}
+}
+
+func BenchmarkEasyJsonDecodeObjSmall(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		result := benchmarks.SmallPayload{}
+		easyjson.Unmarshal(benchmarks.SmallFixture, &result)
 	}
 }
 
