@@ -18,10 +18,13 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	dec.length = len(data)
 	_, err := dec.DecodeArray(v)
 	dec.addToPool()
+	if err != nil {
+		return err
+	}
 	if dec.err != nil {
 		return dec.err
 	}
-	return err
+	return nil
 }
 
 // UnmarshalObject parses the JSON-encoded data and stores the result in the value pointed to by v.
@@ -36,7 +39,13 @@ func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 	dec.length = len(data)
 	_, err := dec.DecodeObject(v)
 	dec.addToPool()
-	return err
+	if err != nil {
+		return err
+	}
+	if dec.err != nil {
+		return dec.err
+	}
+	return nil
 }
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.

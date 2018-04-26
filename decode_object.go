@@ -54,7 +54,7 @@ func (dec *Decoder) DecodeObject(j UnmarshalerObject) (int, error) {
 			// can't unmarshall to struct
 			dec.err = InvalidTypeError(
 				fmt.Sprintf(
-					"Cannot unmarshall to struct, wrong char '%s' found at pos %d",
+					"Cannot unmarshal to struct, wrong char '%s' found at pos %d",
 					string(dec.data[dec.cursor]),
 					dec.cursor,
 				),

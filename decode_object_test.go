@@ -204,7 +204,8 @@ func (j *jsonObjectComplex) NKeys() int {
 func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
 	err := UnmarshalObject(jsonComplex, &result)
-	assert.Nil(t, err, "err should be nil")
+	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
+	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 460`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
 	assert.Equal(t, `\\\\\\n`, result.Test2, "result.Test2 is not expected value")
 	assert.Equal(t, 1, result.Test3, "result.test3 is not expected value")
