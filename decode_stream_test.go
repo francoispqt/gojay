@@ -293,7 +293,7 @@ func runStreamTestCaseStrings(t *testing.T, testCase StreamTestString) {
 	testChan := ChannelStreamStrings(make(chan *string))
 	dec := Stream.NewDecoder(testCase.streamReader)
 	// start decoding (will block the goroutine until something is written to the ReadWriter)
-	go dec.DecodeStream(&testChan)
+	go dec.DecodeStream(testChan)
 	// start writing to the ReadWriter
 	go testCase.streamReader.Write()
 	// prepare our result
@@ -312,12 +312,12 @@ loop:
 
 type ChannelStreamStrings chan *string
 
-func (c *ChannelStreamStrings) UnmarshalStream(dec *StreamDecoder) error {
+func (c ChannelStreamStrings) UnmarshalStream(dec *StreamDecoder) error {
 	str := ""
 	if err := dec.AddString(&str); err != nil {
 		return err
 	}
-	*c <- &str
+	c <- &str
 	return nil
 }
 

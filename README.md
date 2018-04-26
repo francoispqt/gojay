@@ -122,12 +122,12 @@ Example of implementation with a channel:
 ```go
 type ChannelString chan string
 // implement UnmarshalerArray
-func (c *ChannelArray) UnmarshalArray(dec *gojay.Decoder) error {
+func (c ChannelArray) UnmarshalArray(dec *gojay.Decoder) error {
 	str := ""
 	if err := dec.AddString(&str); err != nil {
 		return err
 	}
-	*c <- str
+	c <- str
 	return nil
 }
 ```
@@ -143,12 +143,12 @@ Example:
 ```go
 type ChannelStream chan *TestObj
 // implement UnmarshalerStream
-func (c *ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
+func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
 	obj := &TestObj{}
 	if err := dec.AddObject(obj); err != nil {
 		return err
 	}
-	*c <- obj
+	c <- obj
 	return nil
 }
 
@@ -159,7 +159,7 @@ func main() {
     reader := getAnIOReaderStream()
     dec := gojay.Stream.NewDecoder(reader)
     // start decoding (will block the goroutine until something is written to the ReadWriter)
-    go dec.DecodeStream(&streamChan)
+    go dec.DecodeStream(streamChan)
     for {
         select {
         case v := <-streamChan:
