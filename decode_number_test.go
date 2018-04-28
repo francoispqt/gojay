@@ -15,11 +15,18 @@ func TestDecoderIntBasic(t *testing.T) {
 	assert.Equal(t, 124, v, "v must be equal to 124")
 }
 func TestDecoderIntNegative(t *testing.T) {
-	json := []byte(`-124`)
+	json := []byte(` -124 `)
 	var v int
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, -124, v, "v must be equal to -124")
+}
+func TestDecoderIntNegativeError(t *testing.T) {
+	json := []byte(` -12x4 `)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
 }
 func TestDecoderIntNull(t *testing.T) {
 	json := []byte(`null`)
@@ -69,7 +76,7 @@ func TestDecoderIntPoolError(t *testing.T) {
 	assert.True(t, false, "should not be called as decoder should have panicked")
 }
 func TestDecoderIntOverfow2(t *testing.T) {
-	json := []byte(`92233720368547758089`)
+	json := []byte(`92233720368547758089 `)
 	var v int
 	err := Unmarshal(json, &v)
 	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
@@ -92,11 +99,18 @@ func TestDecoderInt32Basic(t *testing.T) {
 	assert.Equal(t, int32(124), v, "v must be equal to 124")
 }
 func TestDecoderInt32Negative(t *testing.T) {
-	json := []byte(`-124`)
+	json := []byte(`-124 `)
 	var v int32
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, int32(-124), v, "v must be equal to -124")
+}
+func TestDecoderInt32NegativeError(t *testing.T) {
+	json := []byte(`-12x4 `)
+	var v int32
+	err := Unmarshal(json, &v)
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
 }
 func TestDecoderInt32Null(t *testing.T) {
 	json := []byte(`null`)
@@ -127,7 +141,7 @@ func TestDecoderInt32Big(t *testing.T) {
 	assert.Equal(t, int32(2147483647), v, "int32 must be equal to 2147483647")
 }
 func TestDecoderInt32Overflow(t *testing.T) {
-	json := []byte(`2147483648`)
+	json := []byte(` 2147483648`)
 	var v int32
 	err := Unmarshal(json, &v)
 	assert.NotNil(t, err, "err must not be nil as int32 overflows")
@@ -162,7 +176,7 @@ func TestDecoderInt32tDecoderAPI(t *testing.T) {
 }
 
 func TestDecoderUint32Basic(t *testing.T) {
-	json := []byte(`124`)
+	json := []byte(`124 `)
 	var v uint32
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
@@ -190,7 +204,7 @@ func TestDecoderUint32InvalidJSON(t *testing.T) {
 	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
 }
 func TestDecoderUint32Big(t *testing.T) {
-	json := []byte(`4294967295`)
+	json := []byte(`4294967295 `)
 	var v uint32
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "err must not be nil as uint32 does not overflow")
@@ -233,7 +247,7 @@ func TestDecoderUint32tDecoderAPI(t *testing.T) {
 }
 
 func TestDecoderInt64Basic(t *testing.T) {
-	json := []byte(`124`)
+	json := []byte(`124 `)
 	var v int64
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
@@ -309,7 +323,7 @@ func TestDecoderInt64tDecoderAPI(t *testing.T) {
 	assert.Equal(t, int64(33), v, "v must be equal to 33")
 }
 func TestDecoderUint64Basic(t *testing.T) {
-	json := []byte(`124`)
+	json := []byte(` 124 `)
 	var v uint64
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
@@ -378,7 +392,7 @@ func TestDecoderUint64tDecoderAPI(t *testing.T) {
 	assert.Equal(t, uint64(33), v, "v must be equal to 33")
 }
 func TestDecoderFloatBasic(t *testing.T) {
-	json := []byte(`100.11`)
+	json := []byte(`100.11 `)
 	var v float64
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
@@ -386,7 +400,7 @@ func TestDecoderFloatBasic(t *testing.T) {
 }
 
 func TestDecoderFloatBig(t *testing.T) {
-	json := []byte(`89899843.3493493`)
+	json := []byte(`89899843.3493493 `)
 	var v float64
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")

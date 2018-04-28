@@ -11,6 +11,13 @@ var encoderTestCases = []struct {
 	expectations func(t *testing.T, b []byte, err error)
 }{
 	{
+		v: 100,
+		expectations: func(t *testing.T, b []byte, err error) {
+			assert.Nil(t, err, "err should be nil")
+			assert.Equal(t, "100", string(b), "string(b) should equal 100")
+		},
+	},
+	{
 		v: int64(100),
 		expectations: func(t *testing.T, b []byte, err error) {
 			assert.Nil(t, err, "err should be nil")
