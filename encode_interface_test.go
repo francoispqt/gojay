@@ -1,6 +1,8 @@
 package gojay
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -113,6 +115,7 @@ var encoderTestCases = []struct {
 		expectations: func(t *testing.T, b []byte, err error) {
 			assert.NotNil(t, err, "err should be nil")
 			assert.IsType(t, InvalidMarshalError(""), err, "err should be of type InvalidMarshalError")
+			assert.Equal(t, fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(&struct{}{}).String()), err.Error(), "err message should be equal to invalidMarshalErrorMsg")
 		},
 	},
 }

@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/francoispqt/gojay.svg?branch=master)](https://travis-ci.org/francoispqt/gojay)
 [![codecov](https://codecov.io/gh/francoispqt/gojay/branch/master/graph/badge.svg)](https://codecov.io/gh/francoispqt/gojay)
 [![Go Report Card](https://goreportcard.com/badge/github.com/francoispqt/gojay)](https://goreportcard.com/report/github.com/francoispqt/gojay)
-[![Sourcegraph](https://sourcegraph.com/github.com/francoispqt/gojay/-/badge.svg)](https://sourcegraph.com/github.com/francoispqt/gojay?badge)
 [![Go doc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square
 )](https://godoc.org/github.com/francoispqt/gojay)
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
