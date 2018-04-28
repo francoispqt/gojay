@@ -14,7 +14,8 @@ import (
 // overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
 func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	dec := newDecoder(nil, 0)
-	dec.data = data
+	dec.data = make([]byte, len(data))
+	copy(dec.data, data)
 	dec.length = len(data)
 	_, err := dec.DecodeArray(v)
 	dec.addToPool()
@@ -35,7 +36,8 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 // overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
 func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 	dec := newDecoder(nil, 0)
-	dec.data = data
+	dec.data = make([]byte, len(data))
+	copy(dec.data, data)
 	dec.length = len(data)
 	_, err := dec.DecodeObject(v)
 	dec.addToPool()
@@ -113,12 +115,14 @@ func Unmarshal(data []byte, v interface{}) error {
 	case UnmarshalerObject:
 		dec = newDecoder(nil, 0)
 		dec.length = len(data)
-		dec.data = data
+		dec.data = make([]byte, len(data))
+		copy(dec.data, data)
 		_, err = dec.DecodeObject(vt)
 	case UnmarshalerArray:
 		dec = newDecoder(nil, 0)
 		dec.length = len(data)
-		dec.data = data
+		dec.data = make([]byte, len(data))
+		copy(dec.data, data)
 		_, err = dec.DecodeArray(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))

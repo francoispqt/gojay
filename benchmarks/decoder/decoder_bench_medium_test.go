@@ -60,3 +60,13 @@ func BenchmarkGoJayDecodeObjMedium(b *testing.B) {
 		}
 	}
 }
+func BenchmarkGoJayUnsafeDecodeObjMedium(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		result := benchmarks.MediumPayload{}
+		err := gojay.Unsafe.UnmarshalObject(benchmarks.MediumFixture, &result)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}

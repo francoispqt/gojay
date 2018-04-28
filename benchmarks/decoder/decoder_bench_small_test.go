@@ -59,3 +59,11 @@ func BenchmarkGoJayDecodeObjSmall(b *testing.B) {
 		gojay.UnmarshalObject(benchmarks.SmallFixture, &result)
 	}
 }
+
+func BenchmarkGoJayUnsafeDecodeObjSmall(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		result := benchmarks.SmallPayload{}
+		gojay.Unsafe.UnmarshalObject(benchmarks.SmallFixture, &result)
+	}
+}
