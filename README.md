@@ -10,9 +10,10 @@
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
-It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices.
+It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices. 
 
-Gojay also comes with powerful stream decoding features.
+Gojay also comes with powerful stream decoding features and an even faster [Unsafe](#unsafe-api) API.
+
 
 # Get started
 
@@ -22,7 +23,12 @@ go get github.com/francoispqt/gojay
 
 ## Decoding
 
-Example of basic stucture decoding:
+Decoding is done through two different API similar to standard `encoding/json`:
+* [Unmarshal](#unmarshal-api)
+* [Decode](#decode-api)
+
+
+Example of basic stucture decoding with Unmarshal:
 ```go 
 import "github.com/francoispqt/gojay"
 
@@ -57,16 +63,77 @@ func main() {
 }
 ```
 
-Or with the Decoder API (which takes an io.Reader):
+with Decode:
 ```go
 func main() {
     u := &user{}
-    dec := gojay.NewDecoder(strings.NewReader(`{"id":1,"name":"gojay","email":"gojay@email.com"}`))
-    err := dec.Decode(u)
+    dec := gojay.NewDecoder(bytes.NewReader([]byte(`{"id":1,"name":"gojay","email":"gojay@email.com"}`)))
+    err := dec.DecodeObject(d, u)
     if err != nil {
         log.Fatal(err)
     }
 }
+```
+
+### Unmarshal API
+
+Unmarshal API decodes a `[]byte` to a given pointer with a single function.
+
+Behind the doors, Unmarshal API borrows a `*gojay.Decoder` resets its settings and decodes the data to the given pointer and releases the `*gojay.Decoder` to the pool when it finishes, whether it encounters an error or not. 
+
+If it cannot find the right Decoding strategy for the type of the given pointer, it returns an `InvalidUnmarshalError`. You can test the error returned by doing `if ok := err.(InvalidUnmarshalError); ok {}`.
+
+Unmarshal API comes with three functions:
+* Unmarshal
+```go
+func Unmarshal(data []byte, v Interface{}) error
+```
+
+* UnmarshalObject 
+```go
+func UnmarshalObject(data []byte, v UnmarshalerObject) error
+```
+
+* UnmarshalArray
+```go
+func UnmarshalArray(data []byte, v UnmarshalerArray) error
+```
+
+
+### Decode API
+
+Decode API decodes a `[]byte` to a given pointer by creating or borrowing a `*gojay.Decoder` with an `io.Reader` and calling `Decode` methods. 
+
+*Getting a *gojay.Decoder or Borrowing*
+
+You can either get a fresh `*gojay.Decoder` calling `dec := gojay.NewDecoder(io.Reader)` or borrow one from the pool by calling `dec := gojay.BorrowDecoder(io.Reader)`.
+
+After using a decoder, you can release it by calling `dec.Release()`. Beware, if you reuse the decoder after releasing it, it will panic with an error of type `InvalidUsagePooledDecoderError`. If you want to fully benefit from the pooling, you must release your decoders after using.
+
+`*gojay.Decoder` has multiple methods to decode to specific types:
+* Decode
+```go
+func (dec *Decoder) DecodeInt(v *int) error
+```
+* DecodeObject
+```go
+func (dec *Decoder) DecodeObject(v UnmarshalerObject) error
+```
+* DecodeArray
+```go
+func (dec *Decoder) DecodeArray(v UnmarshalerArray) error
+```
+* DecodeInt
+```go
+func (dec *Decoder) DecodeInt(v *int) error
+```
+* DecodeBool
+```go
+func (dec *Decoder) DecodeBool(v *bool) error
+```
+* DecodeString
+```go
+func (dec *Decoder) DecodeString(v *string) error
 ```
 
 
@@ -298,6 +365,19 @@ func main() {
     }
     fmt.Println(string(b)) // "Jay"
 }
+```
+
+# Unsafe API
+
+Unsafe API has the same functions than the regular API, it only has `Unmarshal API` for now. It is unsafe because it makes assumptions on the quality of the given JSON. 
+
+If you are not sure if you're JSON is valid, don't use the Unsafe API. 
+
+Also, the `Unsafe` API does not copy the buffer when using Unmarshal API, which, in case of string decoding, can lead to data corruption if a byte buffer is reused. Using the `Decode` API makes `Unsafe` API safer as the io.Reader relies on `copy` builtin method and `Decoder` will have its own internal buffer :) 
+
+Access the `Unsafe` API this way:
+```go
+gojay.Unsafe.Unmarshal(b, v) 
 ```
 
 

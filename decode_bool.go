@@ -6,6 +6,12 @@ import "fmt"
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeBool(v *bool) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeBool(v)
+}
+func (dec *Decoder) decodeBool(v *bool) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':

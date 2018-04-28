@@ -1,5 +1,52 @@
 package gojay
 
+import (
+	"fmt"
+	"reflect"
+)
+
+// Encode encodes a value to JSON.
+//
+// If Encode cannot find a way to encode the type to JSON
+// it will return an InvalidMarshalError.
+func (enc *Encoder) Encode(v interface{}) ([]byte, error) {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	switch vt := v.(type) {
+	case string:
+		return enc.encodeString(vt)
+	case bool:
+		return enc.encodeBool(vt)
+	case MarshalerArray:
+		return enc.encodeArray(vt)
+	case MarshalerObject:
+		return enc.encodeObject(vt)
+	case int:
+		return enc.encodeInt(int64(vt))
+	case int64:
+		return enc.encodeInt(vt)
+	case int32:
+		return enc.encodeInt(int64(vt))
+	case int8:
+		return enc.encodeInt(int64(vt))
+	case uint64:
+		return enc.encodeInt(int64(vt))
+	case uint32:
+		return enc.encodeInt(int64(vt))
+	case uint16:
+		return enc.encodeInt(int64(vt))
+	case uint8:
+		return enc.encodeInt(int64(vt))
+	case float64:
+		return enc.encodeFloat(vt)
+	case float32:
+		return enc.encodeFloat(float64(vt))
+	default:
+		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+	}
+}
+
 // AddInterface adds an interface{} to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddInterface(value interface{}) error {
 	switch value.(type) {

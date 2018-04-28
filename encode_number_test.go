@@ -101,3 +101,31 @@ func TestEncoderFloat(t *testing.T) {
 		string(r),
 		"Result of marshalling is different as the one expected")
 }
+
+func TestEncoderIntPooledError(t *testing.T) {
+	v := 1
+	enc := BorrowEncoder()
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_, _ = enc.EncodeInt(int64(v))
+	assert.True(t, false, "should not be called as it should have panicked")
+}
+
+func TestEncoderFloatPooledError(t *testing.T) {
+	v := 1.1
+	enc := BorrowEncoder()
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_, _ = enc.EncodeFloat(v)
+	assert.True(t, false, "should not be called as it should have panicked")
+}

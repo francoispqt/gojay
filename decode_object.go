@@ -10,7 +10,17 @@ import (
 // v must implement UnmarshalerObject.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
-func (dec *Decoder) DecodeObject(j UnmarshalerObject) (int, error) {
+func (dec *Decoder) DecodeObject(j UnmarshalerObject) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	_, err := dec.decodeObject(j)
+	return err
+}
+func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
 	keys := j.NKeys()
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {

@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -166,6 +167,25 @@ func TestDecoderSliceInvalidJSON(t *testing.T) {
 	json := []byte(`hello`)
 	testArr := testSliceInts{}
 	err := UnmarshalArray(json, &testArr)
+	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
+	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
+}
+
+func TestDecoderSliceDecoderAPI(t *testing.T) {
+	json := `["string","string1"]`
+	testArr := testSliceStrings{}
+	dec := NewDecoder(strings.NewReader(json))
+	err := dec.DecodeArray(&testArr)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Len(t, testArr, 2, "testArr should be of len 2")
+	assert.Equal(t, "string", testArr[0], "testArr[0] should be 'string'")
+	assert.Equal(t, "string1", testArr[1], "testArr[1] should be 'string1'")
+}
+
+func TestDecoderSliceDecoderAPIError(t *testing.T) {
+	testArr := testSliceInts{}
+	dec := NewDecoder(strings.NewReader(`hello`))
+	err := dec.DecodeArray(&testArr)
 	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
 }

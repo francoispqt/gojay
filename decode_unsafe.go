@@ -14,11 +14,11 @@ var Unsafe = decUnsafe{}
 type decUnsafe struct{}
 
 func (u decUnsafe) UnmarshalArray(data []byte, v UnmarshalerArray) error {
-	dec := newDecoder(nil, 0)
+	dec := BorrowDecoder(nil, 0)
+	defer dec.Release()
 	dec.data = data
 	dec.length = len(data)
-	_, err := dec.DecodeArray(v)
-	dec.addToPool()
+	_, err := dec.decodeArray(v)
 	if err != nil {
 		return err
 	}
@@ -29,11 +29,11 @@ func (u decUnsafe) UnmarshalArray(data []byte, v UnmarshalerArray) error {
 }
 
 func (u decUnsafe) UnmarshalObject(data []byte, v UnmarshalerObject) error {
-	dec := newDecoder(nil, 0)
+	dec := BorrowDecoder(nil, 0)
+	defer dec.Release()
 	dec.data = data
 	dec.length = len(data)
-	_, err := dec.DecodeObject(v)
-	dec.addToPool()
+	_, err := dec.decodeObject(v)
 	if err != nil {
 		return err
 	}
@@ -48,59 +48,59 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 	var dec *Decoder
 	switch vt := v.(type) {
 	case *string:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeString(vt)
+		err = dec.decodeString(vt)
 	case *int:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt(vt)
+		err = dec.decodeInt(vt)
 	case *int32:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt32(vt)
+		err = dec.decodeInt32(vt)
 	case *uint32:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeUint32(vt)
+		err = dec.decodeUint32(vt)
 	case *int64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt64(vt)
+		err = dec.decodeInt64(vt)
 	case *uint64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeUint64(vt)
+		err = dec.decodeUint64(vt)
 	case *float64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeFloat64(vt)
+		err = dec.decodeFloat64(vt)
 	case *bool:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeBool(vt)
+		err = dec.decodeBool(vt)
 	case UnmarshalerObject:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		_, err = dec.DecodeObject(vt)
+		_, err = dec.decodeObject(vt)
 	case UnmarshalerArray:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		_, err = dec.DecodeArray(vt)
+		_, err = dec.decodeArray(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
-	defer dec.addToPool()
+	defer dec.Release()
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestEncodingArrStrings []string
+
+func (t TestEncodingArrStrings) MarshalArray(enc *Encoder) {
+	for _, e := range t {
+		enc.AddString(e)
+	}
+}
+
 type TestEncodingArr []*TestEncoding
 
 func (t TestEncodingArr) MarshalArray(enc *Encoder) {
@@ -103,4 +111,52 @@ func TestEncoderArrayInterfaces(t *testing.T) {
 		`[1,1,1,1,1,1,1,1,1.31,[],true,"test",{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[],"testF64":0,"testF32":0}]`,
 		string(r),
 		"Result of marshalling is different as the one expected")
+}
+
+func TestEncoderArrayInterfacesEncoderAPI(t *testing.T) {
+	v := &testEncodingArrInterfaces{
+		1,
+		int64(1),
+		int32(1),
+		int16(1),
+		int8(1),
+		uint64(1),
+		uint32(1),
+		uint16(1),
+		uint8(1),
+		float64(1.31),
+		// float32(1.31),
+		&TestEncodingArr{},
+		true,
+		"test",
+		&TestEncoding{
+			test:     "hello world",
+			test2:    "foobar",
+			testInt:  1,
+			testBool: true,
+		},
+	}
+	enc := BorrowEncoder()
+	defer enc.Release()
+	r, err := enc.EncodeArray(v)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`[1,1,1,1,1,1,1,1,1.31,[],true,"test",{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[],"testF64":0,"testF32":0}]`,
+		string(r),
+		"Result of marshalling is different as the one expected")
+}
+
+func TestEncoderArrayPooledError(t *testing.T) {
+	v := &testEncodingArrInterfaces{}
+	enc := BorrowEncoder()
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_, _ = enc.EncodeArray(v)
+	assert.True(t, false, "should not be called as it should have panicked")
 }

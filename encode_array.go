@@ -1,5 +1,20 @@
 package gojay
 
+// EncodeArray encodes an implementation of MarshalerArray to JSON
+func (enc *Encoder) EncodeArray(v MarshalerArray) ([]byte, error) {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	return enc.encodeArray(v)
+}
+func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
+	enc.grow(200)
+	enc.writeByte('[')
+	v.MarshalArray(enc)
+	enc.writeByte(']')
+	return enc.buf, nil
+}
+
 // AddArray adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
 func (enc *Encoder) AddArray(value MarshalerArray) error {

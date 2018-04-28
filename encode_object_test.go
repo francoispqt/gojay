@@ -42,7 +42,7 @@ func (t *testObject) MarshalObject(enc *Encoder) {
 	enc.AddBoolKey("testBool", t.testBool)
 }
 
-func TestEncodeBasicObject(t *testing.T) {
+func TestEncoderObjectBasic(t *testing.T) {
 	r, err := Marshal(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(
@@ -101,7 +101,7 @@ func (t *SubObject) MarshalObject(enc *Encoder) {
 	enc.AddObjectKey("sub", t.sub)
 }
 
-func TestEncoderComplexObject(t *testing.T) {
+func TestEncoderObjectComplex(t *testing.T) {
 	v := &TestEncoding{
 		test:          "hello world",
 		test2:         "foobar",
@@ -149,7 +149,7 @@ func (t *testEncodingObjInterfaces) MarshalObject(enc *Encoder) {
 	enc.AddInterfaceKey("interfaceVal", t.interfaceVal)
 }
 
-func TestObjInterfaces(t *testing.T) {
+func TestEncoderObjectInterfaces(t *testing.T) {
 	v := testEncodingObjInterfaces{"string"}
 	r, err := Marshal(&v)
 	assert.Nil(t, err, "Error should be nil")
@@ -246,4 +246,18 @@ func TestObjInterfaces(t *testing.T) {
 		`{"interfaceVal":1.1}`,
 		string(r),
 		"Result of marshalling is different as the one expected")
+}
+
+func TestEncoderObjectPooledError(t *testing.T) {
+	v := &TestEncoding{}
+	enc := BorrowEncoder()
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_, _ = enc.EncodeObject(v)
+	assert.True(t, false, "should not be called as it should have panicked")
 }

@@ -57,6 +57,12 @@ func init() {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeInt(v *int) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeInt(v)
+}
+func (dec *Decoder) decodeInt(v *int) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
@@ -101,6 +107,12 @@ func (dec *Decoder) DecodeInt(v *int) error {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeInt32(v *int32) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeInt32(v)
+}
+func (dec *Decoder) decodeInt32(v *int32) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
@@ -145,6 +157,13 @@ func (dec *Decoder) DecodeInt32(v *int32) error {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint32(v *uint32) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeUint32(v)
+}
+
+func (dec *Decoder) decodeUint32(v *uint32) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
@@ -190,6 +209,13 @@ func (dec *Decoder) DecodeUint32(v *uint32) error {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeInt64(v *int64) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeInt64(v)
+}
+
+func (dec *Decoder) decodeInt64(v *int64) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
@@ -234,6 +260,12 @@ func (dec *Decoder) DecodeInt64(v *int64) error {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint64(v *uint64) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeUint64(v)
+}
+func (dec *Decoder) decodeUint64(v *uint64) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
@@ -279,6 +311,12 @@ func (dec *Decoder) DecodeUint64(v *uint64) error {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeFloat64(v *float64) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeFloat64(v)
+}
+func (dec *Decoder) decodeFloat64(v *float64) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
