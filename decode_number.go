@@ -581,7 +581,7 @@ func (dec *Decoder) atoi32(start, end int) int32 {
 		for i := start + 1; i < end; i++ {
 			intv := int32(digits[dec.data[i]])
 			if val > maxInt32toMultiply {
-				dec.err = InvalidTypeError("Overflows int321")
+				dec.err = InvalidTypeError("Overflows int32")
 				return 0
 			}
 			val = (val << 3) + (val << 1)

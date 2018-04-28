@@ -85,37 +85,37 @@ func (enc *Encoder) AddInterface(value interface{}) error {
 
 // AddInterfaceKey adds an interface{} to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddInterfaceKey(key string, value interface{}) error {
-	switch value.(type) {
+	switch vt := value.(type) {
 	case string:
-		return enc.AddStringKey(key, value.(string))
+		return enc.AddStringKey(key, vt)
 	case bool:
-		return enc.AddBoolKey(key, value.(bool))
+		return enc.AddBoolKey(key, vt)
 	case MarshalerArray:
 		return enc.AddArrayKey(key, value.(MarshalerArray))
 	case MarshalerObject:
 		return enc.AddObjectKey(key, value.(MarshalerObject))
 	case int:
-		return enc.AddIntKey(key, value.(int))
+		return enc.AddIntKey(key, vt)
 	case int64:
-		return enc.AddIntKey(key, int(value.(int64)))
+		return enc.AddIntKey(key, int(vt))
 	case int32:
-		return enc.AddIntKey(key, int(value.(int32)))
+		return enc.AddIntKey(key, int(vt))
 	case int16:
-		return enc.AddIntKey(key, int(value.(int16)))
+		return enc.AddIntKey(key, int(vt))
 	case int8:
-		return enc.AddIntKey(key, int(value.(int8)))
+		return enc.AddIntKey(key, int(vt))
 	case uint64:
-		return enc.AddIntKey(key, int(value.(uint64)))
+		return enc.AddIntKey(key, int(vt))
 	case uint32:
-		return enc.AddIntKey(key, int(value.(uint32)))
+		return enc.AddIntKey(key, int(vt))
 	case uint16:
-		return enc.AddIntKey(key, int(value.(uint16)))
+		return enc.AddIntKey(key, int(vt))
 	case uint8:
-		return enc.AddIntKey(key, int(value.(uint8)))
+		return enc.AddIntKey(key, int(vt))
 	case float64:
-		return enc.AddFloatKey(key, value.(float64))
+		return enc.AddFloatKey(key, vt)
 	case float32:
-		return enc.AddFloat32Key(key, value.(float32))
+		return enc.AddFloat32Key(key, vt)
 	}
 
 	return nil

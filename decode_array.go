@@ -71,7 +71,7 @@ func (dec *Decoder) skipArray() (int, error) {
 	var arraysOpen = 1
 	var arraysClosed = 0
 	// var stringOpen byte = 0
-	for j := dec.cursor; j < dec.length; j++ {
+	for j := dec.cursor; j < dec.length || dec.read(); j++ {
 		switch dec.data[j] {
 		case ']':
 			arraysClosed++
@@ -94,7 +94,7 @@ func (dec *Decoder) skipArray() (int, error) {
 				// loop backward and count how many anti slash found
 				// to see if string is effectively escaped
 				ct := 1
-				for i := j; i > 0; i-- {
+				for i := j - 2; i > 0; i-- {
 					if dec.data[i] != '\\' {
 						break
 					}

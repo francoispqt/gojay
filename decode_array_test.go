@@ -189,3 +189,38 @@ func TestDecoderSliceDecoderAPIError(t *testing.T) {
 	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
 }
+
+func TestSkipArray(t *testing.T) {
+	testCases := []struct {
+		json         string
+		expectations func(*testing.T, int, error)
+	}{
+		{
+			json: `"testbasic"]`,
+			expectations: func(t *testing.T, i int, err error) {
+				assert.Equal(t, len(`"testbasic"]`), i)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			json: `"test \\\\\" escape"]`,
+			expectations: func(t *testing.T, i int, err error) {
+				assert.Equal(t, len(`"test \\\\\" escape"]`), i)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			json: `"test \\\\\\"]`,
+			expectations: func(t *testing.T, i int, err error) {
+				assert.Equal(t, len(`"test \\\\\\"]`), i)
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		dec := NewDecoder(strings.NewReader(test.json))
+		i, err := dec.skipArray()
+		test.expectations(t, i, err)
+	}
+}
