@@ -318,7 +318,7 @@ func (u *user) IsNil() bool {
 
 func main() {
     u := &user{1, "gojay", "gojay@email.com"}
-    b, _ := gojay.MarshalObject(user)
+    b, _ := gojay.MarshalObject(u)
     fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
 ```
