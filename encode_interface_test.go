@@ -1,6 +1,8 @@
 package gojay
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +55,13 @@ var encoderTestCases = []struct {
 		},
 	},
 	{
+		v: uint16(100),
+		expectations: func(t *testing.T, b []byte, err error) {
+			assert.Nil(t, err, "err should be nil")
+			assert.Equal(t, "100", string(b), "string(b) should equal 100")
+		},
+	},
+	{
 		v: uint8(100),
 		expectations: func(t *testing.T, b []byte, err error) {
 			assert.Nil(t, err, "err should be nil")
@@ -99,6 +108,14 @@ var encoderTestCases = []struct {
 		expectations: func(t *testing.T, b []byte, err error) {
 			assert.Nil(t, err, "err should be nil")
 			assert.Equal(t, `{"testStr":"漢字","testInt":1,"testInt64":1,"testInt32":1,"testInt16":1,"testInt8":1,"testUint64":1,"testUint32":1,"testUint16":1,"testUint8":1,"testFloat64":1.1,"testFloat32":1.1,"testBool":true}`, string(b), `string(b) should equal {"testStr":"漢字","testInt":1,"testInt64":1,"testInt32":1,"testInt16":1,"testInt8":1,"testUint64":1,"testUint32":1,"testUint16":1,"testUint8":1,"testFloat64":1.1,"testFloat32":1.1,"testBool":true}`)
+		},
+	},
+	{
+		v: &struct{}{},
+		expectations: func(t *testing.T, b []byte, err error) {
+			assert.NotNil(t, err, "err should be nil")
+			assert.IsType(t, InvalidMarshalError(""), err, "err should be of type InvalidMarshalError")
+			assert.Equal(t, fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(&struct{}{}).String()), err.Error(), "err message should be equal to invalidMarshalErrorMsg")
 		},
 	},
 }

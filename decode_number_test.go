@@ -63,6 +63,20 @@ func TestDecoderIntOverfow(t *testing.T) {
 	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
 	assert.Equal(t, 0, v, "v must be equal to 0")
 }
+func TestDecoderIntOverfow2(t *testing.T) {
+	json := []byte(`92233720368547758089 `)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
+	assert.Equal(t, 0, v, "v must be equal to 0")
+}
+func TestDecoderIntOverfow3(t *testing.T) {
+	json := []byte(`92233720368547758089 `)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
+	assert.Equal(t, 0, v, "v must be equal to 0")
+}
 func TestDecoderIntPoolError(t *testing.T) {
 	result := int(1)
 	dec := NewDecoder(nil)
@@ -74,13 +88,6 @@ func TestDecoderIntPoolError(t *testing.T) {
 	}()
 	_ = dec.DecodeInt(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderIntOverfow2(t *testing.T) {
-	json := []byte(`92233720368547758089 `)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
-	assert.Equal(t, 0, v, "v must be equal to 0")
 }
 func TestDecoderInttDecoderAPI(t *testing.T) {
 	var v int
@@ -397,6 +404,20 @@ func TestDecoderFloatBasic(t *testing.T) {
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, 100.11, v, "v must be equal to 100.11")
+}
+func TestDecoderFloatBasic2(t *testing.T) {
+	json := []byte(` 100.11 `)
+	var v float64
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 100.11, v, "v must be equal to 100.11")
+}
+func TestDecoderFloatBasic3(t *testing.T) {
+	json := []byte(` 100 `)
+	var v float64
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, float64(100), v, "v must be equal to 100.11")
 }
 
 func TestDecoderFloatBig(t *testing.T) {
