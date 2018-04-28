@@ -2,11 +2,27 @@ package gojay
 
 import "strconv"
 
+// EncodeInt encodes an int to JSON
+func (enc *Encoder) EncodeInt(n int64) ([]byte, error) {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	return enc.encodeInt(n)
+}
+
 // encodeInt encodes an int to JSON
 func (enc *Encoder) encodeInt(n int64) ([]byte, error) {
 	s := strconv.Itoa(int(n))
 	enc.writeString(s)
 	return enc.buf, nil
+}
+
+// EncodeFloat encodes a float64 to JSON
+func (enc *Encoder) EncodeFloat(n float64) ([]byte, error) {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	return enc.encodeFloat(n)
 }
 
 // encodeFloat encodes a float64 to JSON

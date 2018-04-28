@@ -19,7 +19,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-// BorrowDecoder borrows a Decoder a decoder from the pool.
+// BorrowDecoder borrows a Decoder from the pool.
 // It takes an io.Reader implementation as data input.
 // It initiates the done channel returned by Done().
 func BorrowDecoder(r io.Reader, bufSize int) *Decoder {

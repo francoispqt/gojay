@@ -25,3 +25,17 @@ func TestEncoderStringUTF8(t *testing.T) {
 		string(r),
 		"Result of marshalling is different as the one expected")
 }
+
+func TestEncoderStringPooledError(t *testing.T) {
+	v := ""
+	enc := BorrowEncoder()
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_, _ = enc.EncodeString(v)
+	assert.True(t, false, "should not be called as it should have panicked")
+}

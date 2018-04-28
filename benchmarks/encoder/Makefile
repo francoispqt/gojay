@@ -16,6 +16,10 @@ testtrace:
 
 .PHONY: benchgojay
 benchgojay:
+	go test -benchmem -run=^BenchmarkGoJay -bench=^BenchmarkGoJay -benchtime=30ms
+
+.PHONY: benchgojaycpu
+benchgojaycpu: 
 	go test -benchmem -run=^BenchmarkGoJay -bench=^BenchmarkGoJay -benchtime=30ms -cpuprofile cpu.out
 
 .PHONY: benchjsoniter

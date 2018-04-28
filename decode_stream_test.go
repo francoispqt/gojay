@@ -373,3 +373,17 @@ func TestStreamDecodingErrNotSet(t *testing.T) {
 	dec := Stream.NewDecoder(&StreamReader{})
 	assert.Nil(t, dec.Err(), "dec.Err should be nim")
 }
+
+func TestStreamDecodingPoolError(t *testing.T) {
+	dec := Stream.BorrowDecoder(nil, 0)
+	dec.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		assert.Equal(t, "Invalid usage of pooled decoder", err.(InvalidUsagePooledDecoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	testChan := ChannelStreamStrings(make(chan *string))
+	_ = dec.DecodeStream(testChan)
+	assert.True(t, false, "should not be called as it should have panicked")
+}
