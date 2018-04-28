@@ -18,9 +18,6 @@ func (dec *Decoder) DecodeObject(j UnmarshalerObject) error {
 	return err
 }
 func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
-	if dec.isPooled == 1 {
-		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
-	}
 	keys := j.NKeys()
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {

@@ -369,6 +369,19 @@ func TestStreamDecodingDeadline(t *testing.T) {
 	assert.Equal(t, now.String(), dec.deadline.String(), "dec.now and now should be equal")
 }
 
+func TestStreamDecodingDeadlineNotSet(t *testing.T) {
+	dec := Stream.NewDecoder(&StreamReader{})
+	_, isSet := dec.Deadline()
+	assert.Equal(t, false, isSet, "isSet should be false as deadline is not set")
+}
+
+// this test is only relevant for coverage
+func TestStreamDecodingValue(t *testing.T) {
+	dec := Stream.NewDecoder(&StreamReader{})
+	v := dec.Value("")
+	assert.Nil(t, v, "v should be nil")
+}
+
 func TestStreamDecodingErrNotSet(t *testing.T) {
 	dec := Stream.NewDecoder(&StreamReader{})
 	assert.Nil(t, dec.Err(), "dec.Err should be nim")
