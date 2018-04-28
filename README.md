@@ -397,7 +397,7 @@ func main() {
 
 Unsafe API has the same functions than the regular API, it only has `Unmarshal API` for now. It is unsafe because it makes assumptions on the quality of the given JSON. 
 
-If you are not sure if you're JSON is valid, don't use the Unsafe API. 
+If you are not sure if your JSON is valid, don't use the Unsafe API. 
 
 Also, the `Unsafe` API does not copy the buffer when using Unmarshal API, which, in case of string decoding, can lead to data corruption if a byte buffer is reused. Using the `Decode` API makes `Unsafe` API safer as the io.Reader relies on `copy` builtin method and `Decoder` will have its own internal buffer :) 
 
