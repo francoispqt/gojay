@@ -74,11 +74,11 @@ func (t *TestEncoding) MarshalObject(enc *Encoder) {
 	enc.AddStringKey("test2", t.test2)
 	enc.AddIntKey("testInt", t.testInt)
 	enc.AddBoolKey("testBool", t.testBool)
-	enc.AddArrayKey("testArr", t.testArr)
+	enc.AddInterfaceKey("testArr", t.testArr)
 	enc.AddInterfaceKey("testF64", t.testF64)
 	enc.AddInterfaceKey("testF32", t.testF32)
 	enc.AddInterfaceKey("testInterface", t.testInterface)
-	enc.AddObjectKey("sub", t.sub)
+	enc.AddInterfaceKey("sub", t.sub)
 }
 
 type SubObject struct {

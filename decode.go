@@ -13,7 +13,7 @@ import (
 // If a JSON value is not appropriate for a given target type, or if a JSON number
 // overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
 func UnmarshalArray(data []byte, v UnmarshalerArray) error {
-	dec := BorrowDecoder(nil)
+	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
@@ -35,7 +35,7 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 // If a JSON value is not appropriate for a given target type, or if a JSON number
 // overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
 func UnmarshalObject(data []byte, v UnmarshalerObject) error {
-	dec := BorrowDecoder(nil)
+	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
@@ -73,53 +73,53 @@ func Unmarshal(data []byte, v interface{}) error {
 	var dec *Decoder
 	switch vt := v.(type) {
 	case *string:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeString(vt)
 	case *int:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt(vt)
 	case *int32:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt32(vt)
 	case *uint32:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeUint32(vt)
 	case *int64:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt64(vt)
 	case *uint64:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeUint64(vt)
 	case *float64:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeFloat64(vt)
 	case *bool:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeBool(vt)
 	case UnmarshalerObject:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
 		_, err = dec.decodeObject(vt)
 	case UnmarshalerArray:
-		dec = BorrowDecoder(nil)
+		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)

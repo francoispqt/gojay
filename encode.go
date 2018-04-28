@@ -1,5 +1,10 @@
 package gojay
 
+import (
+	"fmt"
+	"reflect"
+)
+
 // MarshalObject returns the JSON encoding of v.
 //
 // It takes a struct implementing Marshaler to a JSON slice of byte
@@ -162,6 +167,8 @@ func Marshal(v interface{}) ([]byte, error) {
 		enc := BorrowEncoder()
 		defer enc.Release()
 		return enc.encodeFloat(float64(vt))
+	default:
+		err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
 	return b, err
 }

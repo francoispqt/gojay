@@ -154,8 +154,13 @@ func TestDecodeObjectNull(t *testing.T) {
 var jsonComplex = []byte(`{
 	"test": "{\"test\":\"1\",\"test1\":2}",
 	"test2\\n": "\\\\\\\\\\\n",
-	"testArrSkip": ["testString with escaped \" quotes"],
+	"testArrSkip": ["testString with escaped \\\" quotes"],
 	"testSkipString": "skip \\ string with \\n escaped char \" ",
+	"testSkipObject": {
+		"testSkipSubObj": {
+			"test": "test"
+		}
+	},
 	"testSkipNumber": 123.23,
 	"testBool": true,
 	"testSub": {
@@ -210,7 +215,7 @@ func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
 	err := UnmarshalObject(jsonComplex, &result)
 	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
-	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 460`, err.Error(), "err should not be as invalid type as been encountered nil")
+	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 531`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
 	assert.Equal(t, `\\\\\\n`, result.Test2, "result.Test2 is not expected value")
 	assert.Equal(t, 1, result.Test3, "result.test3 is not expected value")
