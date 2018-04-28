@@ -375,7 +375,7 @@ func TestStreamDecodingErrNotSet(t *testing.T) {
 }
 
 func TestStreamDecodingPoolError(t *testing.T) {
-	dec := Stream.BorrowDecoder(nil, 0)
+	dec := Stream.BorrowDecoder(nil)
 	dec.Release()
 	defer func() {
 		err := recover()

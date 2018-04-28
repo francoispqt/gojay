@@ -117,6 +117,25 @@ You can either get a fresh `*gojay.Decoder` calling `dec := gojay.NewDecoder(io.
 
 After using a decoder, you can release it by calling `dec.Release()`. Beware, if you reuse the decoder after releasing it, it will panic with an error of type `InvalidUsagePooledDecoderError`. If you want to fully benefit from the pooling, you must release your decoders after using.
 
+Example getting a fresh an releasing: 
+```go
+str := ""
+dec := gojay.NewDecoder(strings.NewReader(`"test"`))
+defer dec.Release()
+if err := dec.Decode(&str); err != nil {
+    log.Fatal(err)
+}
+```
+Example borrowing a decoder and releasing: 
+```go
+str := ""
+dec := gojay.BorrowDecoder(strings.NewReader(`"test"`))
+defer dec.Release()
+if err := dec.Decode(&str); err != nil {
+    log.Fatal(err)
+}
+```
+
 `*gojay.Decoder` has multiple methods to decode to specific types:
 * Decode
 ```go

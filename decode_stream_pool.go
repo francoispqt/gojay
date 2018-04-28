@@ -19,7 +19,11 @@ func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
 // BorrowDecoder borrows a StreamDecoder a decoder from the pool.
 // It takes an io.Reader implementation as data input.
 // It initiates the done channel returned by Done().
-func (s stream) BorrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
+func (s stream) BorrowDecoder(r io.Reader) *StreamDecoder {
+	return s.borrowDecoder(r, 512)
+}
+
+func (s stream) borrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
 	select {
 	case streamDec := <-streamDecPool:
 		streamDec.called = 0
