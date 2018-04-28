@@ -10,7 +10,7 @@ import (
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeString(v *string) error {
 	if dec.isPooled == 1 {
-		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 	return dec.decodeString(v)
 }

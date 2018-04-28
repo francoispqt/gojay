@@ -14,11 +14,11 @@ import (
 // overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
 func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	dec := BorrowDecoder(nil, 0)
+	defer dec.Release()
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
 	_, err := dec.decodeArray(v)
-	defer dec.Release()
 	if err != nil {
 		return err
 	}
@@ -36,11 +36,11 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 // overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
 func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 	dec := BorrowDecoder(nil, 0)
+	defer dec.Release()
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
 	_, err := dec.decodeObject(v)
-	defer dec.Release()
 	if err != nil {
 		return err
 	}
@@ -147,12 +147,6 @@ type UnmarshalerArray interface {
 	UnmarshalArray(*Decoder) error
 }
 
-// UnmarshalerStream is the interface to implement for a slice, an array or a slice
-// to decode a line delimited JSON to.
-type UnmarshalerStream interface {
-	UnmarshalStream(*StreamDecoder) error
-}
-
 // A Decoder reads and decodes JSON values from an input stream.
 type Decoder struct {
 	data     []byte
@@ -171,30 +165,30 @@ type Decoder struct {
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) Decode(v interface{}) error {
 	if dec.isPooled == 1 {
-		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 	switch vt := v.(type) {
 	case *string:
-		return dec.DecodeString(vt)
+		return dec.decodeString(vt)
 	case *int:
-		return dec.DecodeInt(vt)
+		return dec.decodeInt(vt)
 	case *int32:
-		return dec.DecodeInt32(vt)
+		return dec.decodeInt32(vt)
 	case *uint32:
-		return dec.DecodeUint32(vt)
+		return dec.decodeUint32(vt)
 	case *int64:
-		return dec.DecodeInt64(vt)
+		return dec.decodeInt64(vt)
 	case *uint64:
-		return dec.DecodeUint64(vt)
+		return dec.decodeUint64(vt)
 	case *float64:
-		return dec.DecodeFloat64(vt)
+		return dec.decodeFloat64(vt)
 	case *bool:
-		return dec.DecodeBool(vt)
+		return dec.decodeBool(vt)
 	case UnmarshalerObject:
-		_, err := dec.DecodeObject(vt)
+		_, err := dec.decodeObject(vt)
 		return err
 	case UnmarshalerArray:
-		_, err := dec.DecodeArray(vt)
+		_, err := dec.decodeArray(vt)
 		return err
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
@@ -290,9 +284,18 @@ func isDigit(b byte) bool {
 
 func (dec *Decoder) read() bool {
 	if dec.r != nil {
-		// idea is to append data from reader at the end
+		// if we reach the end, double the buffer to ensure there's always more space
+		if len(dec.data) == dec.length {
+			nLen := dec.length * 2
+			Buf := make([]byte, nLen, nLen)
+			copy(Buf, dec.data)
+			dec.data = Buf
+		}
 		n, err := dec.r.Read(dec.data[dec.length:])
-		if err != nil || n == 0 {
+		if err != nil {
+			dec.err = err
+			return false
+		} else if n == 0 {
 			return false
 		}
 		dec.length = dec.length + n

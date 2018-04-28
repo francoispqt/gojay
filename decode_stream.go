@@ -4,6 +4,12 @@ import (
 	"time"
 )
 
+// UnmarshalerStream is the interface to implement for a slice, an array or a slice
+// to decode a line delimited JSON to.
+type UnmarshalerStream interface {
+	UnmarshalStream(*StreamDecoder) error
+}
+
 // Stream is a struct holding the Stream api
 var Stream = stream{}
 
@@ -25,7 +31,7 @@ type StreamDecoder struct {
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *StreamDecoder) DecodeStream(c UnmarshalerStream) error {
 	if dec.isPooled == 1 {
-		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 	if dec.r == nil {
 		dec.err = NoReaderError("No reader given to decode stream")
