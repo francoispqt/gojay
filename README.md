@@ -6,7 +6,7 @@
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 
 # GoJay
-**Package is currently at version 0.9 and still under development**
+**Package is currently at version 0.9.1 and still under development**
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
@@ -14,6 +14,13 @@ It has a simple API and doesn't use reflection. It relies on small interfaces to
 
 Gojay also comes with powerful stream decoding features and an even faster [Unsafe](#unsafe-api) API.
 
+# Why another JSON parser?
+
+I looked at other fast decoder/encoder and realised it was mostly hardly readable static code generation or a lot of reflection, poor streaming features, and not so fast in the end. 
+
+Also, I wanted to build a decoder that could consume an io.Reader of line or comma delimited JSON, in a JIT way. To consume a flow of JSON objects from a TCP connection for example or from a standard output. Same way I wanted to build an encoder that could encode a flow of data to a io.Writer.
+
+This is how GoJay aims to be a very fast, JIT stream parser with 0 reflection, low allocation with a friendly API.
 
 # Get started
 
@@ -86,7 +93,7 @@ If it cannot find the right Decoding strategy for the type of the given pointer,
 Unmarshal API comes with three functions:
 * Unmarshal
 ```go
-func Unmarshal(data []byte, v Interface{}) error
+func Unmarshal(data []byte, v interface{}) error
 ```
 
 * UnmarshalObject 
@@ -104,7 +111,7 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error
 
 Decode API decodes a `[]byte` to a given pointer by creating or borrowing a `*gojay.Decoder` with an `io.Reader` and calling `Decode` methods. 
 
-*Getting a *gojay.Decoder or Borrowing*
+__Getting a *gojay.Decoder or Borrowing__
 
 You can either get a fresh `*gojay.Decoder` calling `dec := gojay.NewDecoder(io.Reader)` or borrow one from the pool by calling `dec := gojay.BorrowDecoder(io.Reader)`.
 
