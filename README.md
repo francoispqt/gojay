@@ -50,7 +50,7 @@ func (u *user) NKeys() int {
 func main() {
     u := &user{}
     d := []byte(`{"id":1,"name":"gojay","email":"gojay@email.com"}`)
-    err := gojay.UnmarshalObject(d, user)
+    err := gojay.UnmarshalObject(d, u)
     if err != nil {
         log.Fatal(err)
     }
