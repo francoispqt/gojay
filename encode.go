@@ -28,7 +28,7 @@ func MarshalObject(v MarshalerObject) ([]byte, error) {
 	enc.writeByte('{')
 	v.MarshalObject(enc)
 	enc.writeByte('}')
-	defer enc.addToPool()
+	defer enc.Release()
 	return enc.buf, nil
 }
 
@@ -59,7 +59,7 @@ func MarshalArray(v MarshalerArray) ([]byte, error) {
 	enc.writeByte('[')
 	v.(MarshalerArray).MarshalArray(enc)
 	enc.writeByte(']')
-	defer enc.addToPool()
+	defer enc.Release()
 	return enc.buf, nil
 }
 
@@ -103,7 +103,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		vt.MarshalObject(enc)
 		enc.writeByte('}')
 		b = enc.buf
-		defer enc.addToPool()
+		defer enc.Release()
 		return b, nil
 	case MarshalerArray:
 		enc := NewEncoder()
@@ -111,60 +111,60 @@ func Marshal(v interface{}) ([]byte, error) {
 		vt.MarshalArray(enc)
 		enc.writeByte(']')
 		b = enc.buf
-		defer enc.addToPool()
+		defer enc.Release()
 		return b, nil
 	case string:
 		enc := NewEncoder()
 		b, err = enc.encodeString(vt)
-		defer enc.addToPool()
+		defer enc.Release()
 	case bool:
 		enc := NewEncoder()
 		err = enc.AddBool(vt)
 		b = enc.buf
-		defer enc.addToPool()
+		defer enc.Release()
 	case int:
 		enc := NewEncoder()
 		b, err = enc.encodeInt(int64(vt))
-		defer enc.addToPool()
+		defer enc.Release()
 	case int64:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(vt)
 	case int32:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case int16:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case int8:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint64:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint32:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint16:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint8:
 		enc := NewEncoder()
 		b, err = enc.encodeInt(int64(vt))
-		defer enc.addToPool()
+		defer enc.Release()
 	case float64:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeFloat(vt)
 	case float32:
 		enc := NewEncoder()
-		defer enc.addToPool()
+		defer enc.Release()
 		return enc.encodeFloat(float64(vt))
 	}
 	return b, err

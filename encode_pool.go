@@ -12,7 +12,7 @@ func NewEncoder() *Encoder {
 	}
 }
 
-func (enc *Encoder) addToPool() {
+func (enc *Encoder) Release() {
 	enc.buf = nil
 	select {
 	case encObjPool <- enc:

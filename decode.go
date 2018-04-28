@@ -13,12 +13,12 @@ import (
 // If a JSON value is not appropriate for a given target type, or if a JSON number
 // overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
 func UnmarshalArray(data []byte, v UnmarshalerArray) error {
-	dec := newDecoder(nil, 0)
+	dec := BorrowDecoder(nil, 0)
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
-	_, err := dec.DecodeArray(v)
-	dec.addToPool()
+	_, err := dec.decodeArray(v)
+	defer dec.Release()
 	if err != nil {
 		return err
 	}
@@ -35,12 +35,12 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 // If a JSON value is not appropriate for a given target type, or if a JSON number
 // overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
 func UnmarshalObject(data []byte, v UnmarshalerObject) error {
-	dec := newDecoder(nil, 0)
+	dec := BorrowDecoder(nil, 0)
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
-	_, err := dec.DecodeObject(v)
-	dec.addToPool()
+	_, err := dec.decodeObject(v)
+	defer dec.Release()
 	if err != nil {
 		return err
 	}
@@ -73,61 +73,61 @@ func Unmarshal(data []byte, v interface{}) error {
 	var dec *Decoder
 	switch vt := v.(type) {
 	case *string:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeString(vt)
+		err = dec.decodeString(vt)
 	case *int:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt(vt)
+		err = dec.decodeInt(vt)
 	case *int32:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt32(vt)
+		err = dec.decodeInt32(vt)
 	case *uint32:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeUint32(vt)
+		err = dec.decodeUint32(vt)
 	case *int64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeInt64(vt)
+		err = dec.decodeInt64(vt)
 	case *uint64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeUint64(vt)
+		err = dec.decodeUint64(vt)
 	case *float64:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeFloat64(vt)
+		err = dec.decodeFloat64(vt)
 	case *bool:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
-		err = dec.DecodeBool(vt)
+		err = dec.decodeBool(vt)
 	case UnmarshalerObject:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
-		_, err = dec.DecodeObject(vt)
+		_, err = dec.decodeObject(vt)
 	case UnmarshalerArray:
-		dec = newDecoder(nil, 0)
+		dec = BorrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
-		_, err = dec.DecodeArray(vt)
+		_, err = dec.decodeArray(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
-	defer dec.addToPool()
+	defer dec.Release()
 	if err != nil {
 		return err
 	}
@@ -163,12 +163,16 @@ type Decoder struct {
 	child    byte
 	err      error
 	r        io.Reader
+	isPooled byte
 }
 
 // Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) Decode(v interface{}) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+	}
 	switch vt := v.(type) {
 	case *string:
 		return dec.DecodeString(vt)
@@ -202,7 +206,7 @@ func (dec *Decoder) Decode(v interface{}) error {
 // AddInt decodes the next key to an *int.
 // If next key value overflows int, an InvalidTypeError error will be returned.
 func (dec *Decoder) AddInt(v *int) error {
-	err := dec.DecodeInt(v)
+	err := dec.decodeInt(v)
 	if err != nil {
 		return err
 	}
@@ -213,7 +217,7 @@ func (dec *Decoder) AddInt(v *int) error {
 // AddFloat decodes the next key to a *float64.
 // If next key value overflows float64, an InvalidTypeError error will be returned.
 func (dec *Decoder) AddFloat(v *float64) error {
-	err := dec.DecodeFloat64(v)
+	err := dec.decodeFloat64(v)
 	if err != nil {
 		return err
 	}
@@ -225,7 +229,7 @@ func (dec *Decoder) AddFloat(v *float64) error {
 // If next key is neither null nor a JSON boolean, an InvalidTypeError will be returned.
 // If next key is null, bool will be false.
 func (dec *Decoder) AddBool(v *bool) error {
-	err := dec.DecodeBool(v)
+	err := dec.decodeBool(v)
 	if err != nil {
 		return err
 	}
@@ -236,7 +240,7 @@ func (dec *Decoder) AddBool(v *bool) error {
 // AddString decodes the next key to a *string.
 // If next key is not a JSON string nor null, InvalidTypeError will be returned.
 func (dec *Decoder) AddString(v *string) error {
-	err := dec.DecodeString(v)
+	err := dec.decodeString(v)
 	if err != nil {
 		return err
 	}
@@ -251,7 +255,7 @@ func (dec *Decoder) AddObject(value UnmarshalerObject) error {
 	dec.keysDone = 0
 	dec.called = 0
 	dec.child |= 1
-	newCursor, err := dec.DecodeObject(value)
+	newCursor, err := dec.decodeObject(value)
 	if err != nil {
 		return err
 	}
@@ -264,7 +268,7 @@ func (dec *Decoder) AddObject(value UnmarshalerObject) error {
 
 // AddArray decodes the next key to a UnmarshalerArray.
 func (dec *Decoder) AddArray(value UnmarshalerArray) error {
-	newCursor, err := dec.DecodeArray(value)
+	newCursor, err := dec.decodeArray(value)
 	if err != nil {
 		return err
 	}

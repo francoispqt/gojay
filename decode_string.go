@@ -9,6 +9,12 @@ import (
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeString(v *string) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+	}
+	return dec.decodeString(v)
+}
+func (dec *Decoder) decodeString(v *string) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':

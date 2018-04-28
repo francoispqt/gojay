@@ -33,3 +33,11 @@ type NoReaderError string
 func (err NoReaderError) Error() string {
 	return string(err)
 }
+
+// InvalidUsagePooledDecoderError is a type representing an error returned
+// when decoding is called on a still pooled Decoder
+type InvalidUsagePooledDecoderError string
+
+func (err InvalidUsagePooledDecoderError) Error() string {
+	return string(err)
+}

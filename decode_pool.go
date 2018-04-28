@@ -4,13 +4,25 @@ import "io"
 
 var decPool = make(chan *Decoder, 16)
 
-// NewDecoder returns a new decoder or borrows one from the pool
-// it takes an io.Reader implementation as data input
+// NewDecoder returns a new decoder.
+// It takes an io.Reader implementation as data input.
 func NewDecoder(r io.Reader) *Decoder {
-	return newDecoder(r, 512)
+	return &Decoder{
+		called:   0,
+		cursor:   0,
+		keysDone: 0,
+		err:      nil,
+		r:        r,
+		data:     make([]byte, 512),
+		length:   0,
+		isPooled: 0,
+	}
 }
 
-func newDecoder(r io.Reader, bufSize int) *Decoder {
+// BorrowDecoder borrows a Decoder a decoder from the pool.
+// It takes an io.Reader implementation as data input.
+// It initiates the done channel returned by Done().
+func BorrowDecoder(r io.Reader, bufSize int) *Decoder {
 	select {
 	case dec := <-decPool:
 		dec.called = 0
@@ -19,6 +31,7 @@ func newDecoder(r io.Reader, bufSize int) *Decoder {
 		dec.err = nil
 		dec.r = r
 		dec.length = 0
+		dec.isPooled = 0
 		if bufSize > 0 {
 			dec.data = make([]byte, bufSize)
 		}
@@ -30,16 +43,20 @@ func newDecoder(r io.Reader, bufSize int) *Decoder {
 			keysDone: 0,
 			err:      nil,
 			r:        r,
+			isPooled: 0,
 		}
 		if bufSize > 0 {
 			dec.data = make([]byte, bufSize)
-			dec.length = 0
 		}
 		return dec
 	}
 }
 
-func (dec *Decoder) addToPool() {
+// Release sends back a Decoder to the pool.
+// If a decoder is used after calling Release
+// a panic will be raised with an InvalidUsagePooledDecoderError error.
+func (dec *Decoder) Release() {
+	dec.isPooled = 1
 	select {
 	case decPool <- dec:
 	default:

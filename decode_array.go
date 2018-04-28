@@ -10,6 +10,12 @@ import (
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeArray(arr UnmarshalerArray) (int, error) {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+	}
+	return dec.decodeArray(arr)
+}
+func (dec *Decoder) decodeArray(arr UnmarshalerArray) (int, error) {
 	// not an array not an error, but do not know what to do
 	// do not check syntax
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {

@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"io"
 	"time"
 )
 
@@ -19,24 +18,15 @@ type StreamDecoder struct {
 	deadline *time.Time
 }
 
-// NewDecoder returns a new decoder or borrows one from the pool.
-// It takes an io.Reader implementation as data input.
-// It initiates the done channel returned by Done().
-func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
-	dec := newDecoder(r, 512)
-	streamDec := &StreamDecoder{
-		Decoder: dec,
-		done:    make(chan struct{}, 1),
-	}
-	return streamDec
-}
-
 // DecodeStream reads the next line delimited JSON-encoded value from its input and stores it in the value pointed to by c.
 //
 // c must implement UnmarshalerStream. Ideally c is a channel. See example for implementation.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *StreamDecoder) DecodeStream(c UnmarshalerStream) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usagee of pooled decoder"))
+	}
 	if dec.r == nil {
 		dec.err = NoReaderError("No reader given to decode stream")
 		close(dec.done)
