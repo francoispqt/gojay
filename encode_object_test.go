@@ -1,6 +1,8 @@
 package gojay
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,6 +53,32 @@ func TestEncoderObjectBasic(t *testing.T) {
 		string(r),
 		"Result of marshalling is different as the one expected",
 	)
+}
+func TestEncoderObjectBasicEncoderApi(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`{"testStr":"漢字","testInt":1,"testInt64":1,"testInt32":1,"testInt16":1,"testInt8":1,"testUint64":1,"testUint32":1,"testUint16":1,"testUint8":1,"testFloat64":1.1,"testFloat32":1.1,"testBool":true}`,
+		builder.String(),
+		"Result of marshalling is different as the one expected",
+	)
+}
+
+type TestWiterError string
+
+func (t TestWiterError) Write(b []byte) (int, error) {
+	return 0, errors.New("Test Error")
+}
+
+func TestEncoderObjectBasicEncoderApiError(t *testing.T) {
+	w := TestWiterError("")
+	enc := NewEncoder(w)
+	err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "Test Error", err.Error(), "err.Error() should be 'Test Error'")
 }
 
 type TestEncoding struct {
@@ -250,7 +278,7 @@ func TestEncoderObjectInterfaces(t *testing.T) {
 
 func TestEncoderObjectPooledError(t *testing.T) {
 	v := &TestEncoding{}
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()
@@ -258,6 +286,6 @@ func TestEncoderObjectPooledError(t *testing.T) {
 		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
 		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 	}()
-	_, _ = enc.EncodeObject(v)
+	_ = enc.EncodeObject(v)
 	assert.True(t, false, "should not be called as it should have panicked")
 }

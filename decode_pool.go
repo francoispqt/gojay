@@ -59,9 +59,9 @@ func borrowDecoder(r io.Reader, bufSize int) *Decoder {
 // If a decoder is used after calling Release
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (dec *Decoder) Release() {
-	dec.isPooled = 1
 	select {
 	case decPool <- dec:
+		dec.isPooled = 1
 	default:
 	}
 }

@@ -8,13 +8,13 @@ import (
 
 func TestEncoderNewFromPool(t *testing.T) {
 	// reset pool
-	encObjPool = make(chan *Encoder, 16)
+	encPool = make(chan *Encoder, 16)
 	// get new Encoder
-	enc := NewEncoder()
+	enc := NewEncoder(nil)
 	// add to pool
 	enc.Release()
 	// borrow encoder
-	nEnc := BorrowEncoder()
+	nEnc := BorrowEncoder(nil)
 	// make sure it's the same
 	assert.Equal(t, enc, nEnc, "enc and nEnc from pool should be the same")
 }

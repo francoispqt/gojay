@@ -7,7 +7,7 @@ import (
 )
 
 func TestEncoderBoolTrue(t *testing.T) {
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	defer enc.Release()
 	b, err := enc.EncodeBool(true)
 	assert.Nil(t, err, "err must be nil")
@@ -15,7 +15,7 @@ func TestEncoderBoolTrue(t *testing.T) {
 }
 
 func TestEncoderBoolFalse(t *testing.T) {
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	defer enc.Release()
 	b, err := enc.EncodeBool(false)
 	assert.Nil(t, err, "err must be nil")
@@ -23,7 +23,7 @@ func TestEncoderBoolFalse(t *testing.T) {
 }
 
 func TestEncoderBoolPoolError(t *testing.T) {
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()

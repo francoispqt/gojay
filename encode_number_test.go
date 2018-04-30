@@ -104,7 +104,7 @@ func TestEncoderFloat(t *testing.T) {
 
 func TestEncoderIntPooledError(t *testing.T) {
 	v := 1
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()
@@ -118,7 +118,7 @@ func TestEncoderIntPooledError(t *testing.T) {
 
 func TestEncoderFloatPooledError(t *testing.T) {
 	v := 1.1
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()

@@ -2,11 +2,12 @@ package gojay
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEncoderBuilderError(t *testing.T) {
-	enc := NewEncoder()
+	enc := NewEncoder(nil)
 	defer func() {
 		err := recover()
 		assert.NotNil(t, err, "err is not nil as we pass an invalid number to grow")

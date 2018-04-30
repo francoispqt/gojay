@@ -61,7 +61,7 @@ func (enc *Encoder) AddIntKey(key string, value int) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKey)
+	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendInt(enc.buf, int64(value), 10)
 
 	return nil
@@ -75,7 +75,7 @@ func (enc *Encoder) AddFloatKey(key string, value float64) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKey)
+	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendFloat(enc.buf, value, 'f', -1, 64)
 
 	return nil

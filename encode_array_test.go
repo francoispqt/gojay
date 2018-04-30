@@ -136,7 +136,7 @@ func TestEncoderArrayInterfacesEncoderAPI(t *testing.T) {
 			testBool: true,
 		},
 	}
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	defer enc.Release()
 	r, err := enc.EncodeArray(v)
 	assert.Nil(t, err, "Error should be nil")
@@ -149,7 +149,7 @@ func TestEncoderArrayInterfacesEncoderAPI(t *testing.T) {
 
 func TestEncoderArrayPooledError(t *testing.T) {
 	v := &testEncodingArrInterfaces{}
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()

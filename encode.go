@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 )
 
@@ -28,7 +29,7 @@ import (
 // 		fmt.Println(b) // {"id":123456}
 //	}
 func MarshalObject(v MarshalerObject) ([]byte, error) {
-	enc := NewEncoder()
+	enc := newEncoder()
 	defer enc.Release()
 	return enc.encodeObject(v)
 }
@@ -55,7 +56,7 @@ func MarshalObject(v MarshalerObject) ([]byte, error) {
 //		fmt.Println(b) // [{"id":123456},{"id":7890}]
 //	}
 func MarshalArray(v MarshalerArray) ([]byte, error) {
-	enc := NewEncoder()
+	enc := newEncoder()
 	enc.grow(200)
 	enc.writeByte('[')
 	v.(MarshalerArray).MarshalArray(enc)
@@ -99,7 +100,7 @@ func Marshal(v interface{}) ([]byte, error) {
 	var err error = InvalidTypeError("Unknown type to Marshal")
 	switch vt := v.(type) {
 	case MarshalerObject:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		enc.writeByte('{')
 		vt.MarshalObject(enc)
 		enc.writeByte('}')
@@ -107,7 +108,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		defer enc.Release()
 		return b, nil
 	case MarshalerArray:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		enc.writeByte('[')
 		vt.MarshalArray(enc)
 		enc.writeByte(']')
@@ -115,56 +116,56 @@ func Marshal(v interface{}) ([]byte, error) {
 		defer enc.Release()
 		return b, nil
 	case string:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		b, err = enc.encodeString(vt)
 		defer enc.Release()
 	case bool:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		err = enc.AddBool(vt)
 		b = enc.buf
 		defer enc.Release()
 	case int:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		b, err = enc.encodeInt(int64(vt))
 		defer enc.Release()
 	case int64:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(vt)
 	case int32:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case int16:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case int8:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint64:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint32:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint16:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeInt(int64(vt))
 	case uint8:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		b, err = enc.encodeInt(int64(vt))
 		defer enc.Release()
 	case float64:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeFloat(vt)
 	case float32:
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeFloat(float64(vt))
 	default:
@@ -189,6 +190,8 @@ type MarshalerArray interface {
 type Encoder struct {
 	buf      []byte
 	isPooled byte
+	w        io.Writer
+	err      error
 }
 
 func (enc *Encoder) getPreviousRune() (byte, bool) {
@@ -197,4 +200,13 @@ func (enc *Encoder) getPreviousRune() (byte, bool) {
 		return 0, false
 	}
 	return enc.buf[last], true
+}
+
+func (enc *Encoder) write() (int, error) {
+	i, err := enc.w.Write(enc.buf)
+	if err != nil {
+		enc.err = err
+	}
+	enc.buf = make([]byte, 0, 512)
+	return i, err
 }

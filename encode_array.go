@@ -38,7 +38,7 @@ func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKeyArr)
+	enc.writeBytes(objKeyArr)
 	value.MarshalArray(enc)
 	enc.writeByte(']')
 	return nil

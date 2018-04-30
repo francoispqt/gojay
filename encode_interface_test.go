@@ -122,7 +122,7 @@ var encoderTestCases = []struct {
 
 func TestEncoderInterfaceAllTypesDecoderAPI(t *testing.T) {
 	for _, test := range encoderTestCases {
-		enc := BorrowEncoder()
+		enc := BorrowEncoder(nil)
 		b, err := enc.Encode(test.v)
 		enc.Release()
 		test.expectations(t, b, err)

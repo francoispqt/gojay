@@ -42,7 +42,7 @@ func (enc *Encoder) AddBoolKey(key string, value bool) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKey)
+	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendBool(enc.buf, value)
 	return nil
 }

@@ -28,7 +28,7 @@ func TestEncoderStringUTF8(t *testing.T) {
 
 func TestEncoderStringPooledError(t *testing.T) {
 	v := ""
-	enc := BorrowEncoder()
+	enc := BorrowEncoder(nil)
 	enc.Release()
 	defer func() {
 		err := recover()

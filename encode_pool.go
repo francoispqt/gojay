@@ -1,23 +1,28 @@
 package gojay
 
-var encObjPool = make(chan *Encoder, 16)
+import "io"
+
+var encPool = make(chan *Encoder, 16)
+var streamEncPool = make(chan *StreamEncoder, 16)
 
 // NewEncoder returns a new encoder or borrows one from the pool
-func NewEncoder() *Encoder {
-	return &Encoder{}
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{w: w}
 }
 func newEncoder() *Encoder {
 	return &Encoder{}
 }
 
 // BorrowEncoder borrows an Encoder from the pool.
-func BorrowEncoder() *Encoder {
+func BorrowEncoder(w io.Writer) *Encoder {
 	select {
-	case enc := <-encObjPool:
+	case enc := <-encPool:
 		enc.isPooled = 0
+		enc.w = w
+		enc.buf = make([]byte, 0)
 		return enc
 	default:
-		return &Encoder{}
+		return &Encoder{w: w}
 	}
 }
 
@@ -25,7 +30,7 @@ func BorrowEncoder() *Encoder {
 func (enc *Encoder) Release() {
 	enc.buf = nil
 	select {
-	case encObjPool <- enc:
+	case encPool <- enc:
 		enc.isPooled = 1
 	default:
 	}

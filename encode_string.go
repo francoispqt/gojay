@@ -38,7 +38,7 @@ func (enc *Encoder) AddStringKey(key, value string) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKeyStr)
+	enc.writeBytes(objKeyStr)
 	enc.writeString(value)
 	enc.writeByte('"')
 

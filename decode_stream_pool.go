@@ -4,7 +4,7 @@ import "io"
 
 var streamDecPool = make(chan *StreamDecoder, 16)
 
-// NewDecoder returns a new decoder.
+// NewDecoder returns a new StreamDecoder.
 // It takes an io.Reader implementation as data input.
 // It initiates the done channel returned by Done().
 func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
@@ -16,9 +16,11 @@ func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
 	return streamDec
 }
 
-// BorrowDecoder borrows a StreamDecoder a decoder from the pool.
+// BorrowDecoder borrows a StreamDecoder from the pool.
 // It takes an io.Reader implementation as data input.
 // It initiates the done channel returned by Done().
+//
+// If no StreamEncoder is available in the pool, it returns a fresh one
 func (s stream) BorrowDecoder(r io.Reader) *StreamDecoder {
 	return s.borrowDecoder(r, 512)
 }
@@ -49,5 +51,16 @@ func (s stream) borrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
 			done:    make(chan struct{}, 1),
 		}
 		return streamDec
+	}
+}
+
+// Release sends back a Decoder to the pool.
+// If a decoder is used after calling Release
+// a panic will be raised with an InvalidUsagePooledDecoderError error.
+func (dec *StreamDecoder) Release() {
+	select {
+	case streamDecPool <- dec:
+		dec.isPooled = 1
+	default:
 	}
 }

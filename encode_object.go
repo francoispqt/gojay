@@ -6,11 +6,17 @@ var objKeyArr = []byte(`":[`)
 var objKey = []byte(`":`)
 
 // EncodeObject encodes an object to JSON
-func (enc *Encoder) EncodeObject(v MarshalerObject) ([]byte, error) {
+func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeObject(v)
+	_, _ = enc.encodeObject(v)
+	_, err := enc.write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
 }
 func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 	enc.grow(200)
@@ -21,7 +27,7 @@ func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 }
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
-// value must implement Marshaler
+// value must implement MarshalerObject
 func (enc *Encoder) AddObject(value MarshalerObject) error {
 	if value.IsNil() {
 		return nil
@@ -37,7 +43,7 @@ func (enc *Encoder) AddObject(value MarshalerObject) error {
 }
 
 // AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
-// value must implement Marshaler
+// value must implement MarshalerObject
 func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
 	if value.IsNil() {
 		return nil
@@ -48,7 +54,7 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKeyObj)
+	enc.writeBytes(objKeyObj)
 	value.MarshalObject(enc)
 	enc.writeByte('}')
 	return nil
