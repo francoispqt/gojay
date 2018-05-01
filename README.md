@@ -139,7 +139,7 @@ if err := dec.Decode(&str); err != nil {
 `*gojay.Decoder` has multiple methods to decode to specific types:
 * Decode
 ```go
-func (dec *Decoder) DecodeInt(v *int) error
+func (dec *Decoder) Decode(v interface{}) error
 ```
 * DecodeObject
 ```go
@@ -297,7 +297,11 @@ func main() {
 
 ## Encoding
 
-Example of basic structure encoding:
+Encoding is done through two different API similar to standard `encoding/json`:
+* [Marshal](#marshal-api)
+* [Encode](#encode-api)
+
+Example of basic structure encoding with Marshal:
 ```go 
 import "github.com/francoispqt/gojay"
 
@@ -321,6 +325,107 @@ func main() {
     b, _ := gojay.MarshalObject(u)
     fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
+```
+
+with Encode:
+```go
+func main() {
+    u := &user{1, "gojay", "gojay@email.com"}
+    b := strings.Builder{}
+    if err := gojay.NewEncoder(&b); err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(b.String()) // {"id":1,"name":"gojay","email":"gojay@email.com"}
+}
+```
+
+### Marshal API
+
+Marshal API encodes a value to a JSON `[]byte` with a single function.
+
+Behind the doors, Marshal API borrows a `*gojay.Encoder` resets its settings and encodes the data to an internal byte buffer and releases the `*gojay.Encoder` to the pool when it finishes, whether it encounters an error or not. 
+
+If it cannot find the right Encoding strategy for the type of the given value, it returns an `InvalidMarshalError`. You can test the error returned by doing `if ok := err.(InvalidMarshalError); ok {}`.
+
+Marshal API comes with three functions:
+* Marshal
+```go
+func Marshal(v interface{}) ([]byte, error)
+```
+
+* MarshalObject 
+```go
+func MarshalObject(v MarshalerObject) ([]byte, error)
+```
+
+* MarshalArray
+```go
+func MarshalArray(v MarshalerArray) ([]byte, error)
+```
+
+### Encode API
+
+Encode API decodes a value to JSON by creating or borrowing a `*gojay.Encoder` sending it to an `io.Writer` and calling `Encode` methods. 
+
+__Getting a *gojay.Encoder or Borrowing__
+
+You can either get a fresh `*gojay.Encoder` calling `enc := gojay.NewEncoder(io.Writer)` or borrow one from the pool by calling `enc := gojay.BorrowEncoder(io.Writer)`.
+
+After using an encoder, you can release it by calling `enc.Release()`. Beware, if you reuse the encoder after releasing it, it will panic with an error of type `InvalidUsagePooledEncoderError`. If you want to fully benefit from the pooling, you must release your encoders after using.
+
+Example getting a fresh encoder an releasing: 
+```go
+str := "test"
+b := strings.Builder{}
+enc := gojay.NewEncoder(&b)
+defer enc.Release()
+if err := enc.Encode(str); err != nil {
+    log.Fatal(err)
+}
+```
+Example borrowing an encoder and releasing: 
+```go
+str := "test"
+b := strings.Builder{}
+enc := gojay.BorrowEncoder(b)
+defer enc.Release()
+if err := enc.Encode(str); err != nil {
+    log.Fatal(err)
+}
+```
+
+`*gojay.Encoder` has multiple methods to encoder specific types to JSON:
+* Encode
+```go
+func (enc *Encoder) Encode(v interface{}) error
+```
+* EncodeObject
+```go
+func (enc *Encoder) EncodeObject(v MarshalerObject) error 
+```
+* EncodeArray
+```go
+func (enc *Encoder) EncodeArray(v MarshalerArray) error 
+```
+* EncodeInt
+```go
+func (enc *Encoder) EncodeInt(n int) error 
+```
+* EncodeInt64
+```go
+func (enc *Encoder) EncodeInt64(n int64) error 
+```
+* EncodeFloat
+```go
+func (enc *Encoder) EncodeFloat(n float64) error
+```
+* EncodeBool
+```go
+func (enc *Encoder) EncodeBool(v bool) error
+```
+* EncodeString
+```go
+func (enc *Encoder) EncodeString(s string) error
 ```
 
 ### Structs
@@ -358,10 +463,13 @@ func (u *user) IsNil() bool {
 To encode an array or a slice, the slice/array must implement the MarshalerArray interface:
 ```go
 type MarshalerArray interface {
-	MarshalArray(enc *Encoder)
+    MarshalArray(enc *Encoder)
+    IsNil() bool
 }
 ```
 MarshalArray method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
+
+IsNil method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature. 
 
 Example of implementation: 
 ```go
@@ -375,6 +483,9 @@ func (u *users) MarshalArray(dec *Decoder) error {
         }
     }
     return nil
+}
+func (u *users) IsNil() bool {
+    return len(u) == 0
 }
 ```
 
