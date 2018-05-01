@@ -1,11 +1,17 @@
 package gojay
 
 // EncodeArray encodes an implementation of MarshalerArray to JSON
-func (enc *Encoder) EncodeArray(v MarshalerArray) ([]byte, error) {
+func (enc *Encoder) EncodeArray(v MarshalerArray) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeArray(v)
+	_, _ = enc.encodeArray(v)
+	_, err := enc.write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
 }
 func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 	enc.grow(200)

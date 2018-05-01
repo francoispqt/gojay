@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -67,14 +66,8 @@ func TestEncoderObjectBasicEncoderApi(t *testing.T) {
 	)
 }
 
-type TestWiterError string
-
-func (t TestWiterError) Write(b []byte) (int, error) {
-	return 0, errors.New("Test Error")
-}
-
 func TestEncoderObjectBasicEncoderApiError(t *testing.T) {
-	w := TestWiterError("")
+	w := TestWriterError("")
 	enc := NewEncoder(w)
 	err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
 	assert.NotNil(t, err, "Error should not be nil")

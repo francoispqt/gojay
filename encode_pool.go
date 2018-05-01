@@ -29,9 +29,9 @@ func BorrowEncoder(w io.Writer) *Encoder {
 // Release sends back a Encoder to the pool.
 func (enc *Encoder) Release() {
 	enc.buf = nil
+	enc.isPooled = 1
 	select {
 	case encPool <- enc:
-		enc.isPooled = 1
 	default:
 	}
 }

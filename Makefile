@@ -4,7 +4,7 @@ test:
 
 .PHONY: cover
 cover: 
-	go test -coverprofile=coverage.out 
+	go test -coverprofile=coverage.out -covermode=atomic
 
 .PHONY: coverhtml
 coverhtml: 

@@ -9,41 +9,41 @@ import (
 //
 // If Encode cannot find a way to encode the type to JSON
 // it will return an InvalidMarshalError.
-func (enc *Encoder) Encode(v interface{}) ([]byte, error) {
+func (enc *Encoder) Encode(v interface{}) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
 	switch vt := v.(type) {
 	case string:
-		return enc.encodeString(vt)
+		return enc.EncodeString(vt)
 	case bool:
-		return enc.encodeBool(vt)
+		return enc.EncodeBool(vt)
 	case MarshalerArray:
-		return enc.encodeArray(vt)
+		return enc.EncodeArray(vt)
 	case MarshalerObject:
-		return enc.encodeObject(vt)
+		return enc.EncodeObject(vt)
 	case int:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(vt)
 	case int64:
-		return enc.encodeInt(vt)
+		return enc.EncodeInt64(vt)
 	case int32:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case int8:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case uint64:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case uint32:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case uint16:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case uint8:
-		return enc.encodeInt(int64(vt))
+		return enc.EncodeInt(int(vt))
 	case float64:
-		return enc.encodeFloat(vt)
+		return enc.EncodeFloat(vt)
 	case float32:
-		return enc.encodeFloat(float64(vt))
+		return enc.EncodeFloat32(vt)
 	default:
-		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+		return InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
 }
 
