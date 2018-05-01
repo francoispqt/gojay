@@ -128,41 +128,43 @@ var encoderTestCases = []struct {
 	},
 }
 
-func TestEncoderInterfaceAllTypesEncoderAPI(t *testing.T) {
-	for _, test := range encoderTestCases {
-		builder := &strings.Builder{}
-		enc := BorrowEncoder(builder)
-		err := enc.Encode(test.v)
-		enc.Release()
-		test.expectations(t, builder.String(), err)
-	}
-}
-
-func TestEncoderInterfaceAllTypesEncoderAPIWriteError(t *testing.T) {
-	v := ""
-	w := TestWriterError("")
-	enc := BorrowEncoder(w)
-	err := enc.Encode(v)
-	assert.NotNil(t, err, "err should not be nil")
-}
-
-func TestEncoderInterfaceAllTypesEncoderAPIPoolError(t *testing.T) {
-	v := ""
-	w := TestWriterError("")
-	enc := BorrowEncoder(w)
-	enc.Release()
-	defer func() {
-		err := recover()
+func TestEncoderInterfaceEncodeAPI(t *testing.T) {
+	t.Run("encode-all-types", func(t *testing.T) {
+		for _, test := range encoderTestCases {
+			builder := &strings.Builder{}
+			enc := BorrowEncoder(builder)
+			err := enc.Encode(test.v)
+			enc.Release()
+			test.expectations(t, builder.String(), err)
+		}
+	})
+	t.Run("encode-all-types-write-error", func(t *testing.T) {
+		v := ""
+		w := TestWriterError("")
+		enc := BorrowEncoder(w)
+		err := enc.Encode(v)
 		assert.NotNil(t, err, "err should not be nil")
-		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
-	}()
-	_ = enc.Encode(v)
-	assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("encode-all-types-pool-error", func(t *testing.T) {
+		v := ""
+		w := TestWriterError("")
+		enc := BorrowEncoder(w)
+		enc.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err should not be nil")
+			assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		}()
+		_ = enc.Encode(v)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
 }
 
-func TestEncoderInterfaceAllTypesMarshalAPI(t *testing.T) {
-	for _, test := range encoderTestCases {
-		b, err := Marshal(test.v)
-		test.expectations(t, string(b), err)
-	}
+func TestEncoderInterfaceMarshalAPI(t *testing.T) {
+	t.Run("marshal-all-types", func(t *testing.T) {
+		for _, test := range encoderTestCases {
+			b, err := Marshal(test.v)
+			test.expectations(t, string(b), err)
+		}
+	})
 }
