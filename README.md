@@ -444,14 +444,10 @@ Example of implementation:
 ```go
 type users []*user
 // implement MarshalerArray
-func (u *users) MarshalArray(dec *Decoder) error {
+func (u *users) MarshalArray(dec *Decoder) {
 	for _, e := range u {
-        err := enc.AddObject(e)
-        if err != nil {
-            return err
-        }
+        enc.AddObject(e)
     }
-    return nil
 }
 func (u *users) IsNil() bool {
     return len(u) == 0
