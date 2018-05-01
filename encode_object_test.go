@@ -172,7 +172,7 @@ func TestEncoderObjectComplex(t *testing.T) {
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(
 		t,
-		`{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[{"test":"1","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0}],"testF64":120.15,"testF32":120.53,"testInterface":true,"sub":{"test1":10,"test2":"hello world","test3":1.23543,"testBool":true,"sub":{"test1":10,"test2":"hello world","test3":0,"testBool":false}}}`,
+		`{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[{"test":"1","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}],"testF64":120.15,"testF32":120.53,"testInterface":true,"sub":{"test1":10,"test2":"hello world","test3":1.23543,"testBool":true,"sub":{"test1":10,"test2":"hello world","test3":0,"testBool":false,"sub":{}}}}`,
 		string(r),
 		"Result of marshalling is different as the one expected",
 	)
@@ -287,6 +287,103 @@ func TestEncoderObjectInterfaces(t *testing.T) {
 		`{"interfaceVal":1.1}`,
 		string(r),
 		"Result of marshalling is different as the one expected")
+}
+
+type TestObectOmitEmpty struct {
+	nonNiler           int
+	testInt            int
+	testFloat          float64
+	testFloat32        float32
+	testString         string
+	testBool           bool
+	testObectOmitEmpty *TestObectOmitEmpty
+	testObect          *TestObectOmitEmpty
+}
+
+func (t *TestObectOmitEmpty) IsNil() bool {
+	return t == nil
+}
+
+func (t *TestObectOmitEmpty) MarshalObject(enc *Encoder) {
+	enc.AddIntKeyOmitEmpty("testInt", t.testInt)
+	enc.AddIntKeyOmitEmpty("testIntNotEmpty", 1)
+	enc.AddFloatKeyOmitEmpty("testFloat", t.testFloat)
+	enc.AddFloatKeyOmitEmpty("testFloatNotEmpty", 1.1)
+	enc.AddFloat32KeyOmitEmpty("testFloat32", t.testFloat32)
+	enc.AddFloat32KeyOmitEmpty("testFloat32NotEmpty", 1.1)
+	enc.AddStringKeyOmitEmpty("testString", t.testString)
+	enc.AddStringKeyOmitEmpty("testStringNotEmpty", "foo")
+	enc.AddBoolKeyOmitEmpty("testBool", t.testBool)
+	enc.AddBoolKeyOmitEmpty("testBoolNotEmpty", true)
+	enc.AddObjectKeyOmitEmpty("testObect", t.testObect)
+	enc.AddObjectKeyOmitEmpty("testObectOmitEmpty", t.testObectOmitEmpty)
+	enc.AddArrayKeyOmitEmpty("testArrayOmitEmpty", TestEncodingArrStrings{})
+	enc.AddArrayKeyOmitEmpty("testArray", TestEncodingArrStrings{"foo"})
+}
+
+func TestEncoderObjectOmitEmpty(t *testing.T) {
+	v := &TestObectOmitEmpty{
+		nonNiler:  1,
+		testInt:   0,
+		testObect: &TestObectOmitEmpty{testInt: 1},
+	}
+	r, err := MarshalObject(v)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`{"testIntNotEmpty":1,"testFloatNotEmpty":1.1,"testFloat32NotEmpty":1.1,"testStringNotEmpty":"foo","testBoolNotEmpty":true,"testObect":{"testInt":1,"testIntNotEmpty":1,"testFloatNotEmpty":1.1,"testFloat32NotEmpty":1.1,"testStringNotEmpty":"foo","testBoolNotEmpty":true,"testArray":["foo"]},"testArray":["foo"]}`,
+		string(r),
+		"Result of marshalling is different as the one expected",
+	)
+}
+
+type TestObectOmitEmptyInterface struct{}
+
+func (t *TestObectOmitEmptyInterface) IsNil() bool {
+	return t == nil
+}
+
+func (t *TestObectOmitEmptyInterface) MarshalObject(enc *Encoder) {
+	enc.AddInterfaceKeyOmitEmpty("testInt", 0)
+	enc.AddInterfaceKeyOmitEmpty("testInt64", int64(0))
+	enc.AddInterfaceKeyOmitEmpty("testInt32", int32(0))
+	enc.AddInterfaceKeyOmitEmpty("testInt16", int16(0))
+	enc.AddInterfaceKeyOmitEmpty("testInt8", int8(0))
+	enc.AddInterfaceKeyOmitEmpty("testUint8", uint8(0))
+	enc.AddInterfaceKeyOmitEmpty("testUint16", uint16(0))
+	enc.AddInterfaceKeyOmitEmpty("testUint32", uint32(0))
+	enc.AddInterfaceKeyOmitEmpty("testUint64", uint64(0))
+	enc.AddInterfaceKeyOmitEmpty("testIntNotEmpty", 1)
+	enc.AddInterfaceKeyOmitEmpty("testFloat", 0)
+	enc.AddInterfaceKeyOmitEmpty("testFloatNotEmpty", 1.1)
+	enc.AddInterfaceKeyOmitEmpty("testFloat32", float32(0))
+	enc.AddInterfaceKeyOmitEmpty("testFloat32NotEmpty", float32(1.1))
+	enc.AddInterfaceKeyOmitEmpty("testString", "")
+	enc.AddInterfaceKeyOmitEmpty("testStringNotEmpty", "foo")
+	enc.AddInterfaceKeyOmitEmpty("testBool", false)
+	enc.AddInterfaceKeyOmitEmpty("testBoolNotEmpty", true)
+	enc.AddInterfaceKeyOmitEmpty("testObectOmitEmpty", nil)
+	enc.AddInterfaceKeyOmitEmpty("testObect", &TestEncoding{})
+	enc.AddInterfaceKeyOmitEmpty("testArr", &TestEncodingArrStrings{})
+}
+
+func TestEncoderObjectInterfaceOmitEmpty(t *testing.T) {
+	v := &TestObectOmitEmptyInterface{}
+	r, err := MarshalObject(v)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`{"testIntNotEmpty":1,"testFloatNotEmpty":1.1,"testFloat32NotEmpty":1.1,"testStringNotEmpty":"foo","testBoolNotEmpty":true,"testObect":{"test":"","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}}`,
+		string(r),
+		"Result of marshalling is different as the one expected",
+	)
+}
+
+func TestEncoderAddInterfaceKeyError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	enc.AddInterfaceKeyOmitEmpty("test", struct{}{})
+	assert.NotNil(t, enc.err, "enc.Err() should not be nil")
 }
 
 func TestEncoderObjectPooledError(t *testing.T) {

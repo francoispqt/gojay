@@ -32,8 +32,14 @@ func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerObject
-func (enc *Encoder) AddObject(value MarshalerObject) {
-	if value.IsNil() {
+func (enc *Encoder) AddObject(v MarshalerObject) {
+	if v.IsNil() {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('{')
+		enc.writeByte('}')
 		return
 	}
 	r, ok := enc.getPreviousRune()
@@ -41,13 +47,55 @@ func (enc *Encoder) AddObject(value MarshalerObject) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
-	value.MarshalObject(enc)
+	v.MarshalObject(enc)
+	enc.writeByte('}')
+}
+
+// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerObject
+func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
+	if v.IsNil() {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('{')
+	v.MarshalObject(enc)
 	enc.writeByte('}')
 }
 
 // AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerObject
 func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
+	if value.IsNil() {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('"')
+		enc.writeString(key)
+		enc.writeBytes(objKeyObj)
+		enc.writeByte('}')
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeString(key)
+	enc.writeBytes(objKeyObj)
+	value.MarshalObject(enc)
+	enc.writeByte('}')
+}
+
+// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerObject
+func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 	if value.IsNil() {
 		return
 	}

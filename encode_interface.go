@@ -130,3 +130,46 @@ func (enc *Encoder) AddInterfaceKey(key string, value interface{}) {
 		return
 	}
 }
+
+// AddInterfaceKeyOmitEmpty adds an interface{} to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddInterfaceKeyOmitEmpty(key string, v interface{}) {
+	switch vt := v.(type) {
+	case string:
+		enc.AddStringKeyOmitEmpty(key, vt)
+	case bool:
+		enc.AddBoolKeyOmitEmpty(key, vt)
+	case MarshalerArray:
+		enc.AddArrayKeyOmitEmpty(key, vt)
+	case MarshalerObject:
+		enc.AddObjectKeyOmitEmpty(key, vt)
+	case int:
+		enc.AddIntKeyOmitEmpty(key, vt)
+	case int64:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case int32:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case int16:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case int8:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case uint64:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case uint32:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case uint16:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case uint8:
+		enc.AddIntKeyOmitEmpty(key, int(vt))
+	case float64:
+		enc.AddFloatKeyOmitEmpty(key, vt)
+	case float32:
+		enc.AddFloat32KeyOmitEmpty(key, vt)
+	default:
+		t := reflect.TypeOf(vt)
+		if t != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+			return
+		}
+		return
+	}
+}

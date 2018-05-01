@@ -15,27 +15,41 @@ func (enc *Encoder) EncodeString(s string) error {
 }
 
 // encodeString encodes a string to
-func (enc *Encoder) encodeString(s string) ([]byte, error) {
+func (enc *Encoder) encodeString(v string) ([]byte, error) {
 	enc.writeByte('"')
-	enc.writeString(s)
+	enc.writeString(v)
 	enc.writeByte('"')
 	return enc.buf, nil
 }
 
 // AddString adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddString(value string) {
+func (enc *Encoder) AddString(v string) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(value)
+	enc.writeString(v)
+	enc.writeByte('"')
+}
+
+// AddStringOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddStringOmitEmpty(v string) {
+	if v == "" {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeString(v)
 	enc.writeByte('"')
 }
 
 // AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) AddStringKey(key, value string) {
-	// grow to avoid allocs (length of key/value + quotes)
+func (enc *Encoder) AddStringKey(key, v string) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
@@ -43,6 +57,23 @@ func (enc *Encoder) AddStringKey(key, value string) {
 	enc.writeByte('"')
 	enc.writeString(key)
 	enc.writeBytes(objKeyStr)
-	enc.writeString(value)
+	enc.writeString(v)
+	enc.writeByte('"')
+}
+
+// AddStringKeyOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
+	if v == "" {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeString(key)
+	enc.writeBytes(objKeyStr)
+	enc.writeString(v)
 	enc.writeByte('"')
 }

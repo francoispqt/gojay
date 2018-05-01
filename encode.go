@@ -172,6 +172,7 @@ type MarshalerObject interface {
 // for a slice or an array to be encoded
 type MarshalerArray interface {
 	MarshalArray(enc *Encoder)
+	IsNil() bool
 }
 
 // An Encoder writes JSON values to an output stream.
@@ -184,9 +185,6 @@ type Encoder struct {
 
 func (enc *Encoder) getPreviousRune() (byte, bool) {
 	last := len(enc.buf) - 1
-	if last < 0 {
-		return 0, false
-	}
 	return enc.buf[last], true
 }
 

@@ -23,20 +23,54 @@ func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 
 // AddArray adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
-func (enc *Encoder) AddArray(value MarshalerArray) {
+func (enc *Encoder) AddArray(v MarshalerArray) {
+	if v.IsNil() {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('[')
+		enc.writeByte(']')
+		return
+	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('[')
-	value.MarshalArray(enc)
+	v.MarshalArray(enc)
+	enc.writeByte(']')
+}
+
+// AddArrayOmitEmpty adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement Marshaler
+func (enc *Encoder) AddArrayOmitEmpty(v MarshalerArray) {
+	if v.IsNil() {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('[')
+	v.MarshalArray(enc)
 	enc.writeByte(']')
 }
 
 // AddArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
 // value must implement Marshaler
-func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) {
-	// grow to avoid allocs (length of key/value + quotes)
+func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
+	if v.IsNil() {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('"')
+		enc.writeString(key)
+		enc.writeBytes(objKeyArr)
+		enc.writeByte(']')
+		return
+	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' && r != '{' {
 		enc.writeByte(',')
@@ -44,6 +78,23 @@ func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) {
 	enc.writeByte('"')
 	enc.writeString(key)
 	enc.writeBytes(objKeyArr)
-	value.MarshalArray(enc)
+	v.MarshalArray(enc)
+	enc.writeByte(']')
+}
+
+// AddArrayKeyOmitEmpty adds an array or slice to be encoded and skips it if it is nil.
+// Must be called inside an object as it will encode a key.
+func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerArray) {
+	if v.IsNil() {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' && r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeString(key)
+	enc.writeBytes(objKeyArr)
+	v.MarshalArray(enc)
 	enc.writeByte(']')
 }
