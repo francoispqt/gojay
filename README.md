@@ -493,14 +493,14 @@ type UnmarshalerStream interface {
 Example of implementation of stream reading from a WebSocket connection: 
 ```go
 // implement UnmarshalerStream
-type ChannelStream chan *TestObj
+type ChannelStream chan *user
 
 func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
-	obj := &TestObj{}
-	if err := dec.AddObject(obj); err != nil {
+	u := &user{}
+	if err := dec.AddObject(u); err != nil {
 		return err
 	}
-	c <- obj
+	c <- u
 	return nil
 }
 
@@ -513,10 +513,11 @@ func main() {
         log.Fatal(err)
     }
     // create our channel which will receive our objects
-    streamChan := ChannelStream(make(chan *TestObj))
-    // get a reader implementing io.Reader
-    dec := gojay.Stream.NewDecoder(ws)
-    // start decoding (will block the goroutine until something is written to the ReadWriter)
+    streamChan := ChannelStream(make(chan *user))
+    // borrow a decoder
+    dec := gojay.Stream.BorrowDecoder(ws)
+    // start decoding, it will block until a JSON message is decoded from the WebSocket
+    // or until Done channel is closed
     go dec.DecodeStream(streamChan)
     for {
         select {

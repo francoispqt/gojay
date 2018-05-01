@@ -20,7 +20,7 @@ func (s stream) BorrowEncoder(w io.Writer) *StreamEncoder {
 	case streamEnc := <-streamEncPool:
 		streamEnc.isPooled = 0
 		streamEnc.w = w
-		streamEnc.err = nil
+		streamEnc.Encoder.err = nil
 		streamEnc.done = make(chan struct{}, 1)
 		streamEnc.Encoder.buf = make([]byte, 0, 512)
 		streamEnc.nConsumer = 1
@@ -35,6 +35,7 @@ func (s stream) borrowEncoder(w io.Writer) *StreamEncoder {
 	case streamEnc := <-streamEncPool:
 		streamEnc.isPooled = 0
 		streamEnc.w = w
+		streamEnc.Encoder.err = nil
 		return streamEnc
 	default:
 		return s.NewEncoder(w)

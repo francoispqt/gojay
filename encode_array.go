@@ -21,7 +21,7 @@ func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 	return enc.buf, enc.err
 }
 
-// AddArray adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// AddArray adds an implementation of MarshalerArray to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
 func (enc *Encoder) AddArray(v MarshalerArray) {
 	if v.IsNil() {

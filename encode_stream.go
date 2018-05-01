@@ -1,6 +1,9 @@
 package gojay
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 // MarshalerStream is the interface to implement
 // to continuously encode of stream of data.
@@ -13,9 +16,9 @@ type MarshalerStream interface {
 // It implements conext.Context and provide a channel to notify interruption.
 type StreamEncoder struct {
 	*Encoder
-	err       error
 	nConsumer int
 	delimiter byte
+	deadline  *time.Time
 	done      chan struct{}
 }
 
@@ -91,6 +94,26 @@ func (s *StreamEncoder) Err() error {
 	return s.err
 }
 
+// Deadline returns the time when work done on behalf of this context
+// should be canceled. Deadline returns ok==false when no deadline is
+// set. Successive calls to Deadline return the same results.
+func (s *StreamEncoder) Deadline() (time.Time, bool) {
+	if s.deadline != nil {
+		return *s.deadline, true
+	}
+	return time.Time{}, false
+}
+
+// SetDeadline sets the deadline
+func (s *StreamEncoder) SetDeadline(t time.Time) {
+	s.deadline = &t
+}
+
+// Value implements context.Context
+func (s *StreamEncoder) Value(key interface{}) interface{} {
+	return nil
+}
+
 // Cancel cancels the consumers of the stream, interrupting the stream encoding.
 //
 // After calling cancel, Done() will return a closed channel.
@@ -103,8 +126,8 @@ func (s *StreamEncoder) Cancel(err error) {
 	}
 }
 
-// AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
-// value must implement MarshalerObject
+// AddObject adds an object to be encoded.
+// value must implement MarshalerObject.
 func (s *StreamEncoder) AddObject(v MarshalerObject) {
 	if v.IsNil() {
 		return
@@ -115,13 +138,29 @@ func (s *StreamEncoder) AddObject(v MarshalerObject) {
 	s.Encoder.writeByte(s.delimiter)
 }
 
-// AddInt adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// AddString adds a string to be encoded.
+func (s *StreamEncoder) AddString(v string) {
+	s.Encoder.writeByte('"')
+	s.Encoder.writeString(v)
+	s.Encoder.writeByte('"')
+	s.Encoder.writeByte(s.delimiter)
+}
+
+// AddArray adds an implementation of MarshalerArray to be encoded.
+func (s *StreamEncoder) AddArray(v MarshalerArray) {
+	s.Encoder.writeByte('[')
+	v.MarshalArray(s.Encoder)
+	s.Encoder.writeByte(']')
+	s.Encoder.writeByte(s.delimiter)
+}
+
+// AddInt adds an int to be encoded.
 func (s *StreamEncoder) AddInt(value int) {
 	s.buf = strconv.AppendInt(s.buf, int64(value), 10)
 	s.Encoder.writeByte(s.delimiter)
 }
 
-// AddFloat adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// AddFloat adds a float64 to be encoded.
 func (s *StreamEncoder) AddFloat(value float64) {
 	s.buf = strconv.AppendFloat(s.buf, value, 'f', -1, 64)
 	s.Encoder.writeByte(s.delimiter)
