@@ -299,12 +299,14 @@ func main() {
 with Encode:
 ```go
 func main() {
-    u := &user{1, "gojay", "gojay@email.com"}
-    b := strings.Builder{}
-    if err := gojay.NewEncoder(&b); err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(b.String()) // {"id":1,"name":"gojay","email":"gojay@email.com"}
+    func main() {
+	u := &user{1, "gojay", "gojay@email.com"}
+	b := strings.Builder{}
+	enc := gojay.NewEncoder(&b)
+	if err := enc.Encode(u); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(b.String()) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
 ```
 
@@ -526,7 +528,7 @@ func main() {
 }
 ```
 
-## Stream Encoding
+### Stream Encoding
 GoJay ships with a powerful stream encoder part of the Stream API.
 
 It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine. 
@@ -553,7 +555,7 @@ type user struct {
 func (u *user) MarshalObject(enc *gojay.Encoder) {
 	enc.AddIntKey("id", u.id)
 	enc.AddStringKey("name", u.name)
-	enc.AddStringKey("id", u.email)
+	enc.AddStringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
 	return u == nil
@@ -589,16 +591,14 @@ func main() {
     s := StreamChan(make(chan *user))
     // start the stream encoder
     // will block its goroutine until enc.Cancel(error) is called
-    // or until something is written to then channel
+    // or until something is written to the channel
     go enc.EncodeStream(s)
     // write to our MarshalerStream
     for i := 0; i < 1000; i++ {
         s<-&user{i,"username","user@email.com"}
     }
     // Wait
-    select {
-	case <-enc.Done():
-	}
+    <-enc.Done()
 }
 ```
 
