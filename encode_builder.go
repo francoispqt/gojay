@@ -20,7 +20,7 @@ func (enc *Encoder) grow(n int) {
 
 // Write appends the contents of p to b's Buffer.
 // Write always returns len(p), nil.
-func (enc *Encoder) write(p []byte) {
+func (enc *Encoder) writeBytes(p []byte) {
 	enc.buf = append(enc.buf, p...)
 }
 

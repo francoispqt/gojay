@@ -133,6 +133,9 @@ func (m *Avatars) MarshalArray(enc *gojay.Encoder) {
 		enc.AddObject(e)
 	}
 }
+func (m *Avatars) IsNil() bool {
+	return m == nil
+}
 
 type CBGravatar struct {
 	Avatars Avatars

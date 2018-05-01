@@ -6,7 +6,7 @@
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 
 # GoJay
-**Package is currently at version 0.9.1 and still under development**
+**Package is currently at version 0.10.0 and still under development**
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
@@ -27,6 +27,11 @@ This is how GoJay aims to be a very fast, JIT stream parser with 0 reflection, l
 ```bash
 go get github.com/francoispqt/gojay
 ```
+
+* [Encoder](#encoding)
+* [Decoder](#decoding)
+* [Stream API](#stream-api)
+
 
 ## Decoding
 
@@ -139,7 +144,7 @@ if err := dec.Decode(&str); err != nil {
 `*gojay.Decoder` has multiple methods to decode to specific types:
 * Decode
 ```go
-func (dec *Decoder) DecodeInt(v *int) error
+func (dec *Decoder) Decode(v interface{}) error
 ```
 * DecodeObject
 ```go
@@ -240,45 +245,6 @@ func (c ChannelArray) UnmarshalArray(dec *gojay.Decoder) error {
 }
 ```
 
-### Stream Decoding
-GoJay ships with a powerful stream decoder.
-
-It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming. 
-
-When using the Stream API, the Decoder implements context.Context to provide graceful cancellation. 
-
-Example: 
-```go
-type ChannelStream chan *TestObj
-// implement UnmarshalerStream
-func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
-	obj := &TestObj{}
-	if err := dec.AddObject(obj); err != nil {
-		return err
-	}
-	c <- obj
-	return nil
-}
-
-func main() {
-    // create our channel which will receive our objects
-    streamChan := ChannelStream(make(chan *TestObj))
-    // get a reader implementing io.Reader
-    reader := getAnIOReaderStream()
-    dec := gojay.Stream.NewDecoder(reader)
-    // start decoding (will block the goroutine until something is written to the ReadWriter)
-    go dec.DecodeStream(streamChan)
-    for {
-        select {
-        case v := <-streamChan:
-            // do something with my TestObj
-        case <-dec.Done():
-            os.Exit("finished reading stream")
-        }
-    }
-}
-```
-
 ### Other types
 To decode other types (string, int, int32, int64, uint32, uint64, float, booleans), you don't need to implement any interface. 
 
@@ -297,7 +263,11 @@ func main() {
 
 ## Encoding
 
-Example of basic structure encoding:
+Encoding is done through two different API similar to standard `encoding/json`:
+* [Marshal](#marshal-api)
+* [Encode](#encode-api)
+
+Example of basic structure encoding with Marshal:
 ```go 
 import "github.com/francoispqt/gojay"
 
@@ -318,9 +288,113 @@ func (u *user) IsNil() bool {
 
 func main() {
     u := &user{1, "gojay", "gojay@email.com"}
-    b, _ := gojay.MarshalObject(u)
+    b, err := gojay.MarshalObject(u)
+    if err != nil {
+        log.Fatal(err)
+    }
     fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
+```
+
+with Encode:
+```go
+func main() {
+    u := &user{1, "gojay", "gojay@email.com"}
+    b := strings.Builder{}
+    if err := gojay.NewEncoder(&b); err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(b.String()) // {"id":1,"name":"gojay","email":"gojay@email.com"}
+}
+```
+
+### Marshal API
+
+Marshal API encodes a value to a JSON `[]byte` with a single function.
+
+Behind the doors, Marshal API borrows a `*gojay.Encoder` resets its settings and encodes the data to an internal byte buffer and releases the `*gojay.Encoder` to the pool when it finishes, whether it encounters an error or not. 
+
+If it cannot find the right Encoding strategy for the type of the given value, it returns an `InvalidMarshalError`. You can test the error returned by doing `if ok := err.(InvalidMarshalError); ok {}`.
+
+Marshal API comes with three functions:
+* Marshal
+```go
+func Marshal(v interface{}) ([]byte, error)
+```
+
+* MarshalObject 
+```go
+func MarshalObject(v MarshalerObject) ([]byte, error)
+```
+
+* MarshalArray
+```go
+func MarshalArray(v MarshalerArray) ([]byte, error)
+```
+
+### Encode API
+
+Encode API decodes a value to JSON by creating or borrowing a `*gojay.Encoder` sending it to an `io.Writer` and calling `Encode` methods. 
+
+__Getting a *gojay.Encoder or Borrowing__
+
+You can either get a fresh `*gojay.Encoder` calling `enc := gojay.NewEncoder(io.Writer)` or borrow one from the pool by calling `enc := gojay.BorrowEncoder(io.Writer)`.
+
+After using an encoder, you can release it by calling `enc.Release()`. Beware, if you reuse the encoder after releasing it, it will panic with an error of type `InvalidUsagePooledEncoderError`. If you want to fully benefit from the pooling, you must release your encoders after using.
+
+Example getting a fresh encoder an releasing: 
+```go
+str := "test"
+b := strings.Builder{}
+enc := gojay.NewEncoder(&b)
+defer enc.Release()
+if err := enc.Encode(str); err != nil {
+    log.Fatal(err)
+}
+```
+Example borrowing an encoder and releasing: 
+```go
+str := "test"
+b := strings.Builder{}
+enc := gojay.BorrowEncoder(b)
+defer enc.Release()
+if err := enc.Encode(str); err != nil {
+    log.Fatal(err)
+}
+```
+
+`*gojay.Encoder` has multiple methods to encoder specific types to JSON:
+* Encode
+```go
+func (enc *Encoder) Encode(v interface{}) error
+```
+* EncodeObject
+```go
+func (enc *Encoder) EncodeObject(v MarshalerObject) error 
+```
+* EncodeArray
+```go
+func (enc *Encoder) EncodeArray(v MarshalerArray) error 
+```
+* EncodeInt
+```go
+func (enc *Encoder) EncodeInt(n int) error 
+```
+* EncodeInt64
+```go
+func (enc *Encoder) EncodeInt64(n int64) error 
+```
+* EncodeFloat
+```go
+func (enc *Encoder) EncodeFloat(n float64) error
+```
+* EncodeBool
+```go
+func (enc *Encoder) EncodeBool(v bool) error
+```
+* EncodeString
+```go
+func (enc *Encoder) EncodeString(s string) error
 ```
 
 ### Structs
@@ -358,23 +432,25 @@ func (u *user) IsNil() bool {
 To encode an array or a slice, the slice/array must implement the MarshalerArray interface:
 ```go
 type MarshalerArray interface {
-	MarshalArray(enc *Encoder)
+    MarshalArray(enc *Encoder)
+    IsNil() bool
 }
 ```
 MarshalArray method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
+
+IsNil method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature. 
 
 Example of implementation: 
 ```go
 type users []*user
 // implement MarshalerArray
-func (u *users) MarshalArray(dec *Decoder) error {
+func (u *users) MarshalArray(dec *Decoder) {
 	for _, e := range u {
-        err := enc.AddObject(e)
-        if err != nil {
-            return err
-        }
+        enc.AddObject(e)
     }
-    return nil
+}
+func (u *users) IsNil() bool {
+    return len(u) == 0
 }
 ```
 
@@ -390,6 +466,139 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println(string(b)) // "Jay"
+}
+```
+
+# Stream API
+
+### Stream Decoding
+GoJay ships with a powerful stream decoder.
+
+It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming. 
+
+When using the Stream API, the Decoder implements context.Context to provide graceful cancellation. 
+
+To decode a stream of JSON, you must call `gojay.Stream.DecodeStream` and pass it a `UnmarshalerStream` implementation.
+
+```go
+type UnmarshalerStream interface {
+	UnmarshalStream(*StreamDecoder) error
+}
+```
+
+Example of implementation of stream reading from a WebSocket connection: 
+```go
+// implement UnmarshalerStream
+type ChannelStream chan *user
+
+func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
+	u := &user{}
+	if err := dec.AddObject(u); err != nil {
+		return err
+	}
+	c <- u
+	return nil
+}
+
+func main() {
+    // get our websocket connection
+    origin := "http://localhost/"
+    url := "ws://localhost:12345/ws"
+    ws, err := websocket.Dial(url, "", origin)
+    if err != nil {
+        log.Fatal(err)
+    }
+    // create our channel which will receive our objects
+    streamChan := ChannelStream(make(chan *user))
+    // borrow a decoder
+    dec := gojay.Stream.BorrowDecoder(ws)
+    // start decoding, it will block until a JSON message is decoded from the WebSocket
+    // or until Done channel is closed
+    go dec.DecodeStream(streamChan)
+    for {
+        select {
+        case v := <-streamChan:
+            // Got something from my websocket!
+        case <-dec.Done():
+            os.Exit("finished reading from WebSocket")
+        }
+    }
+}
+```
+
+## Stream Encoding
+GoJay ships with a powerful stream encoder part of the Stream API.
+
+It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine. 
+
+When using the Stream API, the Encoder implements context.Context to provide graceful cancellation. 
+
+To encode a stream of data, you must call `EncodeStream` and pass it a `MarshalerStream` implementation.
+
+```go
+type MarshalerStream interface {
+	MarshalStream(enc *StreamEncoder)
+}
+```
+
+Example of implementation of stream writing to a WebSocket: 
+```go
+// Our structure which will be pushed to our stream
+type user struct {
+    id int
+    name string
+    email string
+}
+
+func (u *user) MarshalObject(enc *gojay.Encoder) {
+	enc.AddIntKey("id", u.id)
+	enc.AddStringKey("name", u.name)
+	enc.AddStringKey("id", u.email)
+}
+func (u *user) IsNil() bool {
+	return u == nil
+}
+
+// Our MarshalerStream implementation
+type StreamChan chan *user
+
+func (s StreamChan) MarshalStream(enc *gojay.StreamEncoder) {
+	select {
+	case <-enc.Done():
+		return
+	case o := <-s:
+		enc.AddObject(o)
+	}
+}
+
+// Our main function
+func main() {
+    // get our websocket connection
+    origin := "http://localhost/"
+    url := "ws://localhost:12345/ws"
+    ws, err := websocket.Dial(url, "", origin)
+    if err != nil {
+        log.Fatal(err)
+    }
+    // we borrow an encoder set stdout as the writer, 
+    // set the number of consumer to 10
+    // and tell the encoder to separate each encoded element 
+    // added to the channel by a new line character
+    enc := gojay.Stream.BorrowEncoder(ws).NConsumer(10).LineDelimited()
+    // instantiate our MarshalerStream
+    s := StreamChan(make(chan *user))
+    // start the stream encoder
+    // will block its goroutine until enc.Cancel(error) is called
+    // or until something is written to then channel
+    go enc.EncodeStream(s)
+    // write to our MarshalerStream
+    for i := 0; i < 1000; i++ {
+        s<-&user{i,"username","user@email.com"}
+    }
+    // Wait
+    select {
+	case <-enc.Done():
+	}
 }
 ```
 

@@ -6,41 +6,80 @@ var objKeyArr = []byte(`":[`)
 var objKey = []byte(`":`)
 
 // EncodeObject encodes an object to JSON
-func (enc *Encoder) EncodeObject(v MarshalerObject) ([]byte, error) {
+func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeObject(v)
+	_, err := enc.encodeObject(v)
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	_, err = enc.write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
 }
 func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 	enc.grow(200)
 	enc.writeByte('{')
 	v.MarshalObject(enc)
 	enc.writeByte('}')
-	return enc.buf, nil
+	return enc.buf, enc.err
 }
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
-// value must implement Marshaler
-func (enc *Encoder) AddObject(value MarshalerObject) error {
-	if value.IsNil() {
-		return nil
+// value must implement MarshalerObject
+func (enc *Encoder) AddObject(v MarshalerObject) {
+	if v.IsNil() {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('{')
+		enc.writeByte('}')
+		return
 	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
-	value.MarshalObject(enc)
+	v.MarshalObject(enc)
 	enc.writeByte('}')
-	return nil
+}
+
+// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerObject
+func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
+	if v.IsNil() {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('{')
+	v.MarshalObject(enc)
+	enc.writeByte('}')
 }
 
 // AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
-// value must implement Marshaler
-func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
+// value must implement MarshalerObject
+func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 	if value.IsNil() {
-		return nil
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('"')
+		enc.writeString(key)
+		enc.writeBytes(objKeyObj)
+		enc.writeByte('}')
+		return
 	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
@@ -48,8 +87,25 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
 	}
 	enc.writeByte('"')
 	enc.writeString(key)
-	enc.write(objKeyObj)
+	enc.writeBytes(objKeyObj)
 	value.MarshalObject(enc)
 	enc.writeByte('}')
-	return nil
+}
+
+// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerObject
+func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
+	if value.IsNil() {
+		return
+	}
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeString(key)
+	enc.writeBytes(objKeyObj)
+	value.MarshalObject(enc)
+	enc.writeByte('}')
 }

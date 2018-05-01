@@ -1,10 +1,10 @@
 .PHONY: test
 test:
-	go test -run=^Test -v
+	go test -race -run=^Test -v
 
 .PHONY: cover
 cover: 
-	go test -coverprofile=coverage.out 
+	go test -coverprofile=coverage.out -covermode=atomic
 
 .PHONY: coverhtml
 coverhtml: 

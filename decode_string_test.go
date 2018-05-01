@@ -57,6 +57,8 @@ func TestDecoderStringDecoderAPI(t *testing.T) {
 }
 
 func TestDecoderStringPoolError(t *testing.T) {
+	// reset the pool to make sure it's not full
+	decPool = make(chan *Decoder, 16)
 	result := ""
 	dec := NewDecoder(nil)
 	dec.Release()
