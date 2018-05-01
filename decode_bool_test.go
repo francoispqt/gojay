@@ -48,7 +48,7 @@ func TestDecoderBoolInvalidJSON(t *testing.T) {
 }
 func TestDecoderBoolDecoderAPI(t *testing.T) {
 	var v bool
-	dec := NewDecoder(strings.NewReader("true"))
+	dec := BorrowDecoder(strings.NewReader("true"))
 	defer dec.Release()
 	err := dec.DecodeBool(&v)
 	assert.Nil(t, err, "Err must be nil")

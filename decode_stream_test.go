@@ -338,7 +338,7 @@ func (r *StreamReader) Write() {
 	for r.writeCounter < t {
 		time.Sleep(time.Duration(r.writeCounter*100) * time.Millisecond)
 		currentChunkStart := (chunkSize) * r.writeCounter
-		lastWrite := currentChunkStart + chunkSize
+		lastWrite = currentChunkStart + chunkSize
 		r.readChan <- r.data[currentChunkStart:lastWrite]
 		carry = l - lastWrite
 		r.writeCounter++

@@ -65,6 +65,9 @@ func (m *DSTopics) MarshalArray(enc *gojay.Encoder) {
 		enc.AddObject(e)
 	}
 }
+func (m *DSTopics) IsNil() bool {
+	return m == nil
+}
 
 type DSTopicsList struct {
 	Topics        DSTopics
@@ -106,6 +109,9 @@ func (m *DSUsers) MarshalArray(enc *gojay.Encoder) {
 	for _, e := range *m {
 		enc.AddObject(e)
 	}
+}
+func (m *DSUsers) IsNil() bool {
+	return m == nil
 }
 
 type LargePayload struct {
