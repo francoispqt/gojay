@@ -109,5 +109,5 @@ func (dec *Decoder) skipArray() (int, error) {
 			continue
 		}
 	}
-	return 0, nil
+	return 0, InvalidJSONError("Invalid JSON")
 }
