@@ -57,7 +57,7 @@ func TestEncodeStreamSingleConsumer(t *testing.T) {
 		`{"testStr":"","testInt":0,"testInt64":0,"testInt32":0,"testInt16":0,"testInt8":0,"testUint64":0,"testUint32":0,"testUint16":0,"testUint8":0,"testFloat64":0,"testFloat32":0,"testBool":false}
 `
 	// create our writer
-	w := &TestWriter{target: 100, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 100, mux: &sync.RWMutex{}}
 	enc := Stream.NewEncoder(w).LineDelimited()
 	w.enc = enc
 	s := StreamChanObject(make(chan *testObject))
@@ -73,7 +73,7 @@ func TestEncodeStreamSingleConsumer(t *testing.T) {
 }
 func TestEncodeStreamSingleConsumerInt(t *testing.T) {
 	// create our writer
-	w := &TestWriter{target: 100, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 100, mux: &sync.RWMutex{}}
 	enc := Stream.NewEncoder(w).LineDelimited()
 	w.enc = enc
 	s := StreamChanInt(make(chan int))
@@ -86,7 +86,7 @@ func TestEncodeStreamSingleConsumerInt(t *testing.T) {
 }
 func TestEncodeStreamSingleConsumerFloat(t *testing.T) {
 	// create our writer
-	w := &TestWriter{target: 100, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 100, mux: &sync.RWMutex{}}
 	enc := Stream.NewEncoder(w).LineDelimited()
 	w.enc = enc
 	s := StreamChanFloat(make(chan float64))
@@ -99,7 +99,7 @@ func TestEncodeStreamSingleConsumerFloat(t *testing.T) {
 }
 func TestEncodeStreamSingleConsumerMarshalError(t *testing.T) {
 	// create our writer
-	w := &TestWriter{target: 100, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 100, mux: &sync.RWMutex{}}
 	enc := Stream.NewEncoder(w).LineDelimited()
 	w.enc = enc
 	s := StreamChanError(make(chan *testObject))
@@ -114,7 +114,7 @@ func TestEncodeStreamSingleConsumerCommaDelimited(t *testing.T) {
 	expectedStr :=
 		`{"testStr":"","testInt":0,"testInt64":0,"testInt32":0,"testInt16":0,"testInt8":0,"testUint64":0,"testUint32":0,"testUint16":0,"testUint8":0,"testFloat64":0,"testFloat32":0,"testBool":false},`
 	// create our writer
-	w := &TestWriter{target: 5000, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 5000, mux: &sync.RWMutex{}}
 	enc := Stream.BorrowEncoder(w).NConsumer(50).CommaDelimited()
 	w.enc = enc
 	s := StreamChanObject(make(chan *testObject))
@@ -134,7 +134,7 @@ func TestEncodeStreamMultipleConsumer(t *testing.T) {
 		`{"testStr":"","testInt":0,"testInt64":0,"testInt32":0,"testInt16":0,"testInt8":0,"testUint64":0,"testUint32":0,"testUint16":0,"testUint8":0,"testFloat64":0,"testFloat32":0,"testBool":false}
 `
 	// create our writer
-	w := &TestWriter{target: 5000, mux: &sync.Mutex{}}
+	w := &TestWriter{target: 5000, mux: &sync.RWMutex{}}
 	enc := Stream.NewEncoder(w).NConsumer(50).LineDelimited()
 	w.enc = enc
 	s := StreamChanObject(make(chan *testObject))
@@ -155,17 +155,17 @@ type TestWriter struct {
 	target int
 	enc    *StreamEncoder
 	result [][]byte
-	mux    *sync.Mutex
+	mux    *sync.RWMutex
 }
 
 func (w *TestWriter) Write(b []byte) (int, error) {
 	if len(b) > 0 {
 		w.mux.Lock()
 		w.result = append(w.result, b)
-		w.mux.Unlock()
 		if len(w.result) == w.target {
 			w.enc.Cancel(nil)
 		}
+		w.mux.Unlock()
 	}
 	return len(b), nil
 }

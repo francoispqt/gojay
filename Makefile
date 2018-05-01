@@ -1,6 +1,6 @@
 .PHONY: test
 test:
-	go test -run=^Test -v
+	go test -race -run=^Test -v
 
 .PHONY: cover
 cover: 

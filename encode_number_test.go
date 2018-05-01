@@ -126,6 +126,6 @@ func TestEncoderFloatPooledError(t *testing.T) {
 		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
 		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 	}()
-	_, _ = enc.EncodeFloat(v)
+	_ = enc.EncodeFloat(v)
 	assert.True(t, false, "should not be called as it should have panicked")
 }

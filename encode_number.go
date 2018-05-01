@@ -18,17 +18,45 @@ func (enc *Encoder) encodeInt(n int64) ([]byte, error) {
 }
 
 // EncodeFloat encodes a float64 to JSON
-func (enc *Encoder) EncodeFloat(n float64) ([]byte, error) {
+func (enc *Encoder) EncodeFloat(n float64) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeFloat(n)
+	_, err := enc.encodeFloat(n)
+	if err != nil {
+		return err
+	}
+	_, err = enc.write()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // encodeFloat encodes a float64 to JSON
 func (enc *Encoder) encodeFloat(n float64) ([]byte, error) {
-	s := strconv.FormatFloat(n, 'f', -1, 64)
-	enc.writeString(s)
+	enc.buf = strconv.AppendFloat(enc.buf, float64(n), 'f', -1, 64)
+	return enc.buf, nil
+}
+
+// EncodeFloat encodes a float32 to JSON
+func (enc *Encoder) EncodeFloat32(n float32) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	_, err := enc.encodeFloat32(n)
+	if err != nil {
+		return err
+	}
+	_, err = enc.write()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (enc *Encoder) encodeFloat32(n float32) ([]byte, error) {
+	enc.buf = strconv.AppendFloat(enc.buf, float64(n), 'f', -1, 32)
 	return enc.buf, nil
 }
 
