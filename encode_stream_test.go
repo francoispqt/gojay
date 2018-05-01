@@ -139,23 +139,6 @@ func TestEncodeStreamSingleConsumerWriteError(t *testing.T) {
 		assert.NotNil(t, enc.Err(), "enc.Err() should not be nil")
 	}
 }
-func TestEncodeStreamSingleConsumerNilValue(t *testing.T) {
-	expectedStr := ``
-	// create our writer
-	w := &TestWriter{target: 100, mux: &sync.RWMutex{}}
-	enc := Stream.NewEncoder(w).LineDelimited()
-	w.enc = enc
-	s := StreamChanObject(make(chan *testObject))
-	go enc.EncodeStream(s)
-	go feedStreamNil(s, 100)
-	select {
-	case <-enc.Done():
-		assert.Nil(t, enc.Err(), "enc.Err() should not be nil")
-		for _, b := range w.result {
-			assert.Equal(t, expectedStr, string(b), "every byte buffer should be equal to expected string")
-		}
-	}
-}
 func TestEncodeStreamSingleConsumerCommaDelimited(t *testing.T) {
 	expectedStr :=
 		`{"testStr":"","testInt":0,"testInt64":0,"testInt32":0,"testInt16":0,"testInt8":0,"testUint64":0,"testUint32":0,"testUint16":0,"testUint8":0,"testFloat64":0,"testFloat32":0,"testBool":false},`
