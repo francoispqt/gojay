@@ -23,11 +23,11 @@ func (enc *Encoder) encodeBool(v bool) ([]byte, error) {
 	} else {
 		enc.writeString("false")
 	}
-	return enc.buf, nil
+	return enc.buf, enc.err
 }
 
 // AddBool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddBool(value bool) error {
+func (enc *Encoder) AddBool(value bool) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -37,11 +37,10 @@ func (enc *Encoder) AddBool(value bool) error {
 	} else {
 		enc.writeString("false")
 	}
-	return nil
 }
 
 // AddBoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
-func (enc *Encoder) AddBoolKey(key string, value bool) error {
+func (enc *Encoder) AddBoolKey(key string, value bool) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
@@ -50,5 +49,4 @@ func (enc *Encoder) AddBoolKey(key string, value bool) error {
 	enc.writeString(key)
 	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendBool(enc.buf, value)
-	return nil
 }

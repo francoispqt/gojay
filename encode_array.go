@@ -18,12 +18,12 @@ func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 	enc.writeByte('[')
 	v.MarshalArray(enc)
 	enc.writeByte(']')
-	return enc.buf, nil
+	return enc.buf, enc.err
 }
 
 // AddArray adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
-func (enc *Encoder) AddArray(value MarshalerArray) error {
+func (enc *Encoder) AddArray(value MarshalerArray) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -31,12 +31,11 @@ func (enc *Encoder) AddArray(value MarshalerArray) error {
 	enc.writeByte('[')
 	value.MarshalArray(enc)
 	enc.writeByte(']')
-	return nil
 }
 
 // AddArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
 // value must implement Marshaler
-func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) error {
+func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) {
 	// grow to avoid allocs (length of key/value + quotes)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' && r != '{' {
@@ -47,5 +46,4 @@ func (enc *Encoder) AddArrayKey(key string, value MarshalerArray) error {
 	enc.writeBytes(objKeyArr)
 	value.MarshalArray(enc)
 	enc.writeByte(']')
-	return nil
 }

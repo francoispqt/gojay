@@ -19,6 +19,7 @@ func BorrowEncoder(w io.Writer) *Encoder {
 	case enc := <-encPool:
 		enc.isPooled = 0
 		enc.w = w
+		enc.err = nil
 		enc.buf = make([]byte, 0)
 		return enc
 	default:

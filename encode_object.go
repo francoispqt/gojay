@@ -10,8 +10,12 @@ func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	_, _ = enc.encodeObject(v)
-	_, err := enc.write()
+	_, err := enc.encodeObject(v)
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	_, err = enc.write()
 	if err != nil {
 		enc.err = err
 		return err
@@ -23,14 +27,14 @@ func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 	enc.writeByte('{')
 	v.MarshalObject(enc)
 	enc.writeByte('}')
-	return enc.buf, nil
+	return enc.buf, enc.err
 }
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerObject
-func (enc *Encoder) AddObject(value MarshalerObject) error {
+func (enc *Encoder) AddObject(value MarshalerObject) {
 	if value.IsNil() {
-		return nil
+		return
 	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
@@ -39,14 +43,13 @@ func (enc *Encoder) AddObject(value MarshalerObject) error {
 	enc.writeByte('{')
 	value.MarshalObject(enc)
 	enc.writeByte('}')
-	return nil
 }
 
 // AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerObject
-func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
+func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 	if value.IsNil() {
-		return nil
+		return
 	}
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
@@ -57,5 +60,4 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) error {
 	enc.writeBytes(objKeyObj)
 	value.MarshalObject(enc)
 	enc.writeByte('}')
-	return nil
 }

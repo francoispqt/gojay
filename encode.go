@@ -96,38 +96,27 @@ func MarshalArray(v MarshalerArray) ([]byte, error) {
 // 		fmt.Println(b) // {"id":123456}
 //	}
 func Marshal(v interface{}) ([]byte, error) {
-	var b []byte
-	var err error = InvalidTypeError("Unknown type to Marshal")
 	switch vt := v.(type) {
 	case MarshalerObject:
 		enc := BorrowEncoder(nil)
-		enc.writeByte('{')
-		vt.MarshalObject(enc)
-		enc.writeByte('}')
-		b = enc.buf
 		defer enc.Release()
-		return b, nil
+		return enc.encodeObject(vt)
 	case MarshalerArray:
 		enc := BorrowEncoder(nil)
-		enc.writeByte('[')
-		vt.MarshalArray(enc)
-		enc.writeByte(']')
-		b = enc.buf
 		defer enc.Release()
-		return b, nil
+		return enc.encodeArray(vt)
 	case string:
 		enc := BorrowEncoder(nil)
-		b, err = enc.encodeString(vt)
 		defer enc.Release()
+		return enc.encodeString(vt)
 	case bool:
 		enc := BorrowEncoder(nil)
-		err = enc.AddBool(vt)
-		b = enc.buf
 		defer enc.Release()
+		return enc.encodeBool(vt)
 	case int:
 		enc := BorrowEncoder(nil)
-		b, err = enc.encodeInt(vt)
 		defer enc.Release()
+		return enc.encodeInt(vt)
 	case int64:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
@@ -158,8 +147,8 @@ func Marshal(v interface{}) ([]byte, error) {
 		return enc.encodeInt(int(vt))
 	case uint8:
 		enc := BorrowEncoder(nil)
-		b, err = enc.encodeInt(int(vt))
 		defer enc.Release()
+		return enc.encodeInt(int(vt))
 	case float64:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
@@ -169,9 +158,8 @@ func Marshal(v interface{}) ([]byte, error) {
 		defer enc.Release()
 		return enc.encodeFloat32(vt)
 	default:
-		err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
-	return b, err
 }
 
 // MarshalerObject is the interface to implement for struct to be encoded

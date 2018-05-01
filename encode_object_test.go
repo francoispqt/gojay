@@ -43,6 +43,18 @@ func (t *testObject) MarshalObject(enc *Encoder) {
 	enc.AddBoolKey("testBool", t.testBool)
 }
 
+type testObjectWithUnknownType struct {
+	unknownType struct{}
+}
+
+func (t *testObjectWithUnknownType) IsNil() bool {
+	return t == nil
+}
+
+func (t *testObjectWithUnknownType) MarshalObject(enc *Encoder) {
+	enc.AddInterfaceKey("unknownType", t.unknownType)
+}
+
 func TestEncoderObjectBasic(t *testing.T) {
 	r, err := Marshal(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
 	assert.Nil(t, err, "Error should be nil")
@@ -64,6 +76,14 @@ func TestEncoderObjectBasicEncoderApi(t *testing.T) {
 		builder.String(),
 		"Result of marshalling is different as the one expected",
 	)
+}
+
+func TestEncoderObjectInterfaceEncoderApiError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeObject(&testObjectWithUnknownType{struct{}{}})
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "Invalid type struct {} provided to Marshal", err.Error(), "err.Error() should be 'Invalid type struct {} provided to Marshal'")
 }
 
 func TestEncoderObjectBasicEncoderApiError(t *testing.T) {

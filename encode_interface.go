@@ -48,75 +48,85 @@ func (enc *Encoder) Encode(v interface{}) error {
 }
 
 // AddInterface adds an interface{} to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddInterface(value interface{}) error {
+func (enc *Encoder) AddInterface(value interface{}) {
 	switch vt := value.(type) {
 	case string:
-		return enc.AddString(vt)
+		enc.AddString(vt)
 	case bool:
-		return enc.AddBool(vt)
+		enc.AddBool(vt)
 	case MarshalerArray:
-		return enc.AddArray(vt)
+		enc.AddArray(vt)
 	case MarshalerObject:
-		return enc.AddObject(vt)
+		enc.AddObject(vt)
 	case int:
-		return enc.AddInt(vt)
+		enc.AddInt(vt)
 	case int64:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case int32:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case int8:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case uint64:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case uint32:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case uint16:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case uint8:
-		return enc.AddInt(int(vt))
+		enc.AddInt(int(vt))
 	case float64:
-		return enc.AddFloat(vt)
+		enc.AddFloat(vt)
 	case float32:
-		return enc.AddFloat32(vt)
+		enc.AddFloat32(vt)
+	default:
+		t := reflect.TypeOf(vt)
+		if t != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+			return
+		}
+		return
 	}
-
-	return nil
 }
 
 // AddInterfaceKey adds an interface{} to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) AddInterfaceKey(key string, value interface{}) error {
+func (enc *Encoder) AddInterfaceKey(key string, value interface{}) {
 	switch vt := value.(type) {
 	case string:
-		return enc.AddStringKey(key, vt)
+		enc.AddStringKey(key, vt)
 	case bool:
-		return enc.AddBoolKey(key, vt)
+		enc.AddBoolKey(key, vt)
 	case MarshalerArray:
-		return enc.AddArrayKey(key, value.(MarshalerArray))
+		enc.AddArrayKey(key, vt)
 	case MarshalerObject:
-		return enc.AddObjectKey(key, value.(MarshalerObject))
+		enc.AddObjectKey(key, vt)
 	case int:
-		return enc.AddIntKey(key, vt)
+		enc.AddIntKey(key, vt)
 	case int64:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case int32:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case int16:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case int8:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case uint64:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case uint32:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case uint16:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case uint8:
-		return enc.AddIntKey(key, int(vt))
+		enc.AddIntKey(key, int(vt))
 	case float64:
-		return enc.AddFloatKey(key, vt)
+		enc.AddFloatKey(key, vt)
 	case float32:
-		return enc.AddFloat32Key(key, vt)
+		enc.AddFloat32Key(key, vt)
+	default:
+		t := reflect.TypeOf(vt)
+		if t != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+			return
+		}
+		return
 	}
-
-	return nil
 }

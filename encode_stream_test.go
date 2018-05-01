@@ -26,7 +26,8 @@ func (s StreamChanInt) MarshalStream(enc *StreamEncoder) error {
 	case <-enc.Done():
 		return enc.Err()
 	case o := <-s:
-		return enc.AddInt(o)
+		enc.AddInt(o)
+		return nil
 	}
 }
 
@@ -37,7 +38,8 @@ func (s StreamChanFloat) MarshalStream(enc *StreamEncoder) error {
 	case <-enc.Done():
 		return enc.Err()
 	case o := <-s:
-		return enc.AddFloat(o)
+		enc.AddFloat(o)
+		return nil
 	}
 }
 

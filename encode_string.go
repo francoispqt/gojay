@@ -23,7 +23,7 @@ func (enc *Encoder) encodeString(s string) ([]byte, error) {
 }
 
 // AddString adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddString(value string) error {
+func (enc *Encoder) AddString(value string) {
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -31,12 +31,10 @@ func (enc *Encoder) AddString(value string) error {
 	enc.writeByte('"')
 	enc.writeString(value)
 	enc.writeByte('"')
-
-	return nil
 }
 
 // AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) AddStringKey(key, value string) error {
+func (enc *Encoder) AddStringKey(key, value string) {
 	// grow to avoid allocs (length of key/value + quotes)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
@@ -47,6 +45,4 @@ func (enc *Encoder) AddStringKey(key, value string) error {
 	enc.writeBytes(objKeyStr)
 	enc.writeString(value)
 	enc.writeByte('"')
-
-	return nil
 }

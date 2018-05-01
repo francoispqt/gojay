@@ -117,17 +117,15 @@ func (s *StreamEncoder) AddObject(v MarshalerObject) error {
 }
 
 // AddInt adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (s *StreamEncoder) AddInt(value int) error {
+func (s *StreamEncoder) AddInt(value int) {
 	s.buf = strconv.AppendInt(s.buf, int64(value), 10)
 	s.Encoder.writeByte(s.delimiter)
-	return nil
 }
 
 // AddFloat adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (s *StreamEncoder) AddFloat(value float64) error {
+func (s *StreamEncoder) AddFloat(value float64) {
 	s.buf = strconv.AppendFloat(s.buf, value, 'f', -1, 64)
 	s.Encoder.writeByte(s.delimiter)
-	return nil
 }
 
 // Non exposed
