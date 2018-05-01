@@ -30,6 +30,7 @@ go get github.com/francoispqt/gojay
 
 * [Encoder](#encoding)
 * [Decoder](#decoding)
+* [Stream API](#stream-api)
 
 
 ## Decoding
@@ -241,45 +242,6 @@ func (c ChannelArray) UnmarshalArray(dec *gojay.Decoder) error {
 	}
 	c <- str
 	return nil
-}
-```
-
-### Stream Decoding
-GoJay ships with a powerful stream decoder.
-
-It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming. 
-
-When using the Stream API, the Decoder implements context.Context to provide graceful cancellation. 
-
-Example: 
-```go
-type ChannelStream chan *TestObj
-// implement UnmarshalerStream
-func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
-	obj := &TestObj{}
-	if err := dec.AddObject(obj); err != nil {
-		return err
-	}
-	c <- obj
-	return nil
-}
-
-func main() {
-    // create our channel which will receive our objects
-    streamChan := ChannelStream(make(chan *TestObj))
-    // get a reader implementing io.Reader
-    reader := getAnIOReaderStream()
-    dec := gojay.Stream.NewDecoder(reader)
-    // start decoding (will block the goroutine until something is written to the ReadWriter)
-    go dec.DecodeStream(streamChan)
-    for {
-        select {
-        case v := <-streamChan:
-            // do something with my TestObj
-        case <-dec.Done():
-            os.Exit("finished reading stream")
-        }
-    }
 }
 ```
 
@@ -511,8 +473,63 @@ func main() {
 }
 ```
 
-### Stream Encoding
+# Stream API
 
+### Stream Decoding
+GoJay ships with a powerful stream decoder.
+
+It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming. 
+
+When using the Stream API, the Decoder implements context.Context to provide graceful cancellation. 
+
+To decode a stream of JSON, you must call `gojay.Stream.DecodeStream` and pass it a `UnmarshalerStream` implementation.
+
+```go
+type UnmarshalerStream interface {
+	UnmarshalStream(*StreamDecoder) error
+}
+```
+
+Example of implementation of stream reading from a WebSocket connection: 
+```go
+// implement UnmarshalerStream
+type ChannelStream chan *TestObj
+
+func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
+	obj := &TestObj{}
+	if err := dec.AddObject(obj); err != nil {
+		return err
+	}
+	c <- obj
+	return nil
+}
+
+func main() {
+    // get our websocket connection
+    origin := "http://localhost/"
+    url := "ws://localhost:12345/ws"
+    ws, err := websocket.Dial(url, "", origin)
+    if err != nil {
+        log.Fatal(err)
+    }
+    // create our channel which will receive our objects
+    streamChan := ChannelStream(make(chan *TestObj))
+    // get a reader implementing io.Reader
+    dec := gojay.Stream.NewDecoder(ws)
+    // start decoding (will block the goroutine until something is written to the ReadWriter)
+    go dec.DecodeStream(streamChan)
+    for {
+        select {
+        case v := <-streamChan:
+            // Got something from my websocket!
+        case <-dec.Done():
+            os.Exit("finished reading from WebSocket")
+        }
+    }
+}
+```
+
+## Stream Encoding
 GoJay ships with a powerful stream encoder part of the Stream API.
 
 It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine. 
@@ -527,7 +544,7 @@ type MarshalerStream interface {
 }
 ```
 
-Example of implementation of stream writing to stdout: 
+Example of implementation of stream writing to a WebSocket: 
 ```go
 // Our structure which will be pushed to our stream
 type user struct {
@@ -559,11 +576,18 @@ func (s StreamChan) MarshalStream(enc *gojay.StreamEncoder) {
 
 // Our main function
 func main() {
+    // get our websocket connection
+    origin := "http://localhost/"
+    url := "ws://localhost:12345/ws"
+    ws, err := websocket.Dial(url, "", origin)
+    if err != nil {
+        log.Fatal(err)
+    }
     // we borrow an encoder set stdout as the writer, 
     // set the number of consumer to 10
     // and tell the encoder to separate each encoded element 
     // added to the channel by a new line character
-    enc := gojay.Stream.BorrowEncoder(os.Stdout).NConsumer(10).LineDelimited()
+    enc := gojay.Stream.BorrowEncoder(ws).NConsumer(10).LineDelimited()
     // instantiate our MarshalerStream
     s := StreamChan(make(chan *user))
     // start the stream encoder
