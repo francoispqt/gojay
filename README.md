@@ -28,6 +28,10 @@ This is how GoJay aims to be a very fast, JIT stream parser with 0 reflection, l
 go get github.com/francoispqt/gojay
 ```
 
+* [Encoder](#encoding)
+* [Decoder](#decoding)
+
+
 ## Decoding
 
 Decoding is done through two different API similar to standard `encoding/json`:
@@ -322,7 +326,10 @@ func (u *user) IsNil() bool {
 
 func main() {
     u := &user{1, "gojay", "gojay@email.com"}
-    b, _ := gojay.MarshalObject(u)
+    b, err := gojay.MarshalObject(u)
+    if err != nil {
+        log.Fatal(err)
+    }
     fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
 ```
@@ -501,6 +508,76 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println(string(b)) // "Jay"
+}
+```
+
+### Stream Encoding
+
+GoJay ships with a powerful stream encoder part of the Stream API.
+
+It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine. 
+
+When using the Stream API, the Encoder implements context.Context to provide graceful cancellation. 
+
+To encode a stream of data, you must call `EncodeStream` and pass it a `MarshalerStream` implementation.
+
+```go
+type MarshalerStream interface {
+	MarshalStream(enc *StreamEncoder)
+}
+```
+
+Example of implementation of stream writing to stdout: 
+```go
+// Our structure which will be pushed to our stream
+type user struct {
+    id int
+    name string
+    email string
+}
+
+func (u *user) MarshalObject(enc *gojay.Encoder) {
+	enc.AddIntKey("id", u.id)
+	enc.AddStringKey("name", u.name)
+	enc.AddStringKey("id", u.email)
+}
+func (u *user) IsNil() bool {
+	return u == nil
+}
+
+// Our MarshalerStream implementation
+type StreamChan chan *user
+
+func (s StreamChan) MarshalStream(enc *gojay.StreamEncoder) {
+	select {
+	case <-enc.Done():
+		return
+	case o := <-s:
+		enc.AddObject(o)
+	}
+}
+
+// Our main function
+func main() {
+    // we borrow an encoder set stdout as the writer, 
+    // set the number of consumer to 10
+    // and tell the encoder to separate each encoded element 
+    // added to the channel by a new line character
+    enc := gojay.Stream.BorrowEncoder(os.Stdout).NConsumer(10).LineDelimited()
+    // instantiate our MarshalerStream
+    s := StreamChan(make(chan *user))
+    // start the stream encoder
+    // will block its goroutine until enc.Cancel(error) is called
+    // or until something is written to then channel
+    go enc.EncodeStream(s)
+    // write to our MarshalerStream
+    for i := 0; i < 1000; i++ {
+        s<-&user{i,"username","user@email.com"}
+    }
+    // Wait
+    select {
+	case <-enc.Done():
+	}
 }
 ```
 

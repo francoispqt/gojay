@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"errors"
 	"sync"
 	"testing"
 
@@ -10,47 +9,45 @@ import (
 
 type StreamChanObject chan *testObject
 
-func (s StreamChanObject) MarshalStream(enc *StreamEncoder) error {
+func (s StreamChanObject) MarshalStream(enc *StreamEncoder) {
 	select {
 	case <-enc.Done():
-		return enc.Err()
+		return
 	case o := <-s:
-		return enc.AddObject(o)
+		enc.AddObject(o)
 	}
 }
 
 type StreamChanInt chan int
 
-func (s StreamChanInt) MarshalStream(enc *StreamEncoder) error {
+func (s StreamChanInt) MarshalStream(enc *StreamEncoder) {
 	select {
 	case <-enc.Done():
-		return enc.Err()
+		return
 	case o := <-s:
 		enc.AddInt(o)
-		return nil
 	}
 }
 
 type StreamChanFloat chan float64
 
-func (s StreamChanFloat) MarshalStream(enc *StreamEncoder) error {
+func (s StreamChanFloat) MarshalStream(enc *StreamEncoder) {
 	select {
 	case <-enc.Done():
-		return enc.Err()
+		return
 	case o := <-s:
 		enc.AddFloat(o)
-		return nil
 	}
 }
 
 type StreamChanError chan *testObject
 
-func (s StreamChanError) MarshalStream(enc *StreamEncoder) error {
+func (s StreamChanError) MarshalStream(enc *StreamEncoder) {
 	select {
 	case <-enc.Done():
-		return enc.Err()
+		return
 	case <-s:
-		return errors.New("Test Error")
+		enc.AddInterface(struct{}{})
 	}
 }
 

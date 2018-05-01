@@ -5,7 +5,7 @@ import "strconv"
 // MarshalerStream is the interface to implement
 // to continuously encode of stream of data.
 type MarshalerStream interface {
-	MarshalStream(enc *StreamEncoder) error
+	MarshalStream(enc *StreamEncoder)
 }
 
 // A StreamEncoder reads and encodes values to JSON from an input stream.
@@ -105,15 +105,14 @@ func (s *StreamEncoder) Cancel(err error) {
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerObject
-func (s *StreamEncoder) AddObject(v MarshalerObject) error {
+func (s *StreamEncoder) AddObject(v MarshalerObject) {
 	if v.IsNil() {
-		return nil
+		return
 	}
 	s.Encoder.writeByte('{')
 	v.MarshalObject(s.Encoder)
 	s.Encoder.writeByte('}')
 	s.Encoder.writeByte(s.delimiter)
-	return nil
 }
 
 // AddInt adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
@@ -137,9 +136,9 @@ func consume(init *StreamEncoder, s *StreamEncoder, m MarshalerStream) {
 		case <-init.Done():
 			return
 		default:
-			err := m.MarshalStream(s)
-			if err != nil {
-				init.Cancel(err)
+			m.MarshalStream(s)
+			if s.Encoder.err != nil {
+				init.Cancel(s.Encoder.err)
 				return
 			}
 			i, err := s.Encoder.write()
