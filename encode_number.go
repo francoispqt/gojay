@@ -3,17 +3,40 @@ package gojay
 import "strconv"
 
 // EncodeInt encodes an int to JSON
-func (enc *Encoder) EncodeInt(n int64) ([]byte, error) {
+func (enc *Encoder) EncodeInt(n int) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeInt(n)
+	_, _ = enc.encodeInt(n)
+	_, err := enc.write()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // encodeInt encodes an int to JSON
-func (enc *Encoder) encodeInt(n int64) ([]byte, error) {
-	s := strconv.Itoa(int(n))
-	enc.writeString(s)
+func (enc *Encoder) encodeInt(n int) ([]byte, error) {
+	enc.buf = strconv.AppendInt(enc.buf, int64(n), 10)
+	return enc.buf, nil
+}
+
+// EncodeInt64 encodes an int64 to JSON
+func (enc *Encoder) EncodeInt64(n int64) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	_, _ = enc.encodeInt64(n)
+	_, err := enc.write()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// encodeInt64 encodes an int to JSON
+func (enc *Encoder) encodeInt64(n int64) ([]byte, error) {
+	enc.buf = strconv.AppendInt(enc.buf, n, 10)
 	return enc.buf, nil
 }
 
@@ -22,11 +45,8 @@ func (enc *Encoder) EncodeFloat(n float64) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	_, err := enc.encodeFloat(n)
-	if err != nil {
-		return err
-	}
-	_, err = enc.write()
+	_, _ = enc.encodeFloat(n)
+	_, err := enc.write()
 	if err != nil {
 		return err
 	}
@@ -44,11 +64,8 @@ func (enc *Encoder) EncodeFloat32(n float32) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	_, err := enc.encodeFloat32(n)
-	if err != nil {
-		return err
-	}
-	_, err = enc.write()
+	_, _ = enc.encodeFloat32(n)
+	_, err := enc.write()
 	if err != nil {
 		return err
 	}
@@ -77,6 +94,17 @@ func (enc *Encoder) AddFloat(value float64) error {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendFloat(enc.buf, value, 'f', -1, 64)
+
+	return nil
+}
+
+// AddFloat adds a float32 to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddFloat32(value float32) error {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
+		enc.writeByte(',')
+	}
+	enc.buf = strconv.AppendFloat(enc.buf, float64(value), 'f', -1, 32)
 
 	return nil
 }

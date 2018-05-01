@@ -1,11 +1,17 @@
 package gojay
 
 // EncodeString encodes a string to
-func (enc *Encoder) EncodeString(s string) ([]byte, error) {
+func (enc *Encoder) EncodeString(s string) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeString(s)
+	_, _ = enc.encodeString(s)
+	_, err := enc.write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
 }
 
 // encodeString encodes a string to

@@ -126,39 +126,39 @@ func Marshal(v interface{}) ([]byte, error) {
 		defer enc.Release()
 	case int:
 		enc := BorrowEncoder(nil)
-		b, err = enc.encodeInt(int64(vt))
+		b, err = enc.encodeInt(vt)
 		defer enc.Release()
 	case int64:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(vt)
+		return enc.encodeInt64(vt)
 	case int32:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case int16:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case int8:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case uint64:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case uint32:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case uint16:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeInt(int64(vt))
+		return enc.encodeInt(int(vt))
 	case uint8:
 		enc := BorrowEncoder(nil)
-		b, err = enc.encodeInt(int64(vt))
+		b, err = enc.encodeInt(int(vt))
 		defer enc.Release()
 	case float64:
 		enc := BorrowEncoder(nil)
@@ -167,7 +167,7 @@ func Marshal(v interface{}) ([]byte, error) {
 	case float32:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
-		return enc.encodeFloat(float64(vt))
+		return enc.encodeFloat32(vt)
 	default:
 		err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
@@ -204,9 +204,6 @@ func (enc *Encoder) getPreviousRune() (byte, bool) {
 
 func (enc *Encoder) write() (int, error) {
 	i, err := enc.w.Write(enc.buf)
-	if err != nil {
-		enc.err = err
-	}
 	enc.buf = make([]byte, 0, 512)
 	return i, err
 }

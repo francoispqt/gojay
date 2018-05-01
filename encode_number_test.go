@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,36 @@ func TestEncoderInt(t *testing.T) {
 		string(r),
 		"Result of marshalling is different as the one expected")
 }
+func TestEncoderIntEncodeAPI(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeInt(1)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`1`,
+		builder.String(),
+		"Result of marshalling is different as the one expected")
+}
+func TestEncoderIntEncodeAPIPoolError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+	}()
+	_ = enc.EncodeInt(1)
+	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+func TestEncoderIntEncodeAPIWriteError(t *testing.T) {
+	w := TestWriterError("")
+	enc := NewEncoder(w)
+	err := enc.EncodeInt(1)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
+}
 
 func TestEncoderInt64(t *testing.T) {
 	r, err := Marshal(int64(1))
@@ -24,6 +55,36 @@ func TestEncoderInt64(t *testing.T) {
 		`1`,
 		string(r),
 		"Result of marshalling is different as the one expected")
+}
+func TestEncoderInt64EncodeAPI(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeInt64(int64(1))
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`1`,
+		builder.String(),
+		"Result of marshalling is different as the one expected")
+}
+func TestEncoderInt64EncodeAPIPoolError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+	}()
+	_ = enc.EncodeInt64(1)
+	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+func TestEncoderInt64EncodeAPIWriteError(t *testing.T) {
+	w := TestWriterError("")
+	enc := NewEncoder(w)
+	err := enc.EncodeInt64(1)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
 }
 
 func TestEncoderInt32(t *testing.T) {
@@ -101,6 +162,67 @@ func TestEncoderFloat(t *testing.T) {
 		string(r),
 		"Result of marshalling is different as the one expected")
 }
+func TestEncoderFloatEncodeAPI(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeFloat(float64(1.1))
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`1.1`,
+		builder.String(),
+		"Result of marshalling is different as the one expected")
+}
+func TestEncoderFloatEncodeAPIPoolError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+	}()
+	_ = enc.EncodeFloat(1.1)
+	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+func TestEncoderFloatEncodeAPIWriteError(t *testing.T) {
+	w := TestWriterError("")
+	enc := NewEncoder(w)
+	err := enc.EncodeFloat(1.1)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
+}
+
+func TestEncoderFloat32EncodeAPI(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	err := enc.EncodeFloat32(float32(1.12))
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(
+		t,
+		`1.12`,
+		builder.String(),
+		"Result of marshalling is different as the one expected")
+}
+func TestEncoderFloat32EncodeAPIPoolError(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := NewEncoder(builder)
+	enc.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+	}()
+	_ = enc.EncodeFloat32(float32(1.1))
+	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+func TestEncoderFloat32EncodeAPIWriteError(t *testing.T) {
+	w := TestWriterError("")
+	enc := NewEncoder(w)
+	err := enc.EncodeFloat32(float32(1.1))
+	assert.NotNil(t, err, "err should not be nil")
+	assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
+}
 
 func TestEncoderIntPooledError(t *testing.T) {
 	v := 1
@@ -112,7 +234,7 @@ func TestEncoderIntPooledError(t *testing.T) {
 		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
 		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 	}()
-	_, _ = enc.EncodeInt(int64(v))
+	_ = enc.EncodeInt(v)
 	assert.True(t, false, "should not be called as it should have panicked")
 }
 

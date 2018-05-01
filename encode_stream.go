@@ -145,11 +145,7 @@ func consume(init *StreamEncoder, s *StreamEncoder, m MarshalerStream) {
 				return
 			}
 			i, err := s.Encoder.write()
-			if i == 0 {
-				init.Cancel(err)
-				return
-			}
-			if err != nil {
+			if err != nil || i == 0 {
 				init.Cancel(err)
 				return
 			}

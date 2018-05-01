@@ -3,11 +3,17 @@ package gojay
 import "strconv"
 
 // EncodeBool encodes a bool to JSON
-func (enc *Encoder) EncodeBool(v bool) ([]byte, error) {
+func (enc *Encoder) EncodeBool(v bool) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
-	return enc.encodeBool(v)
+	_, _ = enc.encodeBool(v)
+	_, err := enc.write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
 }
 
 // encodeBool encodes a bool to JSON

@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -93,9 +94,10 @@ func TestEncoderArrayInterfaces(t *testing.T) {
 		uint16(1),
 		uint8(1),
 		float64(1.31),
-		// float32(1.31),
+		float32(1.31),
 		&TestEncodingArr{},
 		true,
+		false,
 		"test",
 		&TestEncoding{
 			test:     "hello world",
@@ -108,7 +110,7 @@ func TestEncoderArrayInterfaces(t *testing.T) {
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(
 		t,
-		`[1,1,1,1,1,1,1,1,1.31,[],true,"test",{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[],"testF64":0,"testF32":0}]`,
+		`[1,1,1,1,1,1,1,1,1.31,1.31,[],true,false,"test",{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[],"testF64":0,"testF32":0}]`,
 		string(r),
 		"Result of marshalling is different as the one expected")
 }
@@ -136,15 +138,25 @@ func TestEncoderArrayInterfacesEncoderAPI(t *testing.T) {
 			testBool: true,
 		},
 	}
-	enc := BorrowEncoder(nil)
+	builder := &strings.Builder{}
+	enc := BorrowEncoder(builder)
 	defer enc.Release()
-	r, err := enc.EncodeArray(v)
+	err := enc.EncodeArray(v)
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(
 		t,
 		`[1,1,1,1,1,1,1,1,1.31,[],true,"test",{"test":"hello world","test2":"foobar","testInt":1,"testBool":true,"testArr":[],"testF64":0,"testF32":0}]`,
-		string(r),
+		builder.String(),
 		"Result of marshalling is different as the one expected")
+}
+
+func TestEncoderArrayInterfacesEncoderAPIWriteError(t *testing.T) {
+	v := &testEncodingArrInterfaces{}
+	w := TestWriterError("")
+	enc := BorrowEncoder(w)
+	defer enc.Release()
+	err := enc.EncodeArray(v)
+	assert.NotNil(t, err, "err should not be nil")
 }
 
 func TestEncoderArrayPooledError(t *testing.T) {
@@ -157,6 +169,6 @@ func TestEncoderArrayPooledError(t *testing.T) {
 		assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
 		assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 	}()
-	_, _ = enc.EncodeArray(v)
+	_ = enc.EncodeArray(v)
 	assert.True(t, false, "should not be called as it should have panicked")
 }
