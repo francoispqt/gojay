@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"context"
+	"errors"
 	"io"
 	"testing"
 	"time"
@@ -311,6 +312,20 @@ loop:
 	testCase.expectations(dec.Err(), result, t)
 }
 
+func TestStreamDecodingErr(t *testing.T) {
+	testChan := ChannelStreamStrings(make(chan *string))
+	dec := Stream.NewDecoder(&StreamReaderErr{})
+	// start decoding (will block the goroutine until something is written to the ReadWriter)
+	go dec.DecodeStream(testChan)
+	select {
+	case <-dec.Done():
+		assert.NotNil(t, dec.Err(), "dec.Err() should not be nil")
+	case <-testChan:
+		assert.True(t, false, "should not be called")
+	}
+
+}
+
 type ChannelStreamStrings chan *string
 
 func (c ChannelStreamStrings) UnmarshalStream(dec *StreamDecoder) error {
@@ -358,6 +373,12 @@ func (r *StreamReader) Read(b []byte) (int, error) {
 	case <-r.done:
 		return 0, io.EOF
 	}
+}
+
+type StreamReaderErr struct{}
+
+func (r *StreamReaderErr) Read(b []byte) (int, error) {
+	return 0, errors.New("Test Error")
 }
 
 // Deadline test

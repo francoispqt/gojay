@@ -309,10 +309,9 @@ func (dec *Decoder) read() bool {
 }
 
 func (dec *Decoder) nextChar() byte {
-	for dec.cursor < dec.length || dec.read() {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':
-			dec.cursor = dec.cursor + 1
 			continue
 		}
 		d := dec.data[dec.cursor]
