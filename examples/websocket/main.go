@@ -1,8 +1,16 @@
 // package main simulates a conversation between
 // a given set of websocket clients and a server.
 //
-// It uses gojay's streaming feature to abstract JSON communication
-// and only having to handle go values.
+// It spins up a web socket server.
+// On a client's connection it creates a SenderReceiver which handles JSON Stream
+// encoding and decoding using gojay's streaming API to abstract JSON communication
+// between server and client, only having to handle go values.
+//
+// To simulate a conversation:
+// - the server sends a welcome message to the client
+// - when the client receives the message, it sends a message back to the server
+// - when the server receives the ack message, it will send a message randomly to a client
+// - when the client receives the message, it sends a message back to the server... and so on.
 package main
 
 import (
@@ -44,7 +52,7 @@ func createClient(url, origin string, i int) {
 	str := strconv.Itoa(i)
 	// Init client's sender and receiver
 	// Set the OnMessage handler
-	c.Init(10).OnMessage(func(m *comm.Message) {
+	c.OnMessage(func(m *comm.Message) {
 		log.Print("client "+str+" received from "+m.UserName+" message: ", m)
 		c.SendMessage(&comm.Message{
 			UserName: str,

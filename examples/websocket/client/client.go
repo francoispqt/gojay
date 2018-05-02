@@ -22,5 +22,6 @@ func (c *client) Dial(url, origin string) error {
 		return err
 	}
 	c.Conn = conn
+	c.Init(10)
 	return nil
 }
