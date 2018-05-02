@@ -291,12 +291,16 @@ func (dec *Decoder) read() bool {
 			copy(Buf, dec.data)
 			dec.data = Buf
 		}
-		n, err := dec.r.Read(dec.data[dec.length:])
-		if err != nil {
-			dec.err = err
-			return false
-		} else if n == 0 {
-			return false
+		var n int
+		var err error
+		for n == 0 {
+			n, err = dec.r.Read(dec.data[dec.length:])
+			if err != nil {
+				if err != io.EOF {
+					dec.err = err
+				}
+				return false
+			}
 		}
 		dec.length = dec.length + n
 		return true
@@ -305,10 +309,9 @@ func (dec *Decoder) read() bool {
 }
 
 func (dec *Decoder) nextChar() byte {
-	for dec.cursor < dec.length || dec.read() {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':
-			dec.cursor = dec.cursor + 1
 			continue
 		}
 		d := dec.data[dec.cursor]
