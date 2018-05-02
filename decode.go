@@ -291,14 +291,18 @@ func (dec *Decoder) read() bool {
 			copy(Buf, dec.data)
 			dec.data = Buf
 		}
-		n, err := dec.r.Read(dec.data[dec.length:])
-		if err != nil {
-			dec.err = err
-			return false
-		} else if n == 0 {
-			return false
+		bRead := 0
+		for bRead == 0 {
+			n, err := dec.r.Read(dec.data[dec.length:])
+			if err != nil {
+				if err != io.EOF {
+					dec.err = err
+				}
+				return false
+			}
+			bRead = n
 		}
-		dec.length = dec.length + n
+		dec.length = dec.length + bRead
 		return true
 	}
 	return false

@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"context"
+	"io"
 	"testing"
 	"time"
 
@@ -355,7 +356,7 @@ func (r *StreamReader) Read(b []byte) (int, error) {
 		n := copy(b, v)
 		return n, nil
 	case <-r.done:
-		return 0, nil
+		return 0, io.EOF
 	}
 }
 
