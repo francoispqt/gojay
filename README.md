@@ -420,7 +420,7 @@ func (enc *Encoder) EncodeBool(v bool) error
 func (enc *Encoder) EncodeString(s string) error
 ```
 
-### Structs
+### Structs and Maps
 
 To encode a structure, the structure must implement the MarshalerObject interface:
 ```go
