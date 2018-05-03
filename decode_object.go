@@ -98,7 +98,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
 			return dec.cursor, nil
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON while paring object")
+	return 0, InvalidJSONError("Invalid JSON while parsing object")
 }
 
 func (dec *Decoder) skipObject() (int, error) {

@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"io"
 	"strings"
 	"testing"
 
@@ -352,6 +353,32 @@ func TestDecoderObjectDecoderAPI(t *testing.T) {
 	dec := NewDecoder(strings.NewReader(json))
 	err := dec.DecodeObject(v)
 	assertResult(t, v, err)
+}
+
+type ReadCloser struct {
+	json []byte
+}
+
+func (r *ReadCloser) Read(b []byte) (int, error) {
+	copy(b, r.json)
+	return len(r.json), io.EOF
+}
+
+func TestDecoderObjectDecoderAPIReadCloser(t *testing.T) {
+	readCloser := ReadCloser{
+		json: []byte(`{
+			"test": "string",
+			"test2": "string",
+			"test3": "string",
+			"test4": "string",
+			"test5": "string",
+		}`),
+	}
+	m := myMap(make(map[string]string))
+	dec := NewDecoder(&readCloser)
+	err := dec.DecodeObject(m)
+	assert.Nil(t, err, "err should be nil")
+	assert.Len(t, m, 5, "len of m should be 5")
 }
 
 func TestDecoderObjectDecoderInvalidJSONError(t *testing.T) {

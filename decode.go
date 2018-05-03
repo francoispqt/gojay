@@ -298,8 +298,13 @@ func (dec *Decoder) read() bool {
 			if err != nil {
 				if err != io.EOF {
 					dec.err = err
+					return false
 				}
-				return false
+				if n == 0 {
+					return false
+				}
+				dec.length = dec.length + n
+				return true
 			}
 		}
 		dec.length = dec.length + n
