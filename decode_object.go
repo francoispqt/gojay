@@ -24,25 +24,50 @@ func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
 		case ' ', '\n', '\t', '\r', ',':
 		case '{':
 			dec.cursor = dec.cursor + 1
-			for (dec.cursor < dec.length || dec.read()) && dec.keysDone < keys {
-				k, done, err := dec.nextKey()
-				if err != nil {
-					return 0, err
-				} else if done {
-					return dec.cursor, nil
-				}
-				err = j.UnmarshalObject(dec, k)
-				if err != nil {
-					return 0, err
-				} else if dec.called&1 == 0 {
-					err := dec.skipData()
+			// if keys is zero we will parse all keys
+			// we run two loops for micro optimization
+			if keys == 0 {
+				for dec.cursor < dec.length || dec.read() {
+					k, done, err := dec.nextKey()
 					if err != nil {
 						return 0, err
+					} else if done {
+						return dec.cursor, nil
 					}
-				} else {
-					dec.keysDone++
+					err = j.UnmarshalObject(dec, k)
+					if err != nil {
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
 				}
-				dec.called &= 0
+			} else {
+				for (dec.cursor < dec.length || dec.read()) && dec.keysDone < keys {
+					k, done, err := dec.nextKey()
+					if err != nil {
+						return 0, err
+					} else if done {
+						return dec.cursor, nil
+					}
+					err = j.UnmarshalObject(dec, k)
+					if err != nil {
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
+				}
 			}
 			// will get to that point when keysDone is not lower than keys anymore
 			// in that case, we make sure cursor goes to the end of object, but we skip

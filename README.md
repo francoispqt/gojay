@@ -168,7 +168,7 @@ func (dec *Decoder) DecodeString(v *string) error
 ```
 
 
-### Structs
+### Structs and Maps
 #### UnmarshalerObject Interface
 
 To unmarshal a JSON object to a structure, the structure must implement the UnmarshalerObject interface:
@@ -180,9 +180,9 @@ type UnmarshalerObject interface {
 ``` 
 UnmarshalObject method takes two arguments, the first one is a pointer to the Decoder (*gojay.Decoder) and the second one is the string value of the current key being parsed. If the JSON data is not an object, the UnmarshalObject method will never be called. 
 
-NKeys method must return the number of keys to Unmarshal in the JSON object. 
+NKeys method must return the number of keys to Unmarshal in the JSON object or 0. If zero is returned, all keys will be parsed. 
 
-Example of implementation: 
+Example of implementation for a struct: 
 ```go 
 type user struct {
     id int
@@ -206,6 +206,27 @@ func (u *user) NKeys() int {
 }
 ```
 
+Example of implementation for a `map[string]string`: 
+```go
+// define our custom map type implementing UnmarshalerObject
+type message map[string]string
+
+// Implementing Unmarshaler
+func (m message) UnmarshalObject(dec *gojay.Decoder, k string) error {
+	str := ""
+	err := dec.AddString(&str)
+	if err != nil {
+		return err
+	}
+	m[k] = str
+	return nil
+}
+
+// we return 0, it tells the Decoder to decode all keys
+func (m myMap) NKeys() int {
+	return 0
+}
+```
 
 ### Arrays, Slices and Channels
 
@@ -399,7 +420,7 @@ func (enc *Encoder) EncodeBool(v bool) error
 func (enc *Encoder) EncodeString(s string) error
 ```
 
-### Structs
+### Structs and Maps
 
 To encode a structure, the structure must implement the MarshalerObject interface:
 ```go
@@ -412,7 +433,7 @@ MarshalObject method takes one argument, a pointer to the Encoder (*gojay.Encode
 
 IsNil method returns a boolean indicating if the interface underlying value is nil or not. It is used to safely ensure that the underlying value is not nil without using Reflection. 
 
-Example of implementation: 
+Example of implementation for a struct: 
 ```go 
 type user struct {
     id int
@@ -427,6 +448,23 @@ func (u *user) MarshalObject(dec *gojay.Decoder, key string) {
 }
 func (u *user) IsNil() bool {
     return u == nil
+}
+```
+
+Example of implementation for a `map[string]string`: 
+```go
+// define our custom map type implementing MarshalerObject
+type message map[string]string
+
+// Implementing Marshaler
+func (m message) MarshalObject(enc *gojay.Encoder) {
+	for k, v := range m {
+		enc.AddStringKey(k, v)
+	}
+}
+
+func (m message) IsNil() bool {
+	return m == nil
 }
 ```
 

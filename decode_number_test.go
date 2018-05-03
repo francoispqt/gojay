@@ -89,13 +89,22 @@ func TestDecoderIntPoolError(t *testing.T) {
 	_ = dec.DecodeInt(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
 }
-func TestDecoderInttDecoderAPI(t *testing.T) {
+func TestDecoderIntDecoderAPI(t *testing.T) {
 	var v int
 	dec := NewDecoder(strings.NewReader(`33`))
 	defer dec.Release()
 	err := dec.DecodeInt(&v)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, int(33), v, "v must be equal to 33")
+}
+
+func TestDecoderIntInvalidJSONError(t *testing.T) {
+	var v int
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeInt(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 }
 
 func TestDecoderInt32Basic(t *testing.T) {
@@ -182,6 +191,15 @@ func TestDecoderInt32tDecoderAPI(t *testing.T) {
 	assert.Equal(t, int32(33), v, "v must be equal to 33")
 }
 
+func TestDecoderInt32InvalidJSONError(t *testing.T) {
+	var v int32
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeInt32(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestDecoderUint32Basic(t *testing.T) {
 	json := []byte(`124 `)
 	var v uint32
@@ -253,6 +271,15 @@ func TestDecoderUint32tDecoderAPI(t *testing.T) {
 	assert.Equal(t, uint32(33), v, "v must be equal to 33")
 }
 
+func TestDecoderUint32InvalidJSONError(t *testing.T) {
+	var v uint32
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeUint32(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestDecoderInt64Basic(t *testing.T) {
 	json := []byte(`124 `)
 	var v int64
@@ -321,7 +348,7 @@ func TestDecoderInt64PoolError(t *testing.T) {
 	_ = dec.DecodeInt64(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
 }
-func TestDecoderInt64tDecoderAPI(t *testing.T) {
+func TestDecoderInt64DecoderAPI(t *testing.T) {
 	var v int64
 	dec := NewDecoder(strings.NewReader(`33`))
 	defer dec.Release()
@@ -329,6 +356,15 @@ func TestDecoderInt64tDecoderAPI(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, int64(33), v, "v must be equal to 33")
 }
+func TestDecoderInt64InvalidJSONError(t *testing.T) {
+	var v int64
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeInt64(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestDecoderUint64Basic(t *testing.T) {
 	json := []byte(` 124 `)
 	var v uint64
@@ -398,6 +434,16 @@ func TestDecoderUint64tDecoderAPI(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, uint64(33), v, "v must be equal to 33")
 }
+
+func TestDecoderUint64InvalidJSONError(t *testing.T) {
+	var v uint64
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeUint64(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestDecoderFloatBasic(t *testing.T) {
 	json := []byte(`100.11 `)
 	var v float64
@@ -462,4 +508,13 @@ func TestDecoderFloatPoolError(t *testing.T) {
 	}()
 	_ = dec.DecodeFloat64(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+
+func TestDecoderFloatInvalidJSONError(t *testing.T) {
+	var v float64
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.DecodeFloat64(&v)
+	assert.NotNil(t, err, "Err must not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 }
