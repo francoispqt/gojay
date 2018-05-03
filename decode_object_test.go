@@ -45,7 +45,7 @@ func (t *TestSubObj) UnmarshalObject(dec *Decoder, key string) error {
 }
 
 func (t *TestSubObj) NKeys() int {
-	return 1000
+	return 0
 }
 
 func (t *TestObj) UnmarshalObject(dec *Decoder, key string) error {
@@ -274,17 +274,37 @@ func TestDecoderObjectInvalidJSON(t *testing.T) {
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
 }
 
-func TestDecoderObjectPoolError(t *testing.T) {
-	result := jsonDecodePartial{}
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeObject(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
+type myMap map[string]string
+
+func (m myMap) UnmarshalObject(dec *Decoder, k string) error {
+	str := ""
+	err := dec.AddString(&str)
+	if err != nil {
+		return err
+	}
+	m[k] = str
+	return nil
+}
+
+// return 0 to parse all keys
+func (m myMap) NKeys() int {
+	return 0
+}
+
+func TestDecoderObjectMap(t *testing.T) {
+	json := `{
+		"test": "string",
+		"test2": "string",
+		"test3": "string",
+		"test4": "string",
+		"test5": "string",
+	}`
+	m := myMap(make(map[string]string))
+	dec := BorrowDecoder(strings.NewReader(json))
+	err := dec.Decode(m)
+
+	assert.Nil(t, err, "err should be nil")
+	assert.Len(t, m, 5, "len of m should be 5")
 }
 
 func TestDecoderObjectDecoderAPI(t *testing.T) {
@@ -334,10 +354,47 @@ func TestDecoderObjectDecoderAPI(t *testing.T) {
 	assertResult(t, v, err)
 }
 
-func TestDecoderObjectDecoderAPIError(t *testing.T) {
+func TestDecoderObjectDecoderInvalidJSONError(t *testing.T) {
+	v := &TestObj{}
+	dec := NewDecoder(strings.NewReader(`{"err:}`))
+	err := dec.DecodeObject(v)
+	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
+	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
+}
+
+func TestDecoderObjectDecoderInvalidJSONError2(t *testing.T) {
+	v := &TestSubObj{}
+	dec := NewDecoder(strings.NewReader(`{"err:}`))
+	err := dec.DecodeObject(v)
+	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
+	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
+}
+
+func TestDecoderObjectDecoderInvalidJSONError3(t *testing.T) {
+	v := &TestSubObj{}
+	dec := NewDecoder(strings.NewReader(`{"err":"test}`))
+	err := dec.DecodeObject(v)
+	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
+	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
+}
+
+func TestDecoderObjectDecoderInvalidJSONError4(t *testing.T) {
 	testArr := testSliceInts{}
 	dec := NewDecoder(strings.NewReader(`hello`))
 	err := dec.DecodeArray(&testArr)
 	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
+}
+
+func TestDecoderObjectPoolError(t *testing.T) {
+	result := jsonDecodePartial{}
+	dec := NewDecoder(nil)
+	dec.Release()
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+	}()
+	_ = dec.DecodeObject(&result)
+	assert.True(t, false, "should not be called as decoder should have panicked")
 }
