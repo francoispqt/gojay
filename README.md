@@ -223,7 +223,7 @@ func (m message) UnmarshalObject(dec *gojay.Decoder, k string) error {
 }
 
 // we return 0, it tells the Decoder to decode all keys
-func (m myMap) NKeys() int {
+func (m message) NKeys() int {
 	return 0
 }
 ```
