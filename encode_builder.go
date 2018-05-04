@@ -1,7 +1,6 @@
 // Copyright 2017 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package gojay
 
 // grow grows b's capacity, if necessary, to guarantee space for
@@ -34,4 +33,27 @@ func (enc *Encoder) writeByte(c byte) {
 // It returns the length of s and a nil error.
 func (enc *Encoder) writeString(s string) {
 	enc.buf = append(enc.buf, s...)
+}
+
+func (enc *Encoder) writeStringEscape(s string) {
+	l := len(s)
+	for i := 0; i < l; i++ {
+		switch s[i] {
+		case '\\', '"':
+			enc.writeByte('\\')
+			enc.writeByte(s[i])
+		case '\n':
+			enc.writeByte('\\')
+			enc.writeByte('n')
+		case '\r':
+			enc.writeByte('\\')
+			enc.writeByte('r')
+		case '\t':
+			enc.writeByte('\\')
+			enc.writeByte('t')
+		default:
+			enc.writeByte(s[i])
+		}
+	}
+
 }

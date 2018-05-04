@@ -17,7 +17,7 @@ func (enc *Encoder) EncodeString(s string) error {
 // encodeString encodes a string to
 func (enc *Encoder) encodeString(v string) ([]byte, error) {
 	enc.writeByte('"')
-	enc.writeString(v)
+	enc.writeStringEscape(v)
 	enc.writeByte('"')
 	return enc.buf, nil
 }
@@ -29,7 +29,7 @@ func (enc *Encoder) AddString(v string) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(v)
+	enc.writeStringEscape(v)
 	enc.writeByte('"')
 }
 
@@ -44,7 +44,7 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(v)
+	enc.writeStringEscape(v)
 	enc.writeByte('"')
 }
 
@@ -55,9 +55,9 @@ func (enc *Encoder) AddStringKey(key, v string) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyStr)
-	enc.writeString(v)
+	enc.writeStringEscape(v)
 	enc.writeByte('"')
 }
 
@@ -72,8 +72,8 @@ func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyStr)
-	enc.writeString(v)
+	enc.writeStringEscape(v)
 	enc.writeByte('"')
 }
