@@ -48,6 +48,25 @@ func BenchmarkGoJayEncodeSmallStruct(b *testing.B) {
 	}
 }
 
+func BenchmarkGoJayEncodeSmallFunc(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		if _, err := gojay.MarshalObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
+			enc.AddIntKey("st", 1)
+			enc.AddIntKey("sid", 1)
+			enc.AddStringKey("tt", "test")
+			enc.AddIntKey("gr", 1)
+			enc.AddStringKey("uuid", "test")
+			enc.AddStringKey("ip", "test")
+			enc.AddStringKey("ua", "test")
+			enc.AddIntKey("tz", 1)
+			enc.AddIntKey("v", 1)
+		})); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func TestGoJayEncodeSmallStruct(t *testing.T) {
 	if output, err := gojay.MarshalObject(benchmarks.NewSmallPayload()); err != nil {
 		t.Fatal(err)

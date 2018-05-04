@@ -22,10 +22,13 @@ func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 	}
 	return nil
 }
+
 func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
-	enc.grow(200)
+	enc.grow(500)
 	enc.writeByte('{')
-	v.MarshalObject(enc)
+	if !v.IsNil() {
+		v.MarshalObject(enc)
+	}
 	enc.writeByte('}')
 	return enc.buf, enc.err
 }
@@ -34,6 +37,7 @@ func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 // value must implement MarshalerObject
 func (enc *Encoder) AddObject(v MarshalerObject) {
 	if v.IsNil() {
+		enc.grow(2)
 		r, ok := enc.getPreviousRune()
 		if ok && r != '{' && r != '[' {
 			enc.writeByte(',')
@@ -42,6 +46,7 @@ func (enc *Encoder) AddObject(v MarshalerObject) {
 		enc.writeByte('}')
 		return
 	}
+	enc.grow(4)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -58,6 +63,7 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
 	if v.IsNil() {
 		return
 	}
+	enc.grow(2)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -71,22 +77,24 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
 // value must implement MarshalerObject
 func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 	if value.IsNil() {
+		enc.grow(2 + len(key))
 		r, ok := enc.getPreviousRune()
-		if ok && r != '{' && r != '[' {
+		if ok && r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
-		enc.writeString(key)
+		enc.writeStringEscape(key)
 		enc.writeBytes(objKeyObj)
 		enc.writeByte('}')
 		return
 	}
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
 	value.MarshalObject(enc)
 	enc.writeByte('}')
@@ -99,13 +107,33 @@ func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 	if value.IsNil() {
 		return
 	}
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
 	value.MarshalObject(enc)
 	enc.writeByte('}')
+}
+
+// EncodeObjectFunc is a custom func type implementating MarshaleObject.
+// Use it to cast a func(*Encoder) to Marshal an object.
+//
+//	enc := gojay.NewEncoder(io.Writer)
+//	enc.EncodeObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
+//		enc.AddStringKey("hello", "world")
+//	}))
+type EncodeObjectFunc func(*Encoder)
+
+// MarshalObject implements MarshalerObject.
+func (f EncodeObjectFunc) MarshalObject(enc *Encoder) {
+	f(enc)
+}
+
+// IsNil implements MarshalerObject.
+func (f EncodeObjectFunc) IsNil() bool {
+	return f == nil
 }

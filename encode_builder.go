@@ -1,16 +1,9 @@
-// Copyright 2017 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package gojay
 
 // grow grows b's capacity, if necessary, to guarantee space for
 // another n bytes. After grow(n), at least n bytes can be written to b
 // without another allocation. If n is negative, grow panics.
 func (enc *Encoder) grow(n int) {
-	if n < 0 {
-		panic("Builder.grow: negative count")
-	}
 	if cap(enc.buf)-len(enc.buf) < n {
 		Buf := make([]byte, len(enc.buf), 2*cap(enc.buf)+n)
 		copy(Buf, enc.buf)
@@ -34,4 +27,27 @@ func (enc *Encoder) writeByte(c byte) {
 // It returns the length of s and a nil error.
 func (enc *Encoder) writeString(s string) {
 	enc.buf = append(enc.buf, s...)
+}
+
+func (enc *Encoder) writeStringEscape(s string) {
+	l := len(s)
+	for i := 0; i < l; i++ {
+		switch s[i] {
+		case '\\', '"':
+			enc.writeByte('\\')
+			enc.writeByte(s[i])
+		case '\n':
+			enc.writeByte('\\')
+			enc.writeByte('n')
+		case '\r':
+			enc.writeByte('\\')
+			enc.writeByte('r')
+		case '\t':
+			enc.writeByte('\\')
+			enc.writeByte('t')
+		default:
+			enc.writeByte(s[i])
+		}
+	}
+
 }

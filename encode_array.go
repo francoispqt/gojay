@@ -25,6 +25,7 @@ func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 // value must implement Marshaler
 func (enc *Encoder) AddArray(v MarshalerArray) {
 	if v.IsNil() {
+		enc.grow(3)
 		r, ok := enc.getPreviousRune()
 		if ok && r != '[' {
 			enc.writeByte(',')
@@ -33,6 +34,7 @@ func (enc *Encoder) AddArray(v MarshalerArray) {
 		enc.writeByte(']')
 		return
 	}
+	enc.grow(100)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -48,6 +50,7 @@ func (enc *Encoder) AddArrayOmitEmpty(v MarshalerArray) {
 	if v.IsNil() {
 		return
 	}
+	enc.grow(4)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -61,22 +64,24 @@ func (enc *Encoder) AddArrayOmitEmpty(v MarshalerArray) {
 // value must implement Marshaler
 func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
 	if v.IsNil() {
+		enc.grow(2 + len(key))
 		r, ok := enc.getPreviousRune()
 		if ok && r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
-		enc.writeString(key)
+		enc.writeStringEscape(key)
 		enc.writeBytes(objKeyArr)
 		enc.writeByte(']')
 		return
 	}
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyArr)
 	v.MarshalArray(enc)
 	enc.writeByte(']')
@@ -88,12 +93,13 @@ func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerArray) {
 	if v.IsNil() {
 		return
 	}
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyArr)
 	v.MarshalArray(enc)
 	enc.writeByte(']')

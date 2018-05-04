@@ -30,6 +30,56 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
+	t.Run("utf8-multibyte", func(t *testing.T) {
+		str := "テュールスト マーティン ヤコブ 😁"
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"テュールスト マーティン ヤコブ 😁"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
+	t.Run("escaped-sequence1", func(t *testing.T) {
+		str := `テュールスト マ\ーテ
+ィン ヤコブ 😁`
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"テュールスト マ\\ーテ\nィン ヤコブ 😁"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
+	t.Run("escaped-sequence2", func(t *testing.T) {
+		str := `テュールスト マ\ーテ
+ィン ヤコブ 😁	`
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"テュールスト マ\\ーテ\nィン ヤコブ 😁\t"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
+	t.Run("escaped-sequence3", func(t *testing.T) {
+		str := "hello \r world 𝄞"
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"hello \r world 𝄞"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
 }
 
 func TestEncoderStringEncodeAPIErrors(t *testing.T) {
