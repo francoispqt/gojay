@@ -24,6 +24,7 @@ func (enc *Encoder) encodeString(v string) ([]byte, error) {
 
 // AddString adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddString(v string) {
+	enc.grow(len(v) + 4)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -50,8 +51,9 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 
 // AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddStringKey(key, v string) {
+	enc.grow(len(key) + len(v) + 5)
 	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -67,8 +69,9 @@ func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
 	if v == "" {
 		return
 	}
+	enc.grow(len(key) + len(v) + 5)
 	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

@@ -298,6 +298,18 @@ func TestEncoderObjectMarshalAPI(t *testing.T) {
 			string(r),
 			"Result of marshalling is different as the one expected")
 	})
+	t.Run("marshal-object-func", func(t *testing.T) {
+		f := EncodeObjectFunc(func(enc *Encoder) {
+			enc.AddStringKey("test", "test")
+		})
+		r, err := Marshal(f)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`{"test":"test"}`,
+			string(r),
+			"Result of marshalling is different as the one expected")
+	})
 }
 
 type TestObectOmitEmpty struct {

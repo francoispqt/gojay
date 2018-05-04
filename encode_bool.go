@@ -18,6 +18,7 @@ func (enc *Encoder) EncodeBool(v bool) error {
 
 // encodeBool encodes a bool to JSON
 func (enc *Encoder) encodeBool(v bool) ([]byte, error) {
+	enc.grow(5)
 	if v {
 		enc.writeString("true")
 	} else {
@@ -28,6 +29,7 @@ func (enc *Encoder) encodeBool(v bool) ([]byte, error) {
 
 // AddBool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddBool(v bool) {
+	enc.grow(5)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -44,6 +46,7 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 	if v == false {
 		return
 	}
+	enc.grow(5)
 	r, ok := enc.getPreviousRune()
 	if ok && r != '[' {
 		enc.writeByte(',')
@@ -53,12 +56,13 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 
 // AddBoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
 func (enc *Encoder) AddBoolKey(key string, value bool) {
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendBool(enc.buf, value)
 }
@@ -69,12 +73,13 @@ func (enc *Encoder) AddBoolKeyOmitEmpty(key string, v bool) {
 	if v == false {
 		return
 	}
+	enc.grow(5 + len(key))
 	r, ok := enc.getPreviousRune()
 	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
-	enc.writeString(key)
+	enc.writeStringEscape(key)
 	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendBool(enc.buf, v)
 }

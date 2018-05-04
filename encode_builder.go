@@ -1,15 +1,9 @@
-// Copyright 2017 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
 package gojay
 
 // grow grows b's capacity, if necessary, to guarantee space for
 // another n bytes. After grow(n), at least n bytes can be written to b
 // without another allocation. If n is negative, grow panics.
 func (enc *Encoder) grow(n int) {
-	if n < 0 {
-		panic("Builder.grow: negative count")
-	}
 	if cap(enc.buf)-len(enc.buf) < n {
 		Buf := make([]byte, len(enc.buf), 2*cap(enc.buf)+n)
 		copy(Buf, enc.buf)
