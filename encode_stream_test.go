@@ -321,6 +321,12 @@ func TestEncodeStream(t *testing.T) {
 		assert.Equal(t, now, d, "deadline should be the one just set")
 	})
 
+	t.Run("encoder-deadline-unset", func(t *testing.T) {
+		enc := Stream.NewEncoder(os.Stdout)
+		d, _ := enc.Deadline()
+		assert.Equal(t, time.Time{}, d, "deadline should be the one just set")
+	})
+
 	// just for coverage
 	t.Run("encoder-context-value", func(t *testing.T) {
 		enc := Stream.NewEncoder(os.Stdout)

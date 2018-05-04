@@ -120,10 +120,10 @@ func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 }
 
 // EncodeObjectFunc is a custom func type implementating MarshaleObject.
-// Use it to cast a func(*Encoder) to Marshal and object.
+// Use it to cast a func(*Encoder) to Marshal an object.
 //
 //	enc := gojay.NewEncoder(io.Writer)
-//	enc.EncoderObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
+//	enc.EncodeObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
 //		enc.AddStringKey("hello", "world")
 //	}))
 type EncodeObjectFunc func(*Encoder)

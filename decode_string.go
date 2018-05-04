@@ -154,7 +154,7 @@ func (dec *Decoder) skipEscapedString() error {
 			}
 		}
 	}
-	return nil
+	return InvalidJSONError("Invalid JSON")
 }
 
 func (dec *Decoder) skipString() error {

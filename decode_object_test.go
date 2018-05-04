@@ -381,6 +381,31 @@ func TestDecoderObjectDecoderAPIReadCloser(t *testing.T) {
 	assert.Len(t, m, 5, "len of m should be 5")
 }
 
+func TestDecoderObjectDecoderAPIFuncReadCloser(t *testing.T) {
+	readCloser := ReadCloser{
+		json: []byte(`{
+			"test": "string",
+			"test2": "string",
+			"test3": "string",
+			"test4": "string",
+			"test5": "string",
+		}`),
+	}
+	m := myMap(make(map[string]string))
+	dec := NewDecoder(&readCloser)
+	err := dec.DecodeObject(DecodeObjectFunc(func(dec *Decoder, k string) error {
+		str := ""
+		err := dec.AddString(&str)
+		if err != nil {
+			return err
+		}
+		m[k] = str
+		return nil
+	}))
+	assert.Nil(t, err, "err should be nil")
+	assert.Len(t, m, 5, "len of m should be 5")
+}
+
 func TestDecoderObjectDecoderInvalidJSONError(t *testing.T) {
 	v := &TestObj{}
 	dec := NewDecoder(strings.NewReader(`{"err:}`))

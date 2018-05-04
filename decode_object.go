@@ -217,3 +217,23 @@ func (dec *Decoder) skipData() error {
 	}
 	return InvalidJSONError("Invalid JSON")
 }
+
+// DecodeObjectFunc is a custom func type implementating UnarshaleObject.
+// Use it to cast a func(*Decoder) to Unmarshal an object.
+//
+//	str := ""
+//	dec := gojay.NewDecoder(io.Reader)
+//	dec.DecodeObject(gojay.DecodeObjectFunc(func(dec *gojay.Decoder, k string) error {
+//		return dec.AddString(&str)
+//	}))
+type DecodeObjectFunc func(*Decoder, string) error
+
+// UnmarshalObject implements UnarshalerObject.
+func (f DecodeObjectFunc) UnmarshalObject(dec *Decoder, k string) error {
+	return f(dec, k)
+}
+
+// NKeys implements UnarshalerObject.
+func (f DecodeObjectFunc) NKeys() int {
+	return 0
+}

@@ -70,3 +70,35 @@ func TestDecoderStringPoolError(t *testing.T) {
 	_ = dec.DecodeString(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
 }
+
+func TestDecoderSkipEscapedStringError(t *testing.T) {
+	dec := NewDecoder(strings.NewReader(``))
+	defer dec.Release()
+	err := dec.skipEscapedString()
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+}
+
+func TestDecoderSkipEscapedStringError2(t *testing.T) {
+	dec := NewDecoder(strings.NewReader(`\"`))
+	defer dec.Release()
+	err := dec.skipEscapedString()
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+}
+
+func TestDecoderSkipEscapedStringError3(t *testing.T) {
+	dec := NewDecoder(strings.NewReader(`invalid`))
+	defer dec.Release()
+	err := dec.skipEscapedString()
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+}
+
+func TestDecoderSkipStringError(t *testing.T) {
+	dec := NewDecoder(strings.NewReader(`invalid`))
+	defer dec.Release()
+	err := dec.skipString()
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+}

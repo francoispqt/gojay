@@ -55,9 +55,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 	enc := gojay.BorrowEncoder(w)
 	defer enc.Release()
 	err = enc.Encode(m)
-	i, err := w.Write([]byte(err.Error()))
-	if err != nil || i == 0 {
-		panic(err)
+	if err != nil {
+		i, err := w.Write([]byte(err.Error()))
+		if err != nil || i == 0 {
+			panic(err)
+		}
 	}
 	return
 }
