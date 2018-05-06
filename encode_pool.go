@@ -2,9 +2,8 @@ package gojay
 
 import "io"
 
-var encPool = make(chan *Encoder, 16)
-var streamEncPool = make(chan *StreamEncoder, 16)
-var bufPool = make(chan []byte, 16)
+var encPool = make(chan *Encoder, 32)
+var streamEncPool = make(chan *StreamEncoder, 32)
 
 func init() {
 initStreamEncPool:
@@ -21,13 +20,6 @@ initEncPool:
 		case encPool <- NewEncoder(nil):
 		default:
 			break initEncPool
-		}
-	}
-	for {
-		select {
-		case bufPool <- make([]byte, 0, 512):
-		default:
-			return
 		}
 	}
 }
@@ -49,7 +41,7 @@ func BorrowEncoder(w io.Writer) *Encoder {
 		enc.err = nil
 		return enc
 	default:
-		return &Encoder{w: w, buf: borrowBuf()}
+		return &Encoder{w: w, buf: make([]byte, 0, 512)}
 	}
 }
 
@@ -60,14 +52,5 @@ func (enc *Encoder) Release() {
 	select {
 	case encPool <- enc:
 	default:
-	}
-}
-
-func borrowBuf() []byte {
-	select {
-	case b := <-bufPool:
-		return b
-	default:
-		return make([]byte, 0, 512)
 	}
 }

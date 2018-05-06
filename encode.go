@@ -183,13 +183,29 @@ type Encoder struct {
 	err      error
 }
 
-func (enc *Encoder) getPreviousRune() (byte, bool) {
-	last := len(enc.buf) - 1
-	return enc.buf[last], true
+// AppendBytes allows a modular usage by appending bytes manually to the current state of the buffer.
+func (enc *Encoder) AppendBytes(b []byte) {
+	enc.writeBytes(b)
 }
 
-func (enc *Encoder) write() (int, error) {
+// AppendByte allows a modular usage by appending a single byte manually to the current state of the buffer.
+func (enc *Encoder) AppendByte(b byte) {
+	enc.writeByte(b)
+}
+
+// Buf returns the Encoder's buffer.
+func (enc *Encoder) Buf() []byte {
+	return enc.buf
+}
+
+// Write writes to the io.Writer and resets the buffer.
+func (enc *Encoder) Write() (int, error) {
 	i, err := enc.w.Write(enc.buf)
 	enc.buf = enc.buf[:0]
 	return i, err
+}
+
+func (enc *Encoder) getPreviousRune() byte {
+	last := len(enc.buf) - 1
+	return enc.buf[last]
 }

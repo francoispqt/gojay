@@ -6,7 +6,7 @@ func (enc *Encoder) EncodeString(s string) error {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
 	_, _ = enc.encodeString(s)
-	_, err := enc.write()
+	_, err := enc.Write()
 	if err != nil {
 		enc.err = err
 		return err
@@ -22,11 +22,18 @@ func (enc *Encoder) encodeString(v string) ([]byte, error) {
 	return enc.buf, nil
 }
 
+func (enc *Encoder) AppendString(v string) {
+	enc.grow(len(v) + 2)
+	enc.writeByte('"')
+	enc.writeStringEscape(v)
+	enc.writeByte('"')
+}
+
 // AddString adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddString(v string) {
 	enc.grow(len(v) + 4)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -40,8 +47,8 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 	if v == "" {
 		return
 	}
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -52,8 +59,8 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 // AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddStringKey(key, v string) {
 	enc.grow(len(key) + len(v) + 5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -70,8 +77,8 @@ func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
 		return
 	}
 	enc.grow(len(key) + len(v) + 5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
