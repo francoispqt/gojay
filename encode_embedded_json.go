@@ -7,7 +7,7 @@ func (enc *Encoder) EncodeEmbeddedJSON(v *EmbeddedJSON) error {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
 	enc.buf = *v
-	_, err := enc.write()
+	_, err := enc.Write()
 	if err != nil {
 		return err
 	}
@@ -25,8 +25,8 @@ func (enc *Encoder) encodeEmbeddedJSON(v *EmbeddedJSON) ([]byte, error) {
 // it expects the JSON to be of proper format.
 func (enc *Encoder) AddEmbeddedJSON(v *EmbeddedJSON) {
 	enc.grow(len(*v) + 4)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeBytes(*v)
@@ -40,8 +40,8 @@ func (enc *Encoder) AddEmbeddedJSONOmitEmpty(v *EmbeddedJSON) {
 	if v == nil || len(*v) == 0 {
 		return
 	}
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeBytes(*v)
@@ -53,8 +53,8 @@ func (enc *Encoder) AddEmbeddedJSONOmitEmpty(v *EmbeddedJSON) {
 // it expects the JSON to be of proper format.
 func (enc *Encoder) AddEmbeddedJSONKey(key string, v *EmbeddedJSON) {
 	enc.grow(len(key) + len(*v) + 5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -72,8 +72,8 @@ func (enc *Encoder) AddEmbeddedJSONKeyOmitEmpty(key string, v *EmbeddedJSON) {
 		return
 	}
 	enc.grow(len(key) + len(*v) + 5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
