@@ -2,7 +2,26 @@ package gojay
 
 import "io"
 
-var decPool = make(chan *Decoder, 16)
+var decPool = make(chan *Decoder, 32)
+
+func init() {
+initStreamDecPool:
+	for {
+		select {
+		case streamDecPool <- Stream.NewDecoder(nil):
+		default:
+			break initStreamDecPool
+		}
+	}
+initDecPool:
+	for {
+		select {
+		case decPool <- NewDecoder(nil):
+		default:
+			break initDecPool
+		}
+	}
+}
 
 // NewDecoder returns a new decoder.
 // It takes an io.Reader implementation as data input.

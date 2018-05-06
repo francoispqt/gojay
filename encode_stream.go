@@ -180,7 +180,7 @@ func consume(init *StreamEncoder, s *StreamEncoder, m MarshalerStream) {
 				init.Cancel(s.Encoder.err)
 				return
 			}
-			i, err := s.Encoder.write()
+			i, err := s.Encoder.Write()
 			if err != nil || i == 0 {
 				init.Cancel(err)
 				return

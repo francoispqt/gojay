@@ -6,7 +6,7 @@ func (enc *Encoder) EncodeArray(v MarshalerArray) error {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
 	_, _ = enc.encodeArray(v)
-	_, err := enc.write()
+	_, err := enc.Write()
 	if err != nil {
 		enc.err = err
 		return err
@@ -26,8 +26,8 @@ func (enc *Encoder) encodeArray(v MarshalerArray) ([]byte, error) {
 func (enc *Encoder) AddArray(v MarshalerArray) {
 	if v.IsNil() {
 		enc.grow(3)
-		r, ok := enc.getPreviousRune()
-		if ok && r != '[' {
+		r := enc.getPreviousRune()
+		if r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('[')
@@ -35,8 +35,8 @@ func (enc *Encoder) AddArray(v MarshalerArray) {
 		return
 	}
 	enc.grow(100)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('[')
@@ -51,8 +51,8 @@ func (enc *Encoder) AddArrayOmitEmpty(v MarshalerArray) {
 		return
 	}
 	enc.grow(4)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('[')
@@ -65,8 +65,8 @@ func (enc *Encoder) AddArrayOmitEmpty(v MarshalerArray) {
 func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
 	if v.IsNil() {
 		enc.grow(2 + len(key))
-		r, ok := enc.getPreviousRune()
-		if ok && r != '[' {
+		r := enc.getPreviousRune()
+		if r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -76,8 +76,8 @@ func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '[' && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -94,8 +94,8 @@ func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerArray) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '[' && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

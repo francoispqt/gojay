@@ -15,7 +15,7 @@ func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 		enc.err = err
 		return err
 	}
-	_, err = enc.write()
+	_, err = enc.Write()
 	if err != nil {
 		enc.err = err
 		return err
@@ -38,8 +38,8 @@ func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
 func (enc *Encoder) AddObject(v MarshalerObject) {
 	if v.IsNil() {
 		enc.grow(2)
-		r, ok := enc.getPreviousRune()
-		if ok && r != '{' && r != '[' {
+		r := enc.getPreviousRune()
+		if r != '{' && r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('{')
@@ -47,8 +47,8 @@ func (enc *Encoder) AddObject(v MarshalerObject) {
 		return
 	}
 	enc.grow(4)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
@@ -64,8 +64,8 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
 		return
 	}
 	enc.grow(2)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
@@ -78,8 +78,8 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
 func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 	if value.IsNil() {
 		enc.grow(2 + len(key))
-		r, ok := enc.getPreviousRune()
-		if ok && r != '{' {
+		r := enc.getPreviousRune()
+		if r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -89,8 +89,8 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -108,8 +108,8 @@ func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' {
+	r := enc.getPreviousRune()
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

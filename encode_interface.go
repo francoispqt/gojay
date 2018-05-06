@@ -42,6 +42,8 @@ func (enc *Encoder) Encode(v interface{}) error {
 		return enc.EncodeFloat(vt)
 	case float32:
 		return enc.EncodeFloat32(vt)
+	case *EmbeddedJSON:
+		return enc.EncodeEmbeddedJSON(vt)
 	default:
 		return InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
