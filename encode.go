@@ -157,6 +157,10 @@ func Marshal(v interface{}) ([]byte, error) {
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeFloat32(vt)
+	case *EmbeddedJSON:
+		enc := BorrowEncoder(nil)
+		defer enc.Release()
+		return enc.encodeEmbeddedJSON(vt)
 	default:
 		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
