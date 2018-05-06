@@ -190,6 +190,6 @@ func (enc *Encoder) getPreviousRune() (byte, bool) {
 
 func (enc *Encoder) write() (int, error) {
 	i, err := enc.w.Write(enc.buf)
-	enc.buf = make([]byte, 0, 512)
+	enc.buf = enc.buf[:0]
 	return i, err
 }
