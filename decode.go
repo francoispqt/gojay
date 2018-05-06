@@ -190,8 +190,8 @@ func (dec *Decoder) Decode(v interface{}) error {
 	case UnmarshalerArray:
 		_, err := dec.decodeArray(vt)
 		return err
-	case *EmbeddedJSON: // <-----------------------------------------  NEW
-		return dec.decodeEmbeddedJSON(vt) // <------------  NEW
+	case *EmbeddedJSON:
+		return dec.decodeEmbeddedJSON(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
