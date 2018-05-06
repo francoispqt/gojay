@@ -2,7 +2,7 @@ package gojay
 
 import "io"
 
-var streamDecPool = make(chan *StreamDecoder, 16)
+var streamDecPool = make(chan *StreamDecoder, 32)
 
 // NewDecoder returns a new StreamDecoder.
 // It takes an io.Reader implementation as data input.

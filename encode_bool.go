@@ -8,7 +8,7 @@ func (enc *Encoder) EncodeBool(v bool) error {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
 	_, _ = enc.encodeBool(v)
-	_, err := enc.write()
+	_, err := enc.Write()
 	if err != nil {
 		enc.err = err
 		return err
@@ -30,8 +30,8 @@ func (enc *Encoder) encodeBool(v bool) ([]byte, error) {
 // AddBool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddBool(v bool) {
 	enc.grow(5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	if v {
@@ -47,8 +47,8 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 		return
 	}
 	enc.grow(5)
-	r, ok := enc.getPreviousRune()
-	if ok && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeString("true")
@@ -57,8 +57,8 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 // AddBoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
 func (enc *Encoder) AddBoolKey(key string, value bool) {
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -74,8 +74,8 @@ func (enc *Encoder) AddBoolKeyOmitEmpty(key string, v bool) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r, ok := enc.getPreviousRune()
-	if ok && r != '{' && r != '[' {
+	r := enc.getPreviousRune()
+	if r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
