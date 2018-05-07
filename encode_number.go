@@ -101,6 +101,30 @@ func (enc *Encoder) AddIntOmitEmpty(v int) {
 	enc.buf = strconv.AppendInt(enc.buf, int64(v), 10)
 }
 
+// AddInt64 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddInt64(v int64) {
+	enc.grow(10)
+	r := enc.getPreviousRune()
+	if r != '[' {
+		enc.writeByte(',')
+	}
+	enc.buf = strconv.AppendInt(enc.buf, v, 10)
+}
+
+// AddIntOmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) AddInt64OmitEmpty(v int64) {
+	if v == 0 {
+		return
+	}
+	enc.grow(10)
+	r := enc.getPreviousRune()
+	if r != '[' {
+		enc.writeByte(',')
+	}
+	enc.buf = strconv.AppendInt(enc.buf, v, 10)
+}
+
 // AddFloat adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddFloat(v float64) {
 	enc.grow(10)
