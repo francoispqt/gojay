@@ -227,3 +227,52 @@ func TestEncoderNumberMarshalAPI(t *testing.T) {
 			"Result of marshalling is different as the one expected")
 	})
 }
+
+func TestAddNumberFunc(t *testing.T) {
+	t.Run("int64", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddInt64Key("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("int64-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`{"test":1`))
+		enc.AddInt64Key("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":1,"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+
+	t.Run("int64-omit-empty", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddInt64KeyOmitEmpty("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("int64-omit-empty-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`{"test":1`))
+		enc.AddInt64KeyOmitEmpty("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":1,"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("int64-omit-empty-3", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddInt64KeyOmitEmpty("test", 0)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+}

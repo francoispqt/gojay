@@ -152,7 +152,7 @@ func (enc *Encoder) AddFloat32OmitEmpty(v float32) {
 func (enc *Encoder) AddIntKey(key string, v int) {
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -178,10 +178,40 @@ func (enc *Encoder) AddIntKeyOmitEmpty(key string, v int) {
 	enc.buf = strconv.AppendInt(enc.buf, int64(v), 10)
 }
 
+// AddInt64Key adds an int64 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddInt64Key(key string, v int64) {
+	enc.grow(10 + len(key))
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKey)
+	enc.buf = strconv.AppendInt(enc.buf, v, 10)
+}
+
+// AddInt64KeyOmitEmpty adds an int64 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) AddInt64KeyOmitEmpty(key string, v int64) {
+	if v == 0 {
+		return
+	}
+	enc.grow(10 + len(key))
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKey)
+	enc.buf = strconv.AppendInt(enc.buf, v, 10)
+}
+
 // AddFloatKey adds a float64 to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddFloatKey(key string, value float64) {
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.grow(10)
@@ -199,7 +229,7 @@ func (enc *Encoder) AddFloatKeyOmitEmpty(key string, v float64) {
 	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -212,7 +242,7 @@ func (enc *Encoder) AddFloatKeyOmitEmpty(key string, v float64) {
 func (enc *Encoder) AddFloat32Key(key string, v float32) {
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -230,7 +260,7 @@ func (enc *Encoder) AddFloat32KeyOmitEmpty(key string, v float32) {
 	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
