@@ -58,7 +58,7 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 func (enc *Encoder) AddBoolKey(key string, value bool) {
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -75,7 +75,7 @@ func (enc *Encoder) AddBoolKeyOmitEmpty(key string, v bool) {
 	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

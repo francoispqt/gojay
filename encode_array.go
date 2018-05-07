@@ -66,7 +66,7 @@ func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
 	if v.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
-		if r != '[' {
+		if r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -77,7 +77,7 @@ func (enc *Encoder) AddArrayKey(key string, v MarshalerArray) {
 	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
-	if r != '[' && r != '{' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -95,7 +95,7 @@ func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerArray) {
 	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
-	if r != '[' && r != '{' {
+	if r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
