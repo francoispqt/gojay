@@ -1,26 +1,28 @@
 package gojay
 
-import "io"
+import (
+	"io"
+	"sync"
+)
 
-var encPool = make(chan *Encoder, 32)
-var streamEncPool = make(chan *StreamEncoder, 32)
+var encPool = sync.Pool{
+	New: func() interface{} {
+		return NewEncoder(nil)
+	},
+}
+
+var streamEncPool = sync.Pool{
+	New: func() interface{} {
+		return Stream.NewEncoder(nil)
+	},
+}
 
 func init() {
-initStreamEncPool:
-	for {
-		select {
-		case streamEncPool <- Stream.NewEncoder(nil):
-		default:
-			break initStreamEncPool
-		}
+	for i := 0; i < 32; i++ {
+		encPool.Put(NewEncoder(nil))
 	}
-initEncPool:
-	for {
-		select {
-		case encPool <- NewEncoder(nil):
-		default:
-			break initEncPool
-		}
+	for i := 0; i < 32; i++ {
+		streamEncPool.Put(Stream.NewEncoder(nil))
 	}
 }
 
@@ -34,23 +36,16 @@ func newEncoder() *Encoder {
 
 // BorrowEncoder borrows an Encoder from the pool.
 func BorrowEncoder(w io.Writer) *Encoder {
-	select {
-	case enc := <-encPool:
-		enc.isPooled = 0
-		enc.w = w
-		enc.err = nil
-		return enc
-	default:
-		return &Encoder{w: w, buf: make([]byte, 0, 512)}
-	}
+	enc := encPool.Get().(*Encoder)
+	enc.w = w
+	enc.buf = enc.buf[:0]
+	enc.isPooled = 0
+	enc.err = nil
+	return enc
 }
 
 // Release sends back a Encoder to the pool.
 func (enc *Encoder) Release() {
-	enc.buf = enc.buf[:0]
 	enc.isPooled = 1
-	select {
-	case encPool <- enc:
-	default:
-	}
+	encPool.Put(enc)
 }

@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,9 +10,11 @@ import (
 
 func TestDecoderBorrowFromPool(t *testing.T) {
 	// reset pool
-	decPool = make(chan *Decoder, 16)
+	decPool = sync.Pool{New: func() interface{} { return NewDecoder(nil) }}
+	dec := decPool.New().(*Decoder)
+	decPool.Put(dec)
 	// borrow decoder
-	dec := BorrowDecoder(strings.NewReader(""))
+	dec = BorrowDecoder(strings.NewReader(""))
 	// release
 	dec.Release()
 	// get from pool

@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,12 +9,20 @@ import (
 
 func TestEncodeStreamBorrow1(t *testing.T) {
 	// we override the pool chan
-	streamEncPool = make(chan *StreamEncoder, 1)
+	streamEncPool = sync.Pool{
+		New: func() interface{} {
+			return Stream.NewEncoder(nil)
+		},
+	}
 	// add one decoder to the channel
 	enc := Stream.NewEncoder(nil)
-	streamEncPool <- enc
+	streamEncPool.Put(enc)
 	// reset streamEncPool
-	streamEncPool = make(chan *StreamEncoder, 1)
+	streamEncPool = sync.Pool{
+		New: func() interface{} {
+			return Stream.NewEncoder(nil)
+		},
+	}
 	// borrow one decoder to the channel
 	nEnc := Stream.BorrowEncoder(nil)
 	// make sure they are the same

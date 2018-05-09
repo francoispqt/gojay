@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,9 +9,14 @@ import (
 
 func TestEncoderNewFromPool(t *testing.T) {
 	// reset pool
-	encPool = make(chan *Encoder, 16)
+	encPool = sync.Pool{
+		New: func() interface{} {
+			return NewEncoder(nil)
+		},
+	}
+
 	// get new Encoder
-	enc := NewEncoder(nil)
+	enc := encPool.New().(*Encoder)
 	// add to pool
 	enc.Release()
 	// borrow encoder

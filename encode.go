@@ -187,6 +187,11 @@ type Encoder struct {
 	err      error
 }
 
+func (enc *Encoder) Init(w io.Writer) {
+	enc.w = w
+	enc.buf = make([]byte, 0, 512)
+}
+
 // AppendBytes allows a modular usage by appending bytes manually to the current state of the buffer.
 func (enc *Encoder) AppendBytes(b []byte) {
 	enc.writeBytes(b)
