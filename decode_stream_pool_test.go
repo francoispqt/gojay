@@ -6,53 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDecodeStreamBorrow(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = make(chan *StreamDecoder, 1)
-	// add one decoder to the channel
-	dec := Stream.NewDecoder(nil)
-	streamDecPool <- dec
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.Equal(t, dec, nDec, "decoder added to the pool and new decoder should be the same")
-}
-
-func TestDecodeStreamBorrow1(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = make(chan *StreamDecoder, 1)
-	// add one decoder to the channel
-	dec := Stream.NewDecoder(nil)
-	streamDecPool <- dec
-	// reset streamDecPool
-	streamDecPool = make(chan *StreamDecoder, 1)
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.NotEqual(t, dec, nDec, "decoder added to the pool and new decoder should be the same")
-}
-func TestDecodeStreamBorrow2(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = make(chan *StreamDecoder, 1)
-	// add one decoder to the channel
-	dec := Stream.NewDecoder(nil)
-	dec.data = make([]byte, 128)
-	streamDecPool <- dec
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.Equal(t, dec, nDec, "decoder added to the pool and new decoder should be the same")
-	assert.Equal(t, 512, len(nDec.data), "len of dec.data should be 512")
-}
-func TestDecodeStreamBorrow3(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = make(chan *StreamDecoder, 16)
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.Equal(t, 512, len(nDec.data), "len of dec.data should be 512")
-}
-
 func TestDecodeStreamDecodePooledDecoderError(t *testing.T) {
 	// we override the pool chan
 	dec := Stream.NewDecoder(nil)

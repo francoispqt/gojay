@@ -74,11 +74,8 @@ func (s *StreamEncoder) NConsumer(n int) *StreamEncoder {
 // If a decoder is used after calling Release
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (s *StreamEncoder) Release() {
-	s.Encoder.isPooled = 1
-	select {
-	case streamEncPool <- s:
-	default:
-	}
+	s.isPooled = 1
+	streamEncPool.Put(s)
 }
 
 // Done returns a channel that's closed when work is done.

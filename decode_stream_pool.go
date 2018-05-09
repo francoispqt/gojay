@@ -1,8 +1,15 @@
 package gojay
 
-import "io"
+import (
+	"io"
+	"sync"
+)
 
-var streamDecPool = make(chan *StreamDecoder, 32)
+var streamDecPool = sync.Pool{
+	New: func() interface{} {
+		return Stream.NewDecoder(nil)
+	},
+}
 
 // NewDecoder returns a new StreamDecoder.
 // It takes an io.Reader implementation as data input.
@@ -26,32 +33,19 @@ func (s stream) BorrowDecoder(r io.Reader) *StreamDecoder {
 }
 
 func (s stream) borrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
-	select {
-	case streamDec := <-streamDecPool:
-		streamDec.called = 0
-		streamDec.keysDone = 0
-		streamDec.cursor = 0
-		streamDec.err = nil
-		streamDec.r = r
-		streamDec.length = 0
-		streamDec.isPooled = 0
-		streamDec.done = make(chan struct{}, 1)
-		if bufSize > 0 {
-			streamDec.data = make([]byte, bufSize)
-		}
-		return streamDec
-	default:
-		dec := NewDecoder(r)
-		if bufSize > 0 {
-			dec.data = make([]byte, bufSize)
-			dec.length = 0
-		}
-		streamDec := &StreamDecoder{
-			Decoder: dec,
-			done:    make(chan struct{}, 1),
-		}
-		return streamDec
+	streamDec := streamDecPool.Get().(*StreamDecoder)
+	streamDec.called = 0
+	streamDec.keysDone = 0
+	streamDec.cursor = 0
+	streamDec.err = nil
+	streamDec.r = r
+	streamDec.length = 0
+	streamDec.isPooled = 0
+	streamDec.done = make(chan struct{}, 1)
+	if bufSize > 0 {
+		streamDec.data = make([]byte, bufSize)
 	}
+	return streamDec
 }
 
 // Release sends back a Decoder to the pool.
@@ -59,8 +53,5 @@ func (s stream) borrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (dec *StreamDecoder) Release() {
 	dec.isPooled = 1
-	select {
-	case streamDecPool <- dec:
-	default:
-	}
+	streamDecPool.Put(dec)
 }

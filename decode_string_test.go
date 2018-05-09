@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,7 +59,11 @@ func TestDecoderStringDecoderAPI(t *testing.T) {
 
 func TestDecoderStringPoolError(t *testing.T) {
 	// reset the pool to make sure it's not full
-	decPool = make(chan *Decoder, 16)
+	decPool = sync.Pool{
+		New: func() interface{} {
+			return NewDecoder(nil)
+		},
+	}
 	result := ""
 	dec := NewDecoder(nil)
 	dec.Release()

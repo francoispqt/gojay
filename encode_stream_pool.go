@@ -16,28 +16,20 @@ func (s stream) NewEncoder(w io.Writer) *StreamEncoder {
 //
 // If no StreamEncoder is available in the pool, it returns a fresh one
 func (s stream) BorrowEncoder(w io.Writer) *StreamEncoder {
-	select {
-	case streamEnc := <-streamEncPool:
-		streamEnc.isPooled = 0
-		streamEnc.w = w
-		streamEnc.Encoder.err = nil
-		streamEnc.done = make(chan struct{}, 1)
-		streamEnc.Encoder.buf = make([]byte, 0, 512)
-		streamEnc.nConsumer = 1
-		return streamEnc
-	default:
-		return s.NewEncoder(w)
-	}
+	streamEnc := streamEncPool.Get().(*StreamEncoder)
+	streamEnc.w = w
+	streamEnc.Encoder.err = nil
+	streamEnc.done = make(chan struct{}, 1)
+	streamEnc.Encoder.buf = streamEnc.buf[:0]
+	streamEnc.nConsumer = 1
+	streamEnc.isPooled = 0
+	return streamEnc
 }
 
 func (s stream) borrowEncoder(w io.Writer) *StreamEncoder {
-	select {
-	case streamEnc := <-streamEncPool:
-		streamEnc.isPooled = 0
-		streamEnc.w = w
-		streamEnc.Encoder.err = nil
-		return streamEnc
-	default:
-		return s.NewEncoder(w)
-	}
+	streamEnc := streamEncPool.Get().(*StreamEncoder)
+	streamEnc.isPooled = 0
+	streamEnc.w = w
+	streamEnc.Encoder.err = nil
+	return streamEnc
 }

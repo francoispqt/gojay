@@ -1,25 +1,19 @@
 package gojay
 
-import "io"
+import (
+	"io"
+	"sync"
+)
 
-var decPool = make(chan *Decoder, 32)
+var decPool = sync.Pool{
+	New: func() interface{} {
+		return NewDecoder(nil)
+	},
+}
 
 func init() {
-initStreamDecPool:
-	for {
-		select {
-		case streamDecPool <- Stream.NewDecoder(nil):
-		default:
-			break initStreamDecPool
-		}
-	}
-initDecPool:
-	for {
-		select {
-		case decPool <- NewDecoder(nil):
-		default:
-			break initDecPool
-		}
+	for i := 0; i < 32; i++ {
+		decPool.Put(NewDecoder(nil))
 	}
 }
 
@@ -45,33 +39,18 @@ func BorrowDecoder(r io.Reader) *Decoder {
 	return borrowDecoder(r, 512)
 }
 func borrowDecoder(r io.Reader, bufSize int) *Decoder {
-	select {
-	case dec := <-decPool:
-		dec.called = 0
-		dec.keysDone = 0
-		dec.cursor = 0
-		dec.err = nil
-		dec.r = r
-		dec.length = 0
-		dec.isPooled = 0
-		if bufSize > 0 {
-			dec.data = make([]byte, bufSize)
-		}
-		return dec
-	default:
-		dec := &Decoder{
-			called:   0,
-			cursor:   0,
-			keysDone: 0,
-			err:      nil,
-			r:        r,
-			isPooled: 0,
-		}
-		if bufSize > 0 {
-			dec.data = make([]byte, bufSize)
-		}
-		return dec
+	dec := decPool.Get().(*Decoder)
+	dec.called = 0
+	dec.keysDone = 0
+	dec.cursor = 0
+	dec.err = nil
+	dec.r = r
+	dec.length = 0
+	dec.isPooled = 0
+	if bufSize > 0 {
+		dec.data = make([]byte, bufSize)
 	}
+	return dec
 }
 
 // Release sends back a Decoder to the pool.
@@ -79,8 +58,5 @@ func borrowDecoder(r io.Reader, bufSize int) *Decoder {
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (dec *Decoder) Release() {
 	dec.isPooled = 1
-	select {
-	case decPool <- dec:
-	default:
-	}
+	decPool.Put(dec)
 }
