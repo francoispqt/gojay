@@ -1,45 +1,10 @@
 package gojay
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestDecodeStreamBorrow(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = sync.Pool{New: func() interface{} { return Stream.NewDecoder(nil) }}
-	// add one decoder to the channel
-	dec := Stream.NewDecoder(nil)
-	streamDecPool.Put(dec)
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.Equal(t, dec, nDec, "decoder added to the pool and new decoder should be the same")
-}
-
-func TestDecodeStreamBorrow1(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = sync.Pool{New: func() interface{} { return Stream.NewDecoder(nil) }}
-	// add one decoder to the channel
-	dec := Stream.NewDecoder(nil)
-	streamDecPool.Put(dec)
-	// reset streamDecPool
-	streamDecPool = sync.Pool{New: func() interface{} { return Stream.NewDecoder(nil) }}
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.NotEqual(t, dec, nDec, "decoder added to the pool and new decoder should be the same")
-}
-func TestDecodeStreamBorrow3(t *testing.T) {
-	// we override the pool chan
-	streamDecPool = sync.Pool{New: func() interface{} { return Stream.NewDecoder(nil) }}
-	// borrow one decoder to the channel
-	nDec := Stream.BorrowDecoder(nil)
-	// make sure they are the same
-	assert.Equal(t, 512, len(nDec.data), "len of dec.data should be 512")
-}
 
 func TestDecodeStreamDecodePooledDecoderError(t *testing.T) {
 	// we override the pool chan
