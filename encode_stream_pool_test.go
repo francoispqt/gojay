@@ -8,14 +8,15 @@ import (
 )
 
 func TestEncodeStreamBorrow1(t *testing.T) {
+	enc := streamEncPool.New().(*StreamEncoder)
 	// we override the pool chan
 	streamEncPool = sync.Pool{
 		New: func() interface{} {
 			return Stream.NewEncoder(nil)
 		},
 	}
+	enc = streamEncPool.New().(*StreamEncoder)
 	// add one decoder to the channel
-	enc := Stream.NewEncoder(nil)
 	streamEncPool.Put(enc)
 	// reset streamEncPool
 	streamEncPool = sync.Pool{
