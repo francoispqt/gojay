@@ -141,7 +141,6 @@ func TestStreamDecodingObjectsParallel(t *testing.T) {
 			},
 			expectations: func(err error, result []*TestObj, t *testing.T) {
 				assert.Nil(t, err, "err should be nil")
-
 				assert.Equal(t, 0, result[0].test, "result[0].test should be equal to 0 as input is null")
 				assert.Equal(t, 0, result[0].test2, "result[0].test2 should be equal to 0 as input is null")
 				assert.Equal(t, "", result[0].test3, "result[0].test3 should be equal to \"\" as input is null")

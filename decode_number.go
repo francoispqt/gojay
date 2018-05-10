@@ -83,7 +83,12 @@ func (dec *Decoder) decodeInt(v *int) error {
 			*v = -int(val)
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = InvalidTypeError(
@@ -133,7 +138,11 @@ func (dec *Decoder) decodeInt32(v *int32) error {
 			*v = -val
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			return nil
 		default:
 			dec.err = InvalidTypeError(
@@ -185,7 +194,11 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 			*v = val
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			return nil
 		default:
 			dec.err = InvalidTypeError(
@@ -236,7 +249,11 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 			*v = -val
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			return nil
 		default:
 			dec.err = InvalidTypeError(
@@ -287,7 +304,11 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 			*v = val
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			return nil
 		default:
 			dec.err = InvalidTypeError(
@@ -337,7 +358,11 @@ func (dec *Decoder) decodeFloat64(v *float64) error {
 			*v = -val
 			return nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			return nil
 		default:
 			dec.err = InvalidTypeError(

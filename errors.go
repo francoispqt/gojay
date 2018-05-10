@@ -1,5 +1,7 @@
 package gojay
 
+const invalidJSONCharErrorMsg = "Invalid JSON character %c found at position %d"
+
 // InvalidJSONError is a type representing an error returned when
 // Decoding encounters invalid JSON.
 type InvalidJSONError string

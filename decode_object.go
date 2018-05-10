@@ -79,8 +79,12 @@ func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
 			}
 			return dec.cursor, nil
 		case 'n':
-			// is null
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return 0, err
+			}
+			dec.cursor++
 			return dec.cursor, nil
 		default:
 			// can't unmarshall to struct
@@ -184,12 +188,27 @@ func (dec *Decoder) skipData() error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		// is null
-		case 'n', 't':
-			dec.cursor = dec.cursor + 4
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			return nil
+		case 't':
+			dec.cursor++
+			err := dec.assertTrue()
+			if err != nil {
+				return err
+			}
 			return nil
 		// is false
 		case 'f':
-			dec.cursor = dec.cursor + 5
+			dec.cursor++
+			err := dec.assertFalse()
+			if err != nil {
+				return err
+			}
 			return nil
 		// is an object
 		case '{':

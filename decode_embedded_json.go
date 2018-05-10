@@ -1,5 +1,7 @@
 package gojay
 
+import "log"
+
 // EmbeddedJSON is a raw encoded JSON value.
 // It can be used to delay JSON decoding or precompute a JSON encoding.
 type EmbeddedJSON []byte
@@ -15,13 +17,32 @@ func (dec *Decoder) decodeEmbeddedJSON(ej *EmbeddedJSON) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		// is null
-		case 'n', 't':
+		case 'n':
 			beginOfEmbeddedJSON = dec.cursor
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+		case 't':
+			beginOfEmbeddedJSON = dec.cursor
+			dec.cursor++
+			err := dec.assertTrue()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
 		// is false
 		case 'f':
 			beginOfEmbeddedJSON = dec.cursor
-			dec.cursor = dec.cursor + 5
+			dec.cursor++
+			err := dec.assertFalse()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			log.Print(string(dec.data[:dec.cursor]))
 		// is an object
 		case '{':
 			beginOfEmbeddedJSON = dec.cursor

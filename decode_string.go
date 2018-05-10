@@ -33,7 +33,12 @@ func (dec *Decoder) decodeString(v *string) error {
 			return nil
 		// is nil
 		case 'n':
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = InvalidTypeError(
