@@ -40,7 +40,7 @@ func TestDecoderStringComplex(t *testing.T) {
 	var v string
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, "string with spaces and \"escape\"d \"quotes\" and escaped line returns \\n and escaped \\\\ escaped char", v, "v is not equal to the value expected")
+	assert.Equal(t, "string with spaces and \"escape\"d \"quotes\" and escaped line returns \n and escaped \\\\ escaped char", v, "v is not equal to the value expected")
 }
 
 func TestDecoderStringNull(t *testing.T) {
@@ -137,6 +137,36 @@ func TestParseEscapedString(t *testing.T) {
 	}{
 		{
 			name:           "escape quote err",
+			json:           `"test string \" escaped"`,
+			expectedResult: `test string " escaped`,
+			err:            false,
+		},
+		{
+			name:           "escape quote err2",
+			json:           `"test string \\t escaped"`,
+			expectedResult: "test string \t escaped",
+			err:            false,
+		},
+		{
+			name:           "escape quote err2",
+			json:           `"test string \\r escaped"`,
+			expectedResult: "test string \r escaped",
+			err:            false,
+		},
+		{
+			name:           "escape quote err2",
+			json:           `"test string \\b escaped"`,
+			expectedResult: "test string \b escaped",
+			err:            false,
+		},
+		{
+			name:           "escape quote err",
+			json:           `"test string \\n escaped"`,
+			expectedResult: "test string \n escaped",
+			err:            false,
+		},
+		{
+			name:           "escape quote err",
 			json:           `"test string \\" escaped"`,
 			expectedResult: ``,
 			err:            true,
@@ -152,20 +182,23 @@ func TestParseEscapedString(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		str := ""
-		dec := NewDecoder(strings.NewReader(testCase.json))
-		err := dec.Decode(&str)
-		if testCase.err {
-			assert.NotNil(t, err, "err should not be nil")
-			if testCase.errType != nil {
-				assert.IsType(t, testCase.errType, err, "err should be of expected type")
+		t.Run(testCase.name, func(t *testing.T) {
+			str := ""
+			dec := NewDecoder(strings.NewReader(testCase.json))
+			err := dec.Decode(&str)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of expected type")
+				}
+				log.Print(err)
+			} else {
+				assert.Nil(t, err, "err should be nil")
 			}
-			log.Print(err)
-		} else {
-			assert.Nil(t, err, "err should be nil")
-		}
-		assert.Equal(t, testCase.expectedResult, str, fmt.Sprintf("str should be equal to '%s'", testCase.expectedResult))
+			assert.Equal(t, testCase.expectedResult, str, fmt.Sprintf("str should be equal to '%s'", testCase.expectedResult))
+		})
 	}
+
 }
 
 func TestSkipString(t *testing.T) {

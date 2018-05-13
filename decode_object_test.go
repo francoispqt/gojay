@@ -158,7 +158,7 @@ func TestDecodeObjectNull(t *testing.T) {
 
 var jsonComplex = []byte(`{
 	"test": "{\"test\":\"1\",\"test1\":2}",
-	"test2\\n": "\\\\\\\\\\\n",
+	"test2\\n": "\\\\\\\\\\n",
 	"testArrSkip": ["testString with escaped \\\" quotes"],
 	"testSkipString": "skip \\ string with \\n escaped char \" ",
 	"testSkipObject": {
@@ -200,7 +200,7 @@ func (j *jsonObjectComplex) UnmarshalObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddString(&j.Test)
-	case `test2\n`:
+	case "test2\n":
 		return dec.AddString(&j.Test2)
 	case "test3":
 		return dec.AddInt(&j.Test3)
@@ -224,9 +224,9 @@ func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
 	err := UnmarshalObject(jsonComplex, &result)
 	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
-	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 643`, err.Error(), "err should not be as invalid type as been encountered nil")
+	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 639`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
-	assert.Equal(t, `\\\\\\n`, result.Test2, "result.Test2 is not expected value")
+	assert.Equal(t, "\\\\\\\\\n", result.Test2, "result.Test2 is not expected value")
 	assert.Equal(t, 1, result.Test3, "result.test3 is not expected value")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.testSub.Test, "result.testSub.test is not expected value")
 	assert.Equal(t, `[1,2,3]`, result.testSub.Test2, "result.testSub.test2 is not expected value")

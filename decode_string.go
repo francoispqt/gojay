@@ -77,21 +77,65 @@ func (dec *Decoder) parseEscapedString() error {
 				dec.length = len(dec.data)
 				dec.cursor -= nSlash - diff
 				return nil
-			case 'n', 'r', 't':
+			case 'b':
 				// number of slash must be even
 				// if is odd number of slashes
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				var diff int
-				if nSlash&1 == 1 {
-					diff = (nSlash - 1) >> 1
-					dec.data = append(dec.data[:start+diff], dec.data[dec.cursor-1:]...)
+				if nSlash&1 != 0 {
+					return InvalidJSONError("Invalid JSON unescaped character")
 				} else {
 					diff = nSlash >> 1
-					dec.data = append(dec.data[:start+diff-1], dec.data[dec.cursor-1:]...)
+					dec.data = append(append(dec.data[:start+diff-2], '\b'), dec.data[dec.cursor:]...)
 				}
 				dec.length = len(dec.data)
-				dec.cursor -= nSlash - diff
+				dec.cursor -= nSlash - diff + 1
+				return nil
+			case 'n':
+				// number of slash must be even
+				// if is odd number of slashes
+				// divide nSlash - 1 by 2 and leave last one
+				// else divide nSlash by 2 and leave the letter
+				var diff int
+				if nSlash&1 != 0 {
+					return InvalidJSONError("Invalid JSON unescaped character")
+				} else {
+					diff = nSlash >> 1
+					dec.data = append(append(dec.data[:start+diff-2], '\n'), dec.data[dec.cursor:]...)
+				}
+				dec.length = len(dec.data)
+				dec.cursor -= nSlash - diff + 1
+				return nil
+			case 'r':
+				// number of slash must be even
+				// if is odd number of slashes
+				// divide nSlash - 1 by 2 and leave last one
+				// else divide nSlash by 2 and leave the letter
+				var diff int
+				if nSlash&1 != 0 {
+					return InvalidJSONError("Invalid JSON unescaped character")
+				} else {
+					diff = nSlash >> 1
+					dec.data = append(append(dec.data[:start+diff-2], '\r'), dec.data[dec.cursor:]...)
+				}
+				dec.length = len(dec.data)
+				dec.cursor -= nSlash - diff + 1
+				return nil
+			case 't':
+				// number of slash must be even
+				// if is odd number of slashes
+				// divide nSlash - 1 by 2 and leave last one
+				// else divide nSlash by 2 and leave the letter
+				var diff int
+				if nSlash&1 != 0 {
+					return InvalidJSONError("Invalid JSON unescaped character")
+				} else {
+					diff = nSlash >> 1
+					dec.data = append(append(dec.data[:start+diff-2], '\t'), dec.data[dec.cursor:]...)
+				}
+				dec.length = len(dec.data)
+				dec.cursor -= nSlash - diff + 1
 				return nil
 			default:
 				// nSlash must be even

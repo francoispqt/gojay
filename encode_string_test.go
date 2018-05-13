@@ -22,11 +22,11 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 	t.Run("utf8", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		err := enc.EncodeString("漢字")
+		err := enc.EncodeString("漢字𩸽")
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
-			`"漢字"`,
+			`"漢字𩸽"`,
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
