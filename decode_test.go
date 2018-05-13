@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -552,19 +551,4 @@ func TestUnmarshalObjects(t *testing.T) {
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
-}
-
-func TestSkipData(t *testing.T) {
-	t.Run("error-invalid-json", func(t *testing.T) {
-		dec := NewDecoder(strings.NewReader(""))
-		err := dec.skipData()
-		assert.NotNil(t, err, "err should not be nil as data is empty")
-		assert.IsType(t, InvalidJSONError(""), err, "err should of type InvalidJSONError")
-	})
-	t.Run("skip-array-error-invalid-json", func(t *testing.T) {
-		dec := NewDecoder(strings.NewReader(""))
-		_, err := dec.skipArray()
-		assert.NotNil(t, err, "err should not be nil as data is empty")
-		assert.IsType(t, InvalidJSONError(""), err, "err should of type InvalidJSONError")
-	})
 }

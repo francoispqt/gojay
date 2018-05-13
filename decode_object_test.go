@@ -168,6 +168,9 @@ var jsonComplex = []byte(`{
 	},
 	"testSkipNumber": 123.23,
 	"testBool": true,
+	"testSkipBoolTrue": true,
+	"testSkipBoolFalse": false,
+	"testSkipBoolNull": null,
 	"testSub": {
 		"test": "{\"test\":\"1\",\"test1\":2}",
 		"test2\\n": "[1,2,3]",
@@ -220,7 +223,7 @@ func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
 	err := UnmarshalObject(jsonComplex, &result)
 	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
-	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 531`, err.Error(), "err should not be as invalid type as been encountered nil")
+	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 614`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
 	assert.Equal(t, `\\\\\\n`, result.Test2, "result.Test2 is not expected value")
 	assert.Equal(t, 1, result.Test3, "result.test3 is not expected value")
@@ -453,4 +456,52 @@ func TestDecoderObjectPoolError(t *testing.T) {
 	}()
 	_ = dec.DecodeObject(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+
+func TestSkipData(t *testing.T) {
+	testCases := []struct {
+		name string
+		err  bool
+		json string
+	}{
+		{
+			name: "skip-bool-false-err",
+			json: `fulse`,
+			err:  true,
+		},
+		{
+			name: "skip-bool-true-err",
+			json: `trou`,
+			err:  true,
+		},
+		{
+			name: "skip-bool-null-err",
+			json: `nil`,
+			err:  true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			dec := NewDecoder(strings.NewReader(testCase.json))
+			err := dec.skipData()
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+			} else {
+				assert.Nil(t, err, "err should be nil")
+			}
+		})
+	}
+	t.Run("error-invalid-json", func(t *testing.T) {
+		dec := NewDecoder(strings.NewReader(""))
+		err := dec.skipData()
+		assert.NotNil(t, err, "err should not be nil as data is empty")
+		assert.IsType(t, InvalidJSONError(""), err, "err should of type InvalidJSONError")
+	})
+	t.Run("skip-array-error-invalid-json", func(t *testing.T) {
+		dec := NewDecoder(strings.NewReader(""))
+		_, err := dec.skipArray()
+		assert.NotNil(t, err, "err should not be nil as data is empty")
+		assert.IsType(t, InvalidJSONError(""), err, "err should of type InvalidJSONError")
+	})
 }

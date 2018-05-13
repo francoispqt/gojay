@@ -42,7 +42,7 @@ func (dec *Decoder) decodeBool(v *bool) error {
 			dec.cursor++
 			return nil
 		default:
-			dec.err = InvalidTypeError(
+			dec.err = InvalidUnmarshalError(
 				fmt.Sprintf(
 					"Cannot unmarshall to bool, wrong char '%s' found at pos %d",
 					string(dec.data[dec.cursor]),

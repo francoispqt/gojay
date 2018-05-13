@@ -1,7 +1,5 @@
 package gojay
 
-import "log"
-
 // EmbeddedJSON is a raw encoded JSON value.
 // It can be used to delay JSON decoding or precompute a JSON encoding.
 type EmbeddedJSON []byte
@@ -42,7 +40,6 @@ func (dec *Decoder) decodeEmbeddedJSON(ej *EmbeddedJSON) error {
 				return err
 			}
 			dec.cursor++
-			log.Print(string(dec.data[:dec.cursor]))
 		// is an object
 		case '{':
 			beginOfEmbeddedJSON = dec.cursor
