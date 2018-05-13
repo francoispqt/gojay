@@ -4,9 +4,10 @@
 [![Go doc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square
 )](https://godoc.org/github.com/francoispqt/gojay)
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
+[![Sourcegraph](https://sourcegraph.com/github.com/francoispqt/gojay/-/badge.svg)](https://sourcegraph.com/github.com/francoispqt/gojay)
 
 # GoJay
-**Package is currently at version 0.10.5 and still under development**
+**Package is currently at version 1.0.0 and safe to use in production**
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 

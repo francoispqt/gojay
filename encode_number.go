@@ -111,7 +111,7 @@ func (enc *Encoder) AddInt64(v int64) {
 	enc.buf = strconv.AppendInt(enc.buf, v, 10)
 }
 
-// AddIntOmitEmpty adds an int to be encoded and skips it if its value is 0,
+// AddInt64OmitEmpty adds an int to be encoded and skips it if its value is 0,
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) AddInt64OmitEmpty(v int64) {
 	if v == 0 {

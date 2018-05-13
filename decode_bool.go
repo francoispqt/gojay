@@ -75,13 +75,21 @@ func (dec *Decoder) assertTrue() error {
 			if dec.data[dec.cursor] != 'e' {
 				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
 			}
-			return nil
-		default:
-			return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+		case 3:
+			switch dec.data[dec.cursor] {
+			case ' ', '\t', '\n', ',', ']', '}':
+				dec.cursor--
+				return nil
+			default:
+				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+			}
 		}
 		i++
 	}
-	return InvalidJSONError("Invalid JSO")
+	if i == 3 {
+		return nil
+	}
+	return InvalidJSONError("Invalid JSON")
 }
 
 func (dec *Decoder) assertNull() error {
@@ -100,11 +108,19 @@ func (dec *Decoder) assertNull() error {
 			if dec.data[dec.cursor] != 'l' {
 				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
 			}
-			return nil
-		default:
-			return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+		case 3:
+			switch dec.data[dec.cursor] {
+			case ' ', '\t', '\n', ',', ']', '}':
+				dec.cursor--
+				return nil
+			default:
+				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+			}
 		}
 		i++
+	}
+	if i == 3 {
+		return nil
 	}
 	return InvalidJSONError("Invalid JSON")
 }
@@ -129,11 +145,19 @@ func (dec *Decoder) assertFalse() error {
 			if dec.data[dec.cursor] != 'e' {
 				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
 			}
-			return nil
-		default:
-			return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+		case 4:
+			switch dec.data[dec.cursor] {
+			case ' ', '\t', '\n', ',', ']', '}':
+				dec.cursor--
+				return nil
+			default:
+				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+			}
 		}
 		i++
+	}
+	if i == 4 {
+		return nil
 	}
 	return InvalidJSONError("Invalid JSON")
 }

@@ -85,6 +85,10 @@ func assertResult(t *testing.T, v *TestObj, err error) {
 	assert.Equal(t, "complex string with spaces and some slashes\"", v.test4, "v.test4 must be equal to 'string'")
 	assert.Equal(t, -1.15657654376543, v.test5, "v.test5 must be equal to 1.15")
 	assert.Len(t, v.testArr, 2, "v.testArr must be of len 2")
+	assert.Equal(t, v.testArr[0].test, 245, "v.testArr[0].test must be equal to 245")
+	assert.Equal(t, v.testArr[0].test2, 246, "v.testArr[0].test must be equal to 246")
+	assert.Equal(t, v.testArr[1].test, 245, "v.testArr[0].test must be equal to 245")
+	assert.Equal(t, v.testArr[1].test2, 246, "v.testArr[0].test must be equal to 246")
 
 	assert.Equal(t, 121, v.testSubObj.test3, "v.testSubObj.test3 must be equal to 121")
 	assert.Equal(t, 122, v.testSubObj.test4, "v.testSubObj.test4 must be equal to 122")

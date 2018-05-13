@@ -1,18 +1,310 @@
 package gojay
 
 import (
+	"fmt"
+	"log"
+	"math"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDecoderInt64Exponent(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult int64
+	}{
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v int64
+			err := Unmarshal(json, &v)
+			assert.Nil(t, err, "Err must be nil")
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+}
+func TestDecoderInt32Exponent(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult int32
+	}{
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v int32
+			err := Unmarshal(json, &v)
+			assert.Nil(t, err, "Err must be nil")
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+}
+
+func TestDecoderFloat64Exponent(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult float64
+	}{
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2",
+			expectedResult: 0.01,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0.000005,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0.003,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0.00008,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v float64
+			err := Unmarshal(json, &v)
+			log.Print(v)
+			assert.Nil(t, err, "Err must be nil")
+			assert.Equal(t, testCase.expectedResult*1000000, math.Round(v*1000000), fmt.Sprintf("v must be equal to %f", testCase.expectedResult))
+		})
+	}
+}
 func TestDecoderIntBasic(t *testing.T) {
 	json := []byte(`124`)
 	var v int
 	err := Unmarshal(json, &v)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, 124, v, "v must be equal to 124")
+}
+func TestDecoderIntExponent(t *testing.T) {
+	json := []byte(`1E+2`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 100, v, "v must be equal to 100")
+}
+func TestDecoderIntExponent1(t *testing.T) {
+	json := []byte(`4E+2`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 400, v, "v must be equal to 100")
+}
+func TestDecoderIntExponentComplex(t *testing.T) {
+	json := []byte(`-3E-004`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 0, v, "v must be equal to 0")
+}
+func TestDecoderIntExponentComplex1(t *testing.T) {
+	json := []byte(`-3.12E+005`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, -312000, v, "v must be equal to -312000")
+}
+func TestDecoderFloatExponentComplex1(t *testing.T) {
+	json := []byte(`-3E-004`)
+	var v float64
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, int64(-0.0003*10000), int64(v*10000), "v must be equal to -0.0003")
+}
+func TestDecoderFloatExponentComplex2(t *testing.T) {
+	json := []byte(`-3E+004`)
+	var v float64
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, float64(-30000), float64(v), "v must be equal to -30000")
+}
+func TestDecoderFloatExponentComplex3(t *testing.T) {
+	json := []byte(`-3.12E-004`)
+	var v float64
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, int64(-0.000312*1000000), int64(v*1000000), "v must be equal to -30000")
+}
+func TestDecoderIntExponentComplex2(t *testing.T) {
+	json := []byte(`3.12E+005`)
+	var v int
+	err := Unmarshal(json, &v)
+	assert.Nil(t, err, "Err must be nil")
+	assert.Equal(t, 312000, v, "v must be equal to 312000")
 }
 func TestDecoderIntNegative(t *testing.T) {
 	json := []byte(` -124 `)
@@ -294,6 +586,7 @@ func TestDecoderInt64Negative(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	assert.Equal(t, int64(-124), v, "v must be equal to -124")
 }
+
 func TestDecoderInt64Null(t *testing.T) {
 	json := []byte(`null`)
 	var v int64

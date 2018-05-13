@@ -22,6 +22,7 @@ func (enc *Encoder) encodeString(v string) ([]byte, error) {
 	return enc.buf, nil
 }
 
+// AppendString appends a string to the buffer
 func (enc *Encoder) AppendString(v string) {
 	enc.grow(len(v) + 2)
 	enc.writeByte('"')

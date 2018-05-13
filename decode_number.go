@@ -67,6 +67,7 @@ func (dec *Decoder) decodeInt(v *int) error {
 		switch c := dec.data[dec.cursor]; c {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			val, err := dec.getInt64(c)
 			if err != nil {
@@ -413,16 +414,93 @@ func (dec *Decoder) getInt64(b byte) (int64, error) {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			end = j
 			continue
-		case ' ', '\n', '\t', '\r':
-			continue
-		case '.', ',', '}', ']':
+		case ' ', '\t', '\n', ',', '}', ']':
 			dec.cursor = j
 			return dec.atoi64(start, end), nil
+		case '.':
+			// if dot is found
+			// look for exponent (e,E) as exponent can change the
+			// way number should be parsed to int.
+			// if no exponent found, just unmarshal the number before decimal point
+			startDecimal := j + 1
+			endDecimal := j + 1
+			j++
+			for ; j < dec.length || dec.read(); j++ {
+				switch dec.data[j] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					endDecimal = j
+					continue
+				case 'e', 'E':
+					dec.cursor = j + 1
+					// can try unmarshalling to int as Exponent might change decimal number to non decimal
+					// let's get the float value first
+					// we get part before decimal as integer
+					beforeDecimal := dec.atoi64(start, end)
+					// get number after the decimal point
+					// multiple the before decimal point portion by 10 using bitwise
+					for i := startDecimal; i <= endDecimal; i++ {
+						beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					}
+					// then we add both integers
+					// then we divide the number by the power found
+					afterDecimal := dec.atoi64(startDecimal, endDecimal)
+					pow := pow10uint64[endDecimal-startDecimal+2]
+					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
+					// we have the floating value, now multiply by the exponent
+					exp := dec.getExponent()
+					val := floatVal * float64(pow10uint64[exp+1])
+					return int64(val), nil
+				default:
+					dec.cursor = j
+					return dec.atoi64(start, end), nil
+				}
+			}
+			return dec.atoi64(start, end), nil
+		case 'e', 'E':
+			// get init n
+			return dec.getInt64WithExp(dec.atoi64(start, end), j+1)
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
 		return 0, InvalidJSONError("Invalid JSON while parsing number")
 	}
 	return dec.atoi64(start, end), nil
+}
+
+func (dec *Decoder) getInt64WithExp(init int64, cursor int) (int64, error) {
+	var exp uint64
+	var sign = int64(1)
+	for ; cursor < dec.length || dec.read(); cursor++ {
+		switch dec.data[cursor] {
+		case '+':
+			continue
+		case '-':
+			sign = -1
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			uintv := uint64(digits[dec.data[cursor]])
+			exp = (exp << 3) + (exp << 1) + uintv
+			cursor++
+			for ; cursor < dec.length || dec.read(); cursor++ {
+				switch dec.data[cursor] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					uintv := uint64(digits[dec.data[cursor]])
+					exp = (exp << 3) + (exp << 1) + uintv
+				default:
+					if sign == -1 {
+						return init * (1 / int64(pow10uint64[exp+1])), nil
+					}
+					return init * int64(pow10uint64[exp+1]), nil
+				}
+			}
+			if sign == -1 {
+				return init * (1 / int64(pow10uint64[exp+1])), nil
+			}
+			return init * int64(pow10uint64[exp+1]), nil
+		default:
+			dec.err = InvalidJSONError("Invalid JSON")
+			return 0, dec.err
+		}
+	}
+	return 0, InvalidJSONError("Invalid JSON")
 }
 
 func (dec *Decoder) getUint64(b byte) (uint64, error) {
@@ -457,7 +535,49 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 			continue
 		case ' ', '\n', '\t', '\r':
 			continue
-		case '.', ',', '}', ']':
+		case '.':
+			// if dot is found
+			// look for exponent (e,E) as exponent can change the
+			// way number should be parsed to int.
+			// if no exponent found, just unmarshal the number before decimal point
+			startDecimal := j + 1
+			endDecimal := j + 1
+			j++
+			for ; j < dec.length || dec.read(); j++ {
+				switch dec.data[j] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					endDecimal = j
+					continue
+				case 'e', 'E':
+					dec.cursor = j + 1
+					// can try unmarshalling to int as Exponent might change decimal number to non decimal
+					// let's get the float value first
+					// we get part before decimal as integer
+					beforeDecimal := dec.atoi64(start, end)
+					// get number after the decimal point
+					// multiple the before decimal point portion by 10 using bitwise
+					for i := startDecimal; i <= endDecimal; i++ {
+						beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					}
+					// then we add both integers
+					// then we divide the number by the power found
+					afterDecimal := dec.atoi64(startDecimal, endDecimal)
+					pow := pow10uint64[endDecimal-startDecimal+2]
+					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
+					// we have the floating value, now multiply by the exponent
+					exp := dec.getExponent()
+					val := floatVal * float64(pow10uint64[exp+1])
+					return int32(val), nil
+				default:
+					dec.cursor = j
+					return dec.atoi32(start, end), nil
+				}
+			}
+			return dec.atoi32(start, end), nil
+		case 'e', 'E':
+			// get init n
+			return dec.getInt32WithExp(dec.atoi32(start, end), j+1)
+		case ',', '}', ']':
 			dec.cursor = j
 			return dec.atoi32(start, end), nil
 		}
@@ -465,6 +585,43 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 		return 0, InvalidJSONError("Invalid JSON while parsing number")
 	}
 	return dec.atoi32(start, end), nil
+}
+
+func (dec *Decoder) getInt32WithExp(init int32, cursor int) (int32, error) {
+	var exp uint32
+	var sign = int32(1)
+	for ; cursor < dec.length || dec.read(); cursor++ {
+		switch dec.data[cursor] {
+		case '+':
+			continue
+		case '-':
+			sign = -1
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			uintv := uint32(digits[dec.data[cursor]])
+			exp = (exp << 3) + (exp << 1) + uintv
+			cursor++
+			for ; cursor < dec.length || dec.read(); cursor++ {
+				switch dec.data[cursor] {
+				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+					uintv := uint32(digits[dec.data[cursor]])
+					exp = (exp << 3) + (exp << 1) + uintv
+				default:
+					if sign == -1 {
+						return init * (1 / int32(pow10uint64[exp+1])), nil
+					}
+					return init * int32(pow10uint64[exp+1]), nil
+				}
+			}
+			if sign == -1 {
+				return init * (1 / int32(pow10uint64[exp+1])), nil
+			}
+			return init * int32(pow10uint64[exp+1]), nil
+		default:
+			dec.err = InvalidJSONError("Invalid JSON")
+			return 0, dec.err
+		}
+	}
+	return 0, InvalidJSONError("Invalid JSON")
 }
 
 func (dec *Decoder) getUint32(b byte) (uint32, error) {
@@ -510,6 +667,17 @@ func (dec *Decoder) getFloat(b byte) (float64, error) {
 					end = i
 					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
 					continue
+				} else if c == 'e' || c == 'E' {
+					afterDecimal := dec.atoi64(start, end)
+					dec.cursor = i + 1
+					pow := pow10uint64[end-start+2]
+					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
+					exp := dec.getExponent()
+					// if exponent is negative
+					if exp < 0 {
+						return float64(floatVal) * (1 / float64(pow10uint64[exp*-1+1])), nil
+					}
+					return float64(floatVal) * float64(pow10uint64[exp+1]), nil
 				}
 				dec.cursor = i
 				break
@@ -519,6 +687,17 @@ func (dec *Decoder) getFloat(b byte) (float64, error) {
 			afterDecimal := dec.atoi64(start, end)
 			pow := pow10uint64[end-start+2]
 			return float64(beforeDecimal+afterDecimal) / float64(pow), nil
+		case 'e', 'E':
+			dec.cursor = dec.cursor + 2
+			// we get part before decimal as integer
+			beforeDecimal := uint64(dec.atoi64(start, end))
+			// get exponent
+			exp := dec.getExponent()
+			// if exponent is negative
+			if exp < 0 {
+				return float64(beforeDecimal) * (1 / float64(pow10uint64[exp*-1+1])), nil
+			}
+			return float64(beforeDecimal) * float64(pow10uint64[exp+1]), nil
 		case ' ', '\n', '\t', '\r':
 			continue
 		case ',', '}', ']': // does not have decimal
@@ -652,4 +831,37 @@ func (dec *Decoder) atoui32(start, end int) uint32 {
 		val = 0
 	}
 	return val
+}
+
+func (dec *Decoder) getExponent() int64 {
+	start := dec.cursor
+	end := dec.cursor
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch dec.data[dec.cursor] { // is positive
+		case '0':
+			// skip leading zeroes
+			if start == end {
+				start = dec.cursor
+				end = dec.cursor
+				continue
+			}
+			end = dec.cursor
+		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			end = dec.cursor
+		case '-':
+			dec.cursor++
+			return -dec.getExponent()
+		case '+':
+			dec.cursor++
+			return dec.getExponent()
+		default:
+			// if nothing return 0
+			// could raise error
+			if start == end {
+				return 0
+			}
+			return dec.atoi64(start, end)
+		}
+	}
+	return dec.atoi64(start, end)
 }
