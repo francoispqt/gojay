@@ -380,6 +380,13 @@ func TestDecoderInt64(t *testing.T) {
 			expectedResult: -800000,
 		},
 		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "8ea+00a5",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "error1",
 			json:           "132zz4",
 			expectedResult: 0,
@@ -661,6 +668,11 @@ func TestDecoderInt32(t *testing.T) {
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp1",
+			json:           "3.5e+005 ",
+			expectedResult: 350000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp1",
 			json:           "3.5e+005",
 			expectedResult: 350000,
 		},
@@ -720,8 +732,20 @@ func TestDecoderInt32(t *testing.T) {
 			expectedResult: -800000,
 		},
 		{
+			name:           "basic-float",
+			json:           "8.32 ",
+			expectedResult: 8,
+		},
+		{
 			name:           "error",
 			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "8ea00$aa5",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -1118,6 +1142,15 @@ func TestDecoderFloat64(t *testing.T) {
 		defer dec.Release()
 		err := dec.DecodeFloat64(&v)
 		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+}
+
+func TestDecodeNumberExra(t *testing.T) {
+	t.Run("skip-number-err", func(t *testing.T) {
+		dec := NewDecoder(strings.NewReader("123456afzfz343"))
+		_, err := dec.skipNumber()
+		assert.NotNil(t, err, "err should not be nil")
 		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 	})
 }

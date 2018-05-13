@@ -241,6 +241,14 @@ func TestUnmarshalArrays(t *testing.T) {
 	}
 }
 
+func TestDecodeArrayNullError(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader("nall"))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestSkipArray(t *testing.T) {
 	testCases := []struct {
 		json         string
