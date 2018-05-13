@@ -250,7 +250,7 @@ func TestDecoderInt64(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "1039405",
+			json:           " 1039405",
 			expectedResult: 1039405,
 		},
 		{
@@ -277,7 +277,7 @@ func TestDecoderInt64(t *testing.T) {
 		},
 		{
 			name:           "basic-big-overflow",
-			json:           "9223372036854775808",
+			json:           " 9223372036854775808",
 			expectedResult: 0,
 			err:            true,
 		},
@@ -458,7 +458,7 @@ func TestDecoderUint64(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "1039405",
+			json:           " 1039405",
 			expectedResult: 1039405,
 		},
 		{
@@ -515,6 +515,13 @@ func TestDecoderUint64(t *testing.T) {
 			json:           "132zz4",
 			expectedResult: 0,
 			err:            true,
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "invalid-type",
@@ -589,7 +596,7 @@ func TestDecoderInt32(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "1039405",
+			json:           " 1039405",
 			expectedResult: 1039405,
 		},
 		{
@@ -616,7 +623,7 @@ func TestDecoderInt32(t *testing.T) {
 		},
 		{
 			name:           "basic-big",
-			json:           "2147483647",
+			json:           " 2147483647",
 			expectedResult: 2147483647,
 		},
 		{
@@ -713,7 +720,14 @@ func TestDecoderInt32(t *testing.T) {
 			expectedResult: -800000,
 		},
 		{
-			name:           "error3",
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error2",
 			json:           "-8e+00$aa5",
 			expectedResult: 0,
 			err:            true,
@@ -844,6 +858,20 @@ func TestDecoderUint32(t *testing.T) {
 			name:           "basic-float2",
 			json:           "-7.8876",
 			expectedResult: 7,
+		},
+		{
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "invalid-type",
@@ -1003,6 +1031,11 @@ func TestDecoderFloat64(t *testing.T) {
 		},
 		{
 			name:           "basic-float2",
+			json:           "877",
+			expectedResult: 877,
+		},
+		{
+			name:           "basic-float2",
 			json:           "-7.8876",
 			expectedResult: -7.8876,
 		},
@@ -1015,6 +1048,20 @@ func TestDecoderFloat64(t *testing.T) {
 			name:           "basic-float2",
 			json:           "-7.8876e002",
 			expectedResult: -788.76,
+		},
+		{
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "invalid-type",

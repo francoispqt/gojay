@@ -536,8 +536,6 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			end = j
 			continue
-		case ' ', '\n', '\t', '\r':
-			continue
 		case '.':
 			// if dot is found
 			// look for exponent (e,E) as exponent can change the
@@ -583,7 +581,7 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 		case 'e', 'E':
 			// get init n
 			return dec.getInt32WithExp(dec.atoi32(start, end), j+1)
-		case ',', '}', ']':
+		case ' ', '\n', '\t', '\r', ',', '}', ']':
 			dec.cursor = j
 			return dec.atoi32(start, end), nil
 		}
