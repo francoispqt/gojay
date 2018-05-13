@@ -40,7 +40,7 @@ func (dec *Decoder) decodeArray(arr UnmarshalerArray) (int, error) {
 				}
 				n++
 			}
-			return dec.cursor, nil
+			return 0, InvalidJSONError("Invalid JSON could not find array closing bracket")
 		case 'n':
 			// is null
 			dec.cursor++
