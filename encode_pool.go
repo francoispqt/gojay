@@ -30,9 +30,6 @@ func init() {
 func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w: w}
 }
-func newEncoder() *Encoder {
-	return &Encoder{}
-}
 
 // BorrowEncoder borrows an Encoder from the pool.
 func BorrowEncoder(w io.Writer) *Encoder {

@@ -80,6 +80,30 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
+	t.Run("escaped-sequence3", func(t *testing.T) {
+		str := "hello \b world 𝄞"
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"hello \b world 𝄞"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
+	t.Run("escaped-sequence3", func(t *testing.T) {
+		str := "hello \f world 𝄞"
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			"\"hello \\f world 𝄞\"",
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
 }
 
 func TestEncoderStringEncodeAPIErrors(t *testing.T) {
