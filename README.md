@@ -7,7 +7,7 @@
 [![Sourcegraph](https://sourcegraph.com/github.com/francoispqt/gojay/-/badge.svg)](https://sourcegraph.com/github.com/francoispqt/gojay)
 
 # GoJay
-**Package is currently at version 0.10.8 and safe to use in production**
+**Package is currently at version 0.10.8 and still in development, it does not cover escaped unicode syntax eg: "\u2605", otherwise it is safe to use in production**
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
