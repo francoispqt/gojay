@@ -17,6 +17,10 @@ func (enc *Encoder) writeBytes(p []byte) {
 	enc.buf = append(enc.buf, p...)
 }
 
+func (enc *Encoder) writeTwoBytes(b1 byte, b2 byte) {
+	enc.buf = append(enc.buf, b1, b2)
+}
+
 // WriteByte appends the byte c to b's Buffer.
 // The returned error is always nil.
 func (enc *Encoder) writeByte(c byte) {
@@ -34,17 +38,17 @@ func (enc *Encoder) writeStringEscape(s string) {
 	for i := 0; i < l; i++ {
 		switch s[i] {
 		case '\\', '"':
-			enc.writeByte('\\')
-			enc.writeByte(s[i])
+			enc.writeTwoBytes('\\', s[i])
 		case '\n':
-			enc.writeByte('\\')
-			enc.writeByte('n')
+			enc.writeTwoBytes('\\', 'n')
+		case '\f':
+			enc.writeTwoBytes('\\', 'f')
+		case '\b':
+			enc.writeTwoBytes('\\', 'b')
 		case '\r':
-			enc.writeByte('\\')
-			enc.writeByte('r')
+			enc.writeTwoBytes('\\', 'r')
 		case '\t':
-			enc.writeByte('\\')
-			enc.writeByte('t')
+			enc.writeTwoBytes('\\', 't')
 		default:
 			enc.writeByte(s[i])
 		}

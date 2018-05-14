@@ -300,7 +300,7 @@ func TestEncoderObjectMarshalAPI(t *testing.T) {
 	})
 	t.Run("marshal-object-func", func(t *testing.T) {
 		f := EncodeObjectFunc(func(enc *Encoder) {
-			enc.AddStringKey("test", "test")
+			enc.AddStringKeyOmitEmpty("test", "test")
 		})
 		r, err := Marshal(f)
 		assert.Nil(t, err, "Error should be nil")

@@ -1,520 +1,1156 @@
 package gojay
 
 import (
+	"fmt"
+	"math"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDecoderIntBasic(t *testing.T) {
-	json := []byte(`124`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 124, v, "v must be equal to 124")
+func TestDecoderInt(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult int
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-positive",
+			json:           "100",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-positive2",
+			json:           "1039405",
+			expectedResult: 1039405,
+		},
+		{
+			name:           "basic-negative",
+			json:           "-2",
+			expectedResult: -2,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-big",
+			json:           "9223372036854775807",
+			expectedResult: 9223372036854775807,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "9223372036854775808",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+		{
+			name:           "basic-big-overflow2",
+			json:           "92233720368547758089",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+		{
+			name:           "basic-big-overflow3",
+			json:           "92233720368547758089 ",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+		{
+			name:           "basic-negative2",
+			json:           "-2349557",
+			expectedResult: -2349557,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: -7,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876 ",
+			expectedResult: -7,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876a",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+		{
+			name:           "error1",
+			json:           "132zz4",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "negative-error2",
+			json:           " -1213xdde2323 ",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error3",
+			json:           "-8e+00$aa5",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v int
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := int(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeInt(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v int
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.DecodeInt(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v int
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeInt(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
-func TestDecoderIntNegative(t *testing.T) {
-	json := []byte(` -124 `)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, -124, v, "v must be equal to -124")
+func TestDecoderInt64(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult int64
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-positive",
+			json:           "100",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-positive2",
+			json:           " 1039405",
+			expectedResult: 1039405,
+		},
+		{
+			name:           "basic-negative",
+			json:           "-2",
+			expectedResult: -2,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-big",
+			json:           "9223372036854775807",
+			expectedResult: 9223372036854775807,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 9223372036854775808",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow2",
+			json:           "92233720368547758089",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow3",
+			json:           "92233720368547758089 ",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-negative2",
+			json:           "-2349557",
+			expectedResult: -2349557,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: -7,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876a",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06 ",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2 ",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5.4e+06",
+			expectedResult: -5400000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "8ea+00a5",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error1",
+			json:           "132zz4",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v int64
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := int64(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeInt64(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v int64
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.DecodeInt64(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int64(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v int64
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeInt64(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
-func TestDecoderIntNegativeError(t *testing.T) {
-	json := []byte(` -12x4 `)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+func TestDecoderUint64(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult uint64
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-positive",
+			json:           "100",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-positive2",
+			json:           " 1039405",
+			expectedResult: 1039405,
+		},
+		{
+			name:           "basic-negative",
+			json:           "-2",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-big",
+			json:           "18446744073709551615",
+			expectedResult: 18446744073709551615,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "18446744073709551616",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow2",
+			json:           "184467440737095516161",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-negative2",
+			json:           "-2349557",
+			expectedResult: 2349557,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: 7,
+		},
+		{
+			name:           "error1",
+			json:           "132zz4",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v uint64
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := uint64(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeUint64(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v uint64
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.DecodeUint64(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, uint64(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api-json-error", func(t *testing.T) {
+		var v uint64
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeUint64(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
-func TestDecoderIntNull(t *testing.T) {
-	json := []byte(`null`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int(0), v, "v must be equal to 0")
-}
-func TestDecoderIntInvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeErrorr")
-}
-func TestDecoderIntInvalidJSON(t *testing.T) {
-	json := []byte(`123n`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderIntBig(t *testing.T) {
-	json := []byte(`9223372036854775807`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 9223372036854775807, v, "v must be equal to 9223372036854775807")
-}
-func TestDecoderIntOverfow(t *testing.T) {
-	json := []byte(`9223372036854775808`)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
-	assert.Equal(t, 0, v, "v must be equal to 0")
-}
-func TestDecoderIntOverfow2(t *testing.T) {
-	json := []byte(`92233720368547758089 `)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
-	assert.Equal(t, 0, v, "v must be equal to 0")
-}
-func TestDecoderIntOverfow3(t *testing.T) {
-	json := []byte(`92233720368547758089 `)
-	var v int
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must not be nil as int is overflowing")
-	assert.Equal(t, 0, v, "v must be equal to 0")
-}
-func TestDecoderIntPoolError(t *testing.T) {
-	result := int(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeInt(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderIntDecoderAPI(t *testing.T) {
-	var v int
-	dec := NewDecoder(strings.NewReader(`33`))
-	defer dec.Release()
-	err := dec.DecodeInt(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int(33), v, "v must be equal to 33")
+func TestDecoderInt32(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult int32
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-positive",
+			json:           "100",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-positive2",
+			json:           " 1039405",
+			expectedResult: 1039405,
+		},
+		{
+			name:           "basic-negative",
+			json:           "-2",
+			expectedResult: -2,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-negative2",
+			json:           "-2349557",
+			expectedResult: -2349557,
+		},
+		{
+			name:           "basic-big",
+			json:           " 2147483647",
+			expectedResult: 2147483647,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 2147483648",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow2",
+			json:           "21474836483",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: -7,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876a",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1.2E2",
+			expectedResult: 120,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp1",
+			json:           "3.5e+005 ",
+			expectedResult: 350000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp1",
+			json:           "3.5e+005",
+			expectedResult: 350000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005 ",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2 ",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5E-6",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+		{
+			name:           "basic-float",
+			json:           "8.32 ",
+			expectedResult: 8,
+		},
+		{
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "8ea00$aa5",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error2",
+			json:           "-8e+00$aa5",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v int32
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := int32(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeInt32(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v int32
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.DecodeInt32(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int32(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v int32
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeInt32(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
-func TestDecoderIntInvalidJSONError(t *testing.T) {
-	var v int
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeInt(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+func TestDecoderUint32(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult uint32
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-positive",
+			json:           "100",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-positive2",
+			json:           "1039405",
+			expectedResult: 1039405,
+		},
+		{
+			name:           "basic-negative",
+			json:           "-2",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-negative2",
+			json:           "-2349557",
+			expectedResult: 2349557,
+		},
+		{
+			name:           "basic-big",
+			json:           "4294967295",
+			expectedResult: 4294967295,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 4294967298",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow2",
+			json:           "42949672983",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: 7,
+		},
+		{
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `123invalid`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v uint32
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, v, fmt.Sprintf("v must be equal to %d", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := uint32(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeUint32(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v uint32
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.DecodeUint32(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, uint32(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api-json-error", func(t *testing.T) {
+		var v uint32
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeUint32(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
-func TestDecoderInt32Basic(t *testing.T) {
-	json := []byte(`124`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int32(124), v, "v must be equal to 124")
-}
-func TestDecoderInt32Negative(t *testing.T) {
-	json := []byte(`-124 `)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int32(-124), v, "v must be equal to -124")
-}
-func TestDecoderInt32NegativeError(t *testing.T) {
-	json := []byte(`-12x4 `)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderInt32Null(t *testing.T) {
-	json := []byte(`null`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int32(0), v, "v must be equal to 0")
-}
-func TestDecoderInt32InvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeErrorr")
-}
-func TestDecoderInt32InvalidJSON(t *testing.T) {
-	json := []byte(`123n`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderInt32Big(t *testing.T) {
-	json := []byte(`2147483647`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "err must not be nil as int32 does not overflow")
-	assert.Equal(t, int32(2147483647), v, "int32 must be equal to 2147483647")
-}
-func TestDecoderInt32Overflow(t *testing.T) {
-	json := []byte(` 2147483648`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderInt32Overflow2(t *testing.T) {
-	json := []byte(`21474836483`)
-	var v int32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderInt32PoolError(t *testing.T) {
-	result := int32(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeInt32(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderInt32tDecoderAPI(t *testing.T) {
-	var v int32
-	dec := NewDecoder(strings.NewReader(`33`))
-	defer dec.Release()
-	err := dec.DecodeInt32(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int32(33), v, "v must be equal to 33")
-}
-
-func TestDecoderInt32InvalidJSONError(t *testing.T) {
-	var v int32
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeInt32(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecoderUint32Basic(t *testing.T) {
-	json := []byte(`124 `)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint32(124), v, "v must be equal to 124")
-}
-func TestDecoderUint32Null(t *testing.T) {
-	json := []byte(`null`)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint32(0), v, "v must be equal to 0")
-}
-func TestDecoderUint32InvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeErrorr")
-}
-func TestDecoderUint32InvalidJSON(t *testing.T) {
-	json := []byte(`123n`)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderUint32Big(t *testing.T) {
-	json := []byte(`4294967295 `)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "err must not be nil as uint32 does not overflow")
-	assert.Equal(t, uint32(4294967295), v, "err must be of type InvalidTypeError")
-}
-func TestDecoderUint32Overflow(t *testing.T) {
-	json := []byte(`4294967298`)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as uint32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-
-func TestDecoderUint32Overflow2(t *testing.T) {
-	json := []byte(`42949672983`)
-	var v uint32
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as uint32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderUint32PoolError(t *testing.T) {
-	result := uint32(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeUint32(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderUint32tDecoderAPI(t *testing.T) {
-	var v uint32
-	dec := NewDecoder(strings.NewReader(`33`))
-	defer dec.Release()
-	err := dec.DecodeUint32(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint32(33), v, "v must be equal to 33")
-}
-
-func TestDecoderUint32InvalidJSONError(t *testing.T) {
-	var v uint32
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeUint32(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecoderInt64Basic(t *testing.T) {
-	json := []byte(`124 `)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int64(124), v, "v must be equal to 124")
-}
-func TestDecoderInt64Negative(t *testing.T) {
-	json := []byte(`-124`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int64(-124), v, "v must be equal to -124")
-}
-func TestDecoderInt64Null(t *testing.T) {
-	json := []byte(`null`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int64(0), v, "v must be equal to 0")
-}
-func TestDecoderInt64InvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeErrorr")
-}
-func TestDecoderInt64InvalidJSON(t *testing.T) {
-	json := []byte(`123n`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderInt64Big(t *testing.T) {
-	json := []byte(`9223372036854775807`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "err must not be nil as int64 does not overflow")
-	assert.Equal(t, int64(9223372036854775807), v, "err must be of type InvalidTypeError")
-}
-func TestDecoderInt64Overflow(t *testing.T) {
-	json := []byte(`9223372036854775808`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int64 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderInt64Overflow2(t *testing.T) {
-	json := []byte(`92233720368547758082`)
-	var v int64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int64 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderInt64PoolError(t *testing.T) {
-	result := int64(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeInt64(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderInt64DecoderAPI(t *testing.T) {
-	var v int64
-	dec := NewDecoder(strings.NewReader(`33`))
-	defer dec.Release()
-	err := dec.DecodeInt64(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, int64(33), v, "v must be equal to 33")
-}
-func TestDecoderInt64InvalidJSONError(t *testing.T) {
-	var v int64
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeInt64(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+func TestDecoderFloat64(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult float64
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-exponent-positive-positive-exp",
+			json:           "1e2",
+			expectedResult: 100,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp2",
+			json:           "5e+06",
+			expectedResult: 5000000,
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp3",
+			json:           "3e+3",
+			expectedResult: 3000,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-exponent-positive-positive-exp4",
+			json:           "8e+005",
+			expectedResult: 800000,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp",
+			json:           "1e-2",
+			expectedResult: 0.01,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp2",
+			json:           "5e-6",
+			expectedResult: 0.000005,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp3",
+			json:           "3e-3",
+			expectedResult: 0.003,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-005",
+			expectedResult: 0.00008,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp",
+			json:           "-1e2",
+			expectedResult: -100,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp2",
+			json:           "-5e+06",
+			expectedResult: -5000000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp3",
+			json:           "-3e03",
+			expectedResult: -3000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8e+005",
+			expectedResult: -800000,
+		},
+		{
+			name:           "basic-exponent-negative-positive-exp4",
+			json:           "-8.2e-005",
+			expectedResult: -0.000082,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595",
+			expectedResult: 2.4595,
+		},
+		{
+			name:           "basic-float2",
+			json:           "877",
+			expectedResult: 877,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876",
+			expectedResult: -7.8876,
+		},
+		{
+			name:           "basic-float",
+			json:           "2.4595e1",
+			expectedResult: 24.595,
+		},
+		{
+			name:           "basic-float2",
+			json:           "-7.8876e002",
+			expectedResult: -788.76,
+		},
+		{
+			name:           "error",
+			json:           "83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error",
+			json:           "-83zez4",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "invalid-type",
+			json:           `"string"`,
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidTypeError(""),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			json := []byte(testCase.json)
+			var v float64
+			err := Unmarshal(json, &v)
+			if testCase.err {
+				assert.NotNil(t, err, "Err must not be nil")
+				if testCase.errType != nil {
+					assert.IsType(
+						t,
+						testCase.errType,
+						err,
+						fmt.Sprintf("err should be of type %s", reflect.TypeOf(err).String()),
+					)
+				}
+			} else {
+				assert.Nil(t, err, "Err must be nil")
+			}
+			assert.Equal(t, testCase.expectedResult*1000000, math.Round(v*1000000), fmt.Sprintf("v must be equal to %f", testCase.expectedResult))
+		})
+	}
+	t.Run("pool-error", func(t *testing.T) {
+		result := float64(1)
+		dec := NewDecoder(nil)
+		dec.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = dec.DecodeFloat64(&result)
+		assert.True(t, false, "should not be called as decoder should have panicked")
+	})
+	t.Run("decoder-api", func(t *testing.T) {
+		var v float64
+		dec := NewDecoder(strings.NewReader(`1.25`))
+		defer dec.Release()
+		err := dec.DecodeFloat64(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, 1.25, v, "v must be equal to 1.25")
+	})
+	t.Run("decoder-api-json-error", func(t *testing.T) {
+		var v float64
+		dec := NewDecoder(strings.NewReader(``))
+		defer dec.Release()
+		err := dec.DecodeFloat64(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
-func TestDecoderUint64Basic(t *testing.T) {
-	json := []byte(` 124 `)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint64(124), v, "v must be equal to 124")
-}
-func TestDecoderUint64Null(t *testing.T) {
-	json := []byte(`null`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint64(0), v, "v must be equal to 0")
-}
-func TestDecoderUint64InvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeErrorr")
-}
-func TestDecoderUint64InvalidJSON(t *testing.T) {
-	json := []byte(`123n`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
-}
-func TestDecoderUint64Big(t *testing.T) {
-	json := []byte(`18446744073709551615`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "err must not be nil as uint64 does not overflow")
-	assert.Equal(t, uint64(18446744073709551615), v, "err must be of type InvalidTypeError")
-}
-func TestDecoderUint64Overflow(t *testing.T) {
-	json := []byte(`18446744073709551616`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderUint64Overflow2(t *testing.T) {
-	json := []byte(`184467440737095516161`)
-	var v uint64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil as int32 overflows")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type InvalidTypeError")
-}
-func TestDecoderUint64PoolError(t *testing.T) {
-	result := uint64(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeUint64(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-func TestDecoderUint64tDecoderAPI(t *testing.T) {
-	var v uint64
-	dec := NewDecoder(strings.NewReader(`33`))
-	defer dec.Release()
-	err := dec.DecodeUint64(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, uint64(33), v, "v must be equal to 33")
-}
-
-func TestDecoderUint64InvalidJSONError(t *testing.T) {
-	var v uint64
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeUint64(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecoderFloatBasic(t *testing.T) {
-	json := []byte(`100.11 `)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 100.11, v, "v must be equal to 100.11")
-}
-func TestDecoderFloatBasic2(t *testing.T) {
-	json := []byte(` 100.11 `)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 100.11, v, "v must be equal to 100.11")
-}
-func TestDecoderFloatBasic3(t *testing.T) {
-	json := []byte(` 100 `)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, float64(100), v, "v must be equal to 100.11")
-}
-
-func TestDecoderFloatBig(t *testing.T) {
-	json := []byte(`89899843.3493493 `)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 89899843.3493493, v, "v must be equal to 8989984340.3493493")
-}
-
-func TestDecoderFloatInvalidType(t *testing.T) {
-	json := []byte(`"string"`)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "err must not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err must be of type *strconv.NumError")
-}
-
-func TestDecoderFloatInvalidJSON(t *testing.T) {
-	json := []byte(`hello`)
-	var v float64
-	err := Unmarshal(json, &v)
-	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
-	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
-}
-func TestDecoderFloatDecoderAPI(t *testing.T) {
-	var v float64
-	dec := NewDecoder(strings.NewReader(`1.25`))
-	defer dec.Release()
-	err := dec.DecodeFloat64(&v)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Equal(t, 1.25, v, "v must be equal to 1.25")
-}
-func TestDecoderFloatPoolError(t *testing.T) {
-	result := float64(1)
-	dec := NewDecoder(nil)
-	dec.Release()
-	defer func() {
-		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
-		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-	}()
-	_ = dec.DecodeFloat64(&result)
-	assert.True(t, false, "should not be called as decoder should have panicked")
-}
-
-func TestDecoderFloatInvalidJSONError(t *testing.T) {
-	var v float64
-	dec := NewDecoder(strings.NewReader(``))
-	defer dec.Release()
-	err := dec.DecodeFloat64(&v)
-	assert.NotNil(t, err, "Err must not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+func TestDecodeNumberExra(t *testing.T) {
+	t.Run("skip-number-err", func(t *testing.T) {
+		dec := NewDecoder(strings.NewReader("123456afzfz343"))
+		_, err := dec.skipNumber()
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }

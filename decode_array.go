@@ -40,10 +40,14 @@ func (dec *Decoder) decodeArray(arr UnmarshalerArray) (int, error) {
 				}
 				n++
 			}
-			return dec.cursor, nil
+			return 0, InvalidJSONError("Invalid JSON could not find array closing bracket")
 		case 'n':
 			// is null
-			dec.cursor = dec.cursor + 4
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return 0, err
+			}
 			return dec.cursor, nil
 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			// can't unmarshall to struct

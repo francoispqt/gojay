@@ -29,7 +29,8 @@ import (
 // 		fmt.Println(b) // {"id":123456}
 //	}
 func MarshalObject(v MarshalerObject) ([]byte, error) {
-	enc := newEncoder()
+	enc := BorrowEncoder(nil)
+	enc.grow(512)
 	defer enc.Release()
 	return enc.encodeObject(v)
 }
@@ -56,8 +57,8 @@ func MarshalObject(v MarshalerObject) ([]byte, error) {
 //		fmt.Println(b) // [{"id":123456},{"id":7890}]
 //	}
 func MarshalArray(v MarshalerArray) ([]byte, error) {
-	enc := newEncoder()
-	enc.grow(200)
+	enc := BorrowEncoder(nil)
+	enc.grow(512)
 	enc.writeByte('[')
 	v.(MarshalerArray).MarshalArray(enc)
 	enc.writeByte(']')

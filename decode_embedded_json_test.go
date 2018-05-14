@@ -38,6 +38,7 @@ func TestDecodeEmbeddedJSONUnmarshalAPI(t *testing.T) {
 		name             string
 		json             []byte
 		expectedEmbedded string
+		err              bool
 	}{
 		{
 			name:             "decode-basic-string",
@@ -74,6 +75,24 @@ func TestDecodeEmbeddedJSONUnmarshalAPI(t *testing.T) {
 			json:             []byte(`{"id":"someid","method":"getmydata","params":[1,2,3], "more":123}`),
 			expectedEmbedded: `[1,2,3]`,
 		},
+		{
+			name:             "decode-null-err",
+			json:             []byte(`{"id":"someid","method":"getmydata","params":nil, "more":123}`),
+			expectedEmbedded: ``,
+			err:              true,
+		},
+		{
+			name:             "decode-bool-false-err",
+			json:             []byte(`{"id":"someid","method":"getmydata","params":faulse, "more":123}`),
+			expectedEmbedded: ``,
+			err:              true,
+		},
+		{
+			name:             "decode-bool-true-err",
+			json:             []byte(`{"id":"someid","method":"getmydata","params":trou, "more":123}`),
+			expectedEmbedded: ``,
+			err:              true,
+		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -81,7 +100,11 @@ func TestDecodeEmbeddedJSONUnmarshalAPI(t *testing.T) {
 			err := Unmarshal(testCase.json, req)
 			t.Log(req)
 			t.Log(string(req.params))
-			assert.Nil(t, err, "err should be nil")
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+			} else {
+				assert.Nil(t, err, "err should be nil")
+			}
 			assert.Equal(t, testCase.expectedEmbedded, string(req.params), "r.params should be equal to expectedEmbeddedResult")
 		})
 	}

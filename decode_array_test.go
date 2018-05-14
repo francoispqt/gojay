@@ -241,6 +241,46 @@ func TestUnmarshalArrays(t *testing.T) {
 	}
 }
 
+func TestDecodeArrayEmpty(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader(""))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArrayInvalidJSONError(t *testing.T) {
+	v := new(testSliceStrings)
+	dec := NewDecoder(strings.NewReader(`["test",""`))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArrayInvalidJSONError2(t *testing.T) {
+	v := new(testSliceStrings)
+	dec := NewDecoder(strings.NewReader(`["test","\\""]`))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArraySkipError(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader("34fef"))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArrayNullError(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader("nall"))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
 func TestSkipArray(t *testing.T) {
 	testCases := []struct {
 		json         string
