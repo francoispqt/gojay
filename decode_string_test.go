@@ -10,6 +10,196 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDecoderString(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult string
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-string",
+			json:           `"string"`,
+			expectedResult: "string",
+			err:            false,
+		},
+		{
+			name:           "basic-string2",
+			json:           `"hello world!"`,
+			expectedResult: "hello world!",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\n"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\\n"`,
+			expectedResult: "\n",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\t"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\\t"`,
+			expectedResult: "\t",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\b"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\\b"`,
+			expectedResult: "\b",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\f"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\\f"`,
+			expectedResult: "\f",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\r"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
+			json:           `"\\r"`,
+			expectedResult: "\r",
+			err:            false,
+		},
+		{
+			name:           "utf8",
+			json:           `"𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿"`,
+			expectedResult: "𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿",
+			err:            false,
+		},
+		{
+			name:           "utf8-code-point",
+			json:           `"\u06fc"`,
+			expectedResult: `ۼ`,
+			err:            false,
+		},
+		{
+			name:           "utf8-code-point-escaped",
+			json:           `"\\u2070"`,
+			expectedResult: `\u2070`,
+			err:            false,
+		},
+		{
+			name:           "utf8-code-point-err",
+			json:           `"\u2Z70"`,
+			expectedResult: ``,
+			err:            true,
+		},
+		{
+			name:           "utf16-surrogate",
+			json:           `"\uD834\uDD1E"`,
+			expectedResult: `𝄞`,
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate",
+			json:           `"\uD834"`,
+			expectedResult: `�`,
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-err",
+			json:           `"\uD834\`,
+			expectedResult: ``,
+			err:            true,
+		},
+		{
+			name:           "utf16-surrogate-err2",
+			json:           `"\uD834\uDZ1E`,
+			expectedResult: ``,
+			err:            true,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\t"`,
+			expectedResult: "�\t",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\n"`,
+			expectedResult: "�\n",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\f"`,
+			expectedResult: "�\f",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\b"`,
+			expectedResult: "�\b",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\r"`,
+			expectedResult: "�\r",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate-followed-by-control-char",
+			json:           `"\uD834\h"`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "null-err",
+			json:           `nall`,
+			expectedResult: "",
+			err:            true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			str := ""
+			dec := NewDecoder(strings.NewReader(testCase.json))
+			err := dec.Decode(&str)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should of the given type")
+				}
+			} else {
+				assert.Nil(t, err, "err should be nil")
+			}
+			assert.Equal(t, testCase.expectedResult, str, fmt.Sprintf("'%s' should be equal to expectedResult", str))
+		})
+	}
+}
+
 func TestDecoderStringBasic(t *testing.T) {
 	json := []byte(`"string"`)
 	var v string
