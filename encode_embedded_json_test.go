@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (r *Request) MarshalObject(enc *Encoder) {
+func (r *Request) MarshalJSONObject(enc *Encoder) {
 	enc.AddStringKey("id", r.id)
 	enc.AddStringKey("method", r.method)
 	enc.AddEmbeddedJSONKey("params", &r.params)
@@ -24,7 +24,7 @@ func (r *Request) IsNil() bool {
 
 type EmbeddedJSONArr []EmbeddedJSON
 
-func (ear EmbeddedJSONArr) MarshalArray(enc *Encoder) {
+func (ear EmbeddedJSONArr) MarshalJSONArray(enc *Encoder) {
 	for _, e := range ear {
 		enc.AddEmbeddedJSON(&e)
 	}
@@ -36,7 +36,7 @@ func (ear EmbeddedJSONArr) IsNil() bool {
 
 type EmbeddedJSONOmitEmptyArr []EmbeddedJSON
 
-func (ear EmbeddedJSONOmitEmptyArr) MarshalArray(enc *Encoder) {
+func (ear EmbeddedJSONOmitEmptyArr) MarshalJSONArray(enc *Encoder) {
 	for _, e := range ear {
 		enc.AddEmbeddedJSONOmitEmpty(&e)
 	}

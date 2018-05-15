@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// MarshalObject returns the JSON encoding of v.
+// MarshalJSONObject returns the JSON encoding of v.
 //
 // It takes a struct implementing Marshaler to a JSON slice of byte
 // it returns a slice of bytes and an error.
@@ -14,7 +14,7 @@ import (
 //	type TestStruct struct {
 //		id int
 //	}
-//	func (s *TestStruct) MarshalObject(enc *gojay.Encoder) {
+//	func (s *TestStruct) MarshalJSONObject(enc *gojay.Encoder) {
 //		enc.AddIntKey("id", s.id)
 //	}
 //	func (s *TestStruct) IsNil() bool {
@@ -28,21 +28,21 @@ import (
 //		b, _ := gojay.Marshal(test)
 // 		fmt.Println(b) // {"id":123456}
 //	}
-func MarshalObject(v MarshalerObject) ([]byte, error) {
+func MarshalJSONObject(v MarshalerJSONObject) ([]byte, error) {
 	enc := BorrowEncoder(nil)
 	enc.grow(512)
 	defer enc.Release()
 	return enc.encodeObject(v)
 }
 
-// MarshalArray returns the JSON encoding of v.
+// MarshalJSONArray returns the JSON encoding of v.
 //
 // It takes an array or a slice implementing Marshaler to a JSON slice of byte
 // it returns a slice of bytes and an error.
 // Example with an Marshaler:
 // 	type TestSlice []*TestStruct
 //
-// 	func (t TestSlice) MarshalArray(enc *Encoder) {
+// 	func (t TestSlice) MarshalJSONArray(enc *Encoder) {
 //		for _, e := range t {
 //			enc.AddObject(e)
 //		}
@@ -56,11 +56,11 @@ func MarshalObject(v MarshalerObject) ([]byte, error) {
 // 		b, _ := Marshal(test)
 //		fmt.Println(b) // [{"id":123456},{"id":7890}]
 //	}
-func MarshalArray(v MarshalerArray) ([]byte, error) {
+func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 	enc := BorrowEncoder(nil)
 	enc.grow(512)
 	enc.writeByte('[')
-	v.(MarshalerArray).MarshalArray(enc)
+	v.(MarshalerJSONArray).MarshalJSONArray(enc)
 	enc.writeByte(']')
 	defer enc.Release()
 	return enc.buf, nil
@@ -82,7 +82,7 @@ func MarshalArray(v MarshalerArray) ([]byte, error) {
 //	type TestStruct struct {
 //		id int
 //	}
-//	func (s *TestStruct) MarshalObject(enc *gojay.Encoder) {
+//	func (s *TestStruct) MarshalJSONObject(enc *gojay.Encoder) {
 //		enc.AddIntKey("id", s.id)
 //	}
 //	func (s *TestStruct) IsNil() bool {
@@ -98,11 +98,11 @@ func MarshalArray(v MarshalerArray) ([]byte, error) {
 //	}
 func Marshal(v interface{}) ([]byte, error) {
 	switch vt := v.(type) {
-	case MarshalerObject:
+	case MarshalerJSONObject:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeObject(vt)
-	case MarshalerArray:
+	case MarshalerJSONArray:
 		enc := BorrowEncoder(nil)
 		defer enc.Release()
 		return enc.encodeArray(vt)
@@ -167,16 +167,16 @@ func Marshal(v interface{}) ([]byte, error) {
 	}
 }
 
-// MarshalerObject is the interface to implement for struct to be encoded
-type MarshalerObject interface {
-	MarshalObject(enc *Encoder)
+// MarshalerJSONObject is the interface to implement for struct to be encoded
+type MarshalerJSONObject interface {
+	MarshalJSONObject(enc *Encoder)
 	IsNil() bool
 }
 
-// MarshalerArray is the interface to implement
+// MarshalerJSONArray is the interface to implement
 // for a slice or an array to be encoded
-type MarshalerArray interface {
-	MarshalArray(enc *Encoder)
+type MarshalerJSONArray interface {
+	MarshalJSONArray(enc *Encoder)
 	IsNil() bool
 }
 

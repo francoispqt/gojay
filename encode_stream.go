@@ -124,13 +124,13 @@ func (s *StreamEncoder) Cancel(err error) {
 }
 
 // AddObject adds an object to be encoded.
-// value must implement MarshalerObject.
-func (s *StreamEncoder) AddObject(v MarshalerObject) {
+// value must implement MarshalerJSONObject.
+func (s *StreamEncoder) AddObject(v MarshalerJSONObject) {
 	if v.IsNil() {
 		return
 	}
 	s.Encoder.writeByte('{')
-	v.MarshalObject(s.Encoder)
+	v.MarshalJSONObject(s.Encoder)
 	s.Encoder.writeByte('}')
 	s.Encoder.writeByte(s.delimiter)
 }
@@ -143,10 +143,10 @@ func (s *StreamEncoder) AddString(v string) {
 	s.Encoder.writeByte(s.delimiter)
 }
 
-// AddArray adds an implementation of MarshalerArray to be encoded.
-func (s *StreamEncoder) AddArray(v MarshalerArray) {
+// AddArray adds an implementation of MarshalerJSONArray to be encoded.
+func (s *StreamEncoder) AddArray(v MarshalerJSONArray) {
 	s.Encoder.writeByte('[')
-	v.MarshalArray(s.Encoder)
+	v.MarshalJSONArray(s.Encoder)
 	s.Encoder.writeByte(']')
 	s.Encoder.writeByte(s.delimiter)
 }

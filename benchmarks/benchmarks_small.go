@@ -17,7 +17,7 @@ type SmallPayload struct {
 	V    int
 }
 
-func (t *SmallPayload) MarshalObject(enc *gojay.Encoder) {
+func (t *SmallPayload) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddIntKey("st", t.St)
 	enc.AddIntKey("sid", t.Sid)
 	enc.AddStringKey("tt", t.Tt)
@@ -33,7 +33,7 @@ func (t *SmallPayload) IsNil() bool {
 	return t == nil
 }
 
-func (t *SmallPayload) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (t *SmallPayload) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "st":
 		return dec.AddInt(&t.St)

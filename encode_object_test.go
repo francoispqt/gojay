@@ -27,7 +27,7 @@ func (t *testObject) IsNil() bool {
 	return t == nil
 }
 
-func (t *testObject) MarshalObject(enc *Encoder) {
+func (t *testObject) MarshalJSONObject(enc *Encoder) {
 	enc.AddStringKey("testStr", t.testStr)
 	enc.AddIntKey("testInt", t.testInt)
 	enc.AddIntKey("testInt64", int(t.testInt64))
@@ -51,7 +51,7 @@ func (t *testObjectWithUnknownType) IsNil() bool {
 	return t == nil
 }
 
-func (t *testObjectWithUnknownType) MarshalObject(enc *Encoder) {
+func (t *testObjectWithUnknownType) MarshalJSONObject(enc *Encoder) {
 	enc.AddInterfaceKey("unknownType", t.unknownType)
 }
 
@@ -71,7 +71,7 @@ func (t *TestEncoding) IsNil() bool {
 	return t == nil
 }
 
-func (t *TestEncoding) MarshalObject(enc *Encoder) {
+func (t *TestEncoding) MarshalJSONObject(enc *Encoder) {
 	enc.AddStringKey("test", t.test)
 	enc.AddStringKey("test2", t.test2)
 	enc.AddIntKey("testInt", t.testInt)
@@ -95,7 +95,7 @@ func (t *SubObject) IsNil() bool {
 	return t == nil
 }
 
-func (t *SubObject) MarshalObject(enc *Encoder) {
+func (t *SubObject) MarshalJSONObject(enc *Encoder) {
 	enc.AddIntKey("test1", t.test1)
 	enc.AddStringKey("test2", t.test2)
 	enc.AddFloatKey("test3", t.test3)
@@ -111,7 +111,7 @@ func (t *testEncodingObjInterfaces) IsNil() bool {
 	return t == nil
 }
 
-func (t *testEncodingObjInterfaces) MarshalObject(enc *Encoder) {
+func (t *testEncodingObjInterfaces) MarshalJSONObject(enc *Encoder) {
 	enc.AddInterfaceKey("interfaceVal", t.interfaceVal)
 }
 
@@ -168,7 +168,7 @@ func TestEncoderObjectMarshalAPI(t *testing.T) {
 				},
 			},
 		}
-		r, err := MarshalObject(v)
+		r, err := MarshalJSONObject(v)
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -327,7 +327,7 @@ func (t *TestObectOmitEmpty) IsNil() bool {
 	return t == nil
 }
 
-func (t *TestObectOmitEmpty) MarshalObject(enc *Encoder) {
+func (t *TestObectOmitEmpty) MarshalJSONObject(enc *Encoder) {
 	enc.AddIntKeyOmitEmpty("testInt", t.testInt)
 	enc.AddIntKeyOmitEmpty("testIntNotEmpty", 1)
 	enc.AddFloatKeyOmitEmpty("testFloat", t.testFloat)
@@ -350,7 +350,7 @@ func (t *TestObectOmitEmptyInterface) IsNil() bool {
 	return t == nil
 }
 
-func (t *TestObectOmitEmptyInterface) MarshalObject(enc *Encoder) {
+func (t *TestObectOmitEmptyInterface) MarshalJSONObject(enc *Encoder) {
 	enc.AddInterfaceKeyOmitEmpty("testInt", 0)
 	enc.AddInterfaceKeyOmitEmpty("testInt64", int64(0))
 	enc.AddInterfaceKeyOmitEmpty("testInt32", int32(0))
@@ -381,7 +381,7 @@ func TestEncoderObjectOmitEmpty(t *testing.T) {
 			testInt:   0,
 			testObect: &TestObectOmitEmpty{testInt: 1},
 		}
-		r, err := MarshalObject(v)
+		r, err := MarshalJSONObject(v)
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -393,7 +393,7 @@ func TestEncoderObjectOmitEmpty(t *testing.T) {
 
 	t.Run("encoder-omit-empty-interface", func(t *testing.T) {
 		v := &TestObectOmitEmptyInterface{}
-		r, err := MarshalObject(v)
+		r, err := MarshalJSONObject(v)
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,

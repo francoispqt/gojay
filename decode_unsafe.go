@@ -13,7 +13,7 @@ var Unsafe = decUnsafe{}
 
 type decUnsafe struct{}
 
-func (u decUnsafe) UnmarshalArray(data []byte, v UnmarshalerArray) error {
+func (u decUnsafe) UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = data
@@ -28,7 +28,7 @@ func (u decUnsafe) UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	return nil
 }
 
-func (u decUnsafe) UnmarshalObject(data []byte, v UnmarshalerObject) error {
+func (u decUnsafe) UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = data
@@ -87,12 +87,12 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeBool(vt)
-	case UnmarshalerObject:
+	case UnmarshalerJSONObject:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		_, err = dec.decodeObject(vt)
-	case UnmarshalerArray:
+	case UnmarshalerJSONArray:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data

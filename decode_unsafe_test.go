@@ -233,7 +233,7 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 func TestUnmarshalUnsafeObjects(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerObject
+		v            UnmarshalerJSONObject
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -280,7 +280,7 @@ func TestUnmarshalUnsafeObjects(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := Unsafe.UnmarshalObject(testCase.d, testCase.v)
+			err := Unsafe.UnmarshalJSONObject(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
@@ -289,7 +289,7 @@ func TestUnmarshalUnsafeObjects(t *testing.T) {
 func TestUnmarshalUnsafeArrays(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerArray
+		v            UnmarshalerJSONArray
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -331,7 +331,7 @@ func TestUnmarshalUnsafeArrays(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := Unsafe.UnmarshalArray(testCase.d, testCase.v)
+			err := Unsafe.UnmarshalJSONArray(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}

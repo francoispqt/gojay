@@ -11,7 +11,7 @@ import (
 
 func TestGoJayDecodeObjLarge(t *testing.T) {
 	result := benchmarks.LargePayload{}
-	err := gojay.UnmarshalObject(benchmarks.LargeFixture, &result)
+	err := gojay.UnmarshalJSONObject(benchmarks.LargeFixture, &result)
 	assert.Nil(t, err, "err should be nil")
 	assert.Len(t, result.Users, 32, "Len of users should be 32")
 	for _, u := range result.Users {

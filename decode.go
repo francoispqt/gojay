@@ -6,13 +6,13 @@ import (
 	"reflect"
 )
 
-// UnmarshalArray parses the JSON-encoded data and stores the result in the value pointed to by v.
+// UnmarshalJSONArray parses the JSON-encoded data and stores the result in the value pointed to by v.
 //
-// v must implement UnmarshalerArray.
+// v must implement UnmarshalerJSONArray.
 //
 // If a JSON value is not appropriate for a given target type, or if a JSON number
-// overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
-func UnmarshalArray(data []byte, v UnmarshalerArray) error {
+// overflows the target type, UnmarshalJSONArray skips that field and completes the unmarshaling as best it can.
+func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
@@ -28,13 +28,13 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	return nil
 }
 
-// UnmarshalObject parses the JSON-encoded data and stores the result in the value pointed to by v.
+// UnmarshalJSONObject parses the JSON-encoded data and stores the result in the value pointed to by v.
 //
-// v must implement UnmarshalerObject.
+// v must implement UnmarshalerJSONObject.
 //
 // If a JSON value is not appropriate for a given target type, or if a JSON number
-// overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
-func UnmarshalObject(data []byte, v UnmarshalerObject) error {
+// overflows the target type, UnmarshalJSONObject skips that field and completes the unmarshaling as best it can.
+func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
@@ -51,7 +51,7 @@ func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 }
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.
-// If v is nil, not a pointer, or not an implementation of UnmarshalerObject or UnmarshalerArray
+// If v is nil, not a pointer, or not an implementation of UnmarshalerJSONObject or UnmarshalerJSONArray
 // Unmarshal returns an InvalidUnmarshalError.
 //
 // Unmarshal uses the inverse of the encodings that Marshal uses, allocating maps, slices, and pointers as necessary, with the following additional rules:
@@ -60,9 +60,9 @@ func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 // Otherwise, Unmarshal unmarshals the JSON into the value pointed at by the pointer.
 // If the pointer is nil, Unmarshal allocates a new value for it to point to.
 //
-// To Unmarshal JSON into a struct, Unmarshal requires the struct to implement UnmarshalerObject.
+// To Unmarshal JSON into a struct, Unmarshal requires the struct to implement UnmarshalerJSONObject.
 //
-// To unmarshal a JSON array into a slice, Unmarshal requires the slice to implement UnmarshalerArray.
+// To unmarshal a JSON array into a slice, Unmarshal requires the slice to implement UnmarshalerJSONArray.
 //
 // Unmarshal JSON does not allow yet to unmarshall an interface value
 // If a JSON value is not appropriate for a given target type, or if a JSON number
@@ -112,13 +112,13 @@ func Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeBool(vt)
-	case UnmarshalerObject:
+	case UnmarshalerJSONObject:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
 		_, err = dec.decodeObject(vt)
-	case UnmarshalerArray:
+	case UnmarshalerJSONArray:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
@@ -134,17 +134,17 @@ func Unmarshal(data []byte, v interface{}) error {
 	return dec.err
 }
 
-// UnmarshalerObject is the interface to implement for a struct to be
+// UnmarshalerJSONObject is the interface to implement for a struct to be
 // decoded
-type UnmarshalerObject interface {
-	UnmarshalObject(*Decoder, string) error
+type UnmarshalerJSONObject interface {
+	UnmarshalJSONObject(*Decoder, string) error
 	NKeys() int
 }
 
-// UnmarshalerArray is the interface to implement for a slice or an array to be
+// UnmarshalerJSONArray is the interface to implement for a slice or an array to be
 // decoded
-type UnmarshalerArray interface {
-	UnmarshalArray(*Decoder) error
+type UnmarshalerJSONArray interface {
+	UnmarshalJSONArray(*Decoder) error
 }
 
 // A Decoder reads and decodes JSON values from an input stream.
@@ -184,10 +184,10 @@ func (dec *Decoder) Decode(v interface{}) error {
 		return dec.decodeFloat64(vt)
 	case *bool:
 		return dec.decodeBool(vt)
-	case UnmarshalerObject:
+	case UnmarshalerJSONObject:
 		_, err := dec.decodeObject(vt)
 		return err
-	case UnmarshalerArray:
+	case UnmarshalerJSONArray:
 		_, err := dec.decodeArray(vt)
 		return err
 	case *EmbeddedJSON:
@@ -244,8 +244,8 @@ func (dec *Decoder) AddString(v *string) error {
 	return nil
 }
 
-// AddObject decodes the next key to a UnmarshalerObject.
-func (dec *Decoder) AddObject(value UnmarshalerObject) error {
+// AddObject decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObject(value UnmarshalerJSONObject) error {
 	initialKeysDone := dec.keysDone
 	initialChild := dec.child
 	dec.keysDone = 0
@@ -262,8 +262,8 @@ func (dec *Decoder) AddObject(value UnmarshalerObject) error {
 	return nil
 }
 
-// AddArray decodes the next key to a UnmarshalerArray.
-func (dec *Decoder) AddArray(value UnmarshalerArray) error {
+// AddArray decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) AddArray(value UnmarshalerJSONArray) error {
 	newCursor, err := dec.decodeArray(value)
 	if err != nil {
 		return err

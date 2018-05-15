@@ -15,7 +15,7 @@ type Message struct {
 	UserName string
 }
 
-func (m *Message) UnmarshalObject(dec *gojay.Decoder, k string) error {
+func (m *Message) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	switch k {
 	case "message":
 		return dec.AddString(&m.Message)
@@ -28,7 +28,7 @@ func (m *Message) NKeys() int {
 	return 2
 }
 
-func (m *Message) MarshalObject(enc *gojay.Encoder) {
+func (m *Message) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddStringKey("message", m.Message)
 	enc.AddStringKey("userName", m.UserName)
 }
@@ -37,7 +37,7 @@ func (u *Message) IsNil() bool {
 }
 
 // Here are defined our communication types
-type Sender chan gojay.MarshalerObject
+type Sender chan gojay.MarshalerJSONObject
 
 func (s Sender) MarshalStream(enc *gojay.StreamEncoder) {
 	select {
@@ -74,12 +74,12 @@ func (sc *SenderReceiver) SetReceiver() {
 }
 
 func (sc *SenderReceiver) SetSender(nCons int) {
-	sc.Send = Sender(make(chan gojay.MarshalerObject))
+	sc.Send = Sender(make(chan gojay.MarshalerJSONObject))
 	sc.Enc = gojay.Stream.BorrowEncoder(sc.Conn).NConsumer(nCons).LineDelimited()
 	go sc.Enc.EncodeStream(sc.Send)
 }
 
-func (sc *SenderReceiver) SendMessage(m gojay.MarshalerObject) error {
+func (sc *SenderReceiver) SendMessage(m gojay.MarshalerJSONObject) error {
 	select {
 	case <-sc.Enc.Done():
 		return errors.New("sender closed")

@@ -10,7 +10,7 @@ type DSUser struct {
 	Username string
 }
 
-func (m *DSUser) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *DSUser) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "username":
 		return dec.AddString(&m.Username)
@@ -23,7 +23,7 @@ func (m *DSUser) NKeys() int {
 func (m *DSUser) IsNil() bool {
 	return m == nil
 }
-func (m *DSUser) MarshalObject(enc *gojay.Encoder) {
+func (m *DSUser) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddStringKey("username", m.Username)
 }
 
@@ -32,7 +32,7 @@ type DSTopic struct {
 	Slug string
 }
 
-func (m *DSTopic) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *DSTopic) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "id":
 		return dec.AddInt(&m.Id)
@@ -47,20 +47,20 @@ func (m *DSTopic) NKeys() int {
 func (m *DSTopic) IsNil() bool {
 	return m == nil
 }
-func (m *DSTopic) MarshalObject(enc *gojay.Encoder) {
+func (m *DSTopic) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddIntKey("id", m.Id)
 	enc.AddStringKey("slug", m.Slug)
 }
 
 type DSTopics []*DSTopic
 
-func (t *DSTopics) UnmarshalArray(dec *gojay.Decoder) error {
+func (t *DSTopics) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	dsTopic := &DSTopic{}
 	*t = append(*t, dsTopic)
 	return dec.AddObject(dsTopic)
 }
 
-func (m *DSTopics) MarshalArray(enc *gojay.Encoder) {
+func (m *DSTopics) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *m {
 		enc.AddObject(e)
 	}
@@ -74,7 +74,7 @@ type DSTopicsList struct {
 	MoreTopicsUrl string
 }
 
-func (m *DSTopicsList) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *DSTopicsList) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "topics":
 		m.Topics = DSTopics{}
@@ -92,20 +92,20 @@ func (m *DSTopicsList) IsNil() bool {
 	return m == nil
 }
 
-func (m *DSTopicsList) MarshalObject(enc *gojay.Encoder) {
+func (m *DSTopicsList) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddArrayKey("users", &m.Topics)
 	enc.AddStringKey("more_topics_url", m.MoreTopicsUrl)
 }
 
 type DSUsers []*DSUser
 
-func (t *DSUsers) UnmarshalArray(dec *gojay.Decoder) error {
+func (t *DSUsers) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	dsUser := DSUser{}
 	*t = append(*t, &dsUser)
 	return dec.AddObject(&dsUser)
 }
 
-func (m *DSUsers) MarshalArray(enc *gojay.Encoder) {
+func (m *DSUsers) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *m {
 		enc.AddObject(e)
 	}
@@ -119,7 +119,7 @@ type LargePayload struct {
 	Topics *DSTopicsList
 }
 
-func (m *LargePayload) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *LargePayload) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "users":
 		return dec.AddArray(&m.Users)
@@ -135,7 +135,7 @@ func (m *LargePayload) NKeys() int {
 }
 
 //easyjson:json
-func (m *LargePayload) MarshalObject(enc *gojay.Encoder) {
+func (m *LargePayload) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddArrayKey("users", &m.Users)
 	enc.AddObjectKey("topics", m.Topics)
 }

@@ -18,9 +18,9 @@ func (enc *Encoder) Encode(v interface{}) error {
 		return enc.EncodeString(vt)
 	case bool:
 		return enc.EncodeBool(vt)
-	case MarshalerArray:
+	case MarshalerJSONArray:
 		return enc.EncodeArray(vt)
-	case MarshalerObject:
+	case MarshalerJSONObject:
 		return enc.EncodeObject(vt)
 	case int:
 		return enc.EncodeInt(vt)
@@ -56,9 +56,9 @@ func (enc *Encoder) AddInterface(value interface{}) {
 		enc.AddString(vt)
 	case bool:
 		enc.AddBool(vt)
-	case MarshalerArray:
+	case MarshalerJSONArray:
 		enc.AddArray(vt)
-	case MarshalerObject:
+	case MarshalerJSONObject:
 		enc.AddObject(vt)
 	case int:
 		enc.AddInt(vt)
@@ -97,9 +97,9 @@ func (enc *Encoder) AddInterfaceKey(key string, value interface{}) {
 		enc.AddStringKey(key, vt)
 	case bool:
 		enc.AddBoolKey(key, vt)
-	case MarshalerArray:
+	case MarshalerJSONArray:
 		enc.AddArrayKey(key, vt)
-	case MarshalerObject:
+	case MarshalerJSONObject:
 		enc.AddObjectKey(key, vt)
 	case int:
 		enc.AddIntKey(key, vt)
@@ -140,9 +140,9 @@ func (enc *Encoder) AddInterfaceKeyOmitEmpty(key string, v interface{}) {
 		enc.AddStringKeyOmitEmpty(key, vt)
 	case bool:
 		enc.AddBoolKeyOmitEmpty(key, vt)
-	case MarshalerArray:
+	case MarshalerJSONArray:
 		enc.AddArrayKeyOmitEmpty(key, vt)
-	case MarshalerObject:
+	case MarshalerJSONObject:
 		enc.AddObjectKeyOmitEmpty(key, vt)
 	case int:
 		enc.AddIntKeyOmitEmpty(key, vt)

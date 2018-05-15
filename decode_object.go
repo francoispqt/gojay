@@ -7,17 +7,17 @@ import (
 
 // DecodeObject reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
 //
-// v must implement UnmarshalerObject.
+// v must implement UnmarshalerJSONObject.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
-func (dec *Decoder) DecodeObject(j UnmarshalerObject) error {
+func (dec *Decoder) DecodeObject(j UnmarshalerJSONObject) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 	_, err := dec.decodeObject(j)
 	return err
 }
-func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
+func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 	keys := j.NKeys()
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
@@ -34,7 +34,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
 					} else if done {
 						return dec.cursor, nil
 					}
-					err = j.UnmarshalObject(dec, k)
+					err = j.UnmarshalJSONObject(dec, k)
 					if err != nil {
 						return 0, err
 					} else if dec.called&1 == 0 {
@@ -55,7 +55,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerObject) (int, error) {
 					} else if done {
 						return dec.cursor, nil
 					}
-					err = j.UnmarshalObject(dec, k)
+					err = j.UnmarshalJSONObject(dec, k)
 					if err != nil {
 						return 0, err
 					} else if dec.called&1 == 0 {
@@ -247,8 +247,8 @@ func (dec *Decoder) skipData() error {
 //	}))
 type DecodeObjectFunc func(*Decoder, string) error
 
-// UnmarshalObject implements UnarshalerObject.
-func (f DecodeObjectFunc) UnmarshalObject(dec *Decoder, k string) error {
+// UnmarshalJSONObject implements UnarshalerObject.
+func (f DecodeObjectFunc) UnmarshalJSONObject(dec *Decoder, k string) error {
 	return f(dec, k)
 }
 

@@ -46,7 +46,7 @@ func BenchmarkGoJayDecodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.LargePayload{}
-		gojay.UnmarshalObject(benchmarks.LargeFixture, &result)
+		gojay.UnmarshalJSONObject(benchmarks.LargeFixture, &result)
 	}
 }
 
@@ -54,6 +54,6 @@ func BenchmarkGoJayUnsafeDecodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.LargePayload{}
-		gojay.Unsafe.UnmarshalObject(benchmarks.LargeFixture, &result)
+		gojay.Unsafe.UnmarshalJSONObject(benchmarks.LargeFixture, &result)
 	}
 }

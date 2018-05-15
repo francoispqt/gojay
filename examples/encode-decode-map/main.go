@@ -7,11 +7,11 @@ import (
 	"github.com/francoispqt/gojay"
 )
 
-// define our custom map type implementing MarshalerObject and UnmarshalerObject
+// define our custom map type implementing MarshalerJSONObject and UnmarshalerJSONObject
 type myMap map[string]string
 
 // Implementing Unmarshaler
-func (m myMap) UnmarshalObject(dec *gojay.Decoder, k string) error {
+func (m myMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	str := ""
 	err := dec.AddString(&str)
 	if err != nil {
@@ -28,7 +28,7 @@ func (m myMap) NKeys() int {
 }
 
 // Implementing Marshaler
-func (m myMap) MarshalObject(enc *gojay.Encoder) {
+func (m myMap) MarshalJSONObject(enc *gojay.Encoder) {
 	for k, v := range m {
 		enc.AddStringKey(k, v)
 	}

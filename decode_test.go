@@ -13,7 +13,7 @@ type testDecodeObj struct {
 	test string
 }
 
-func (t *testDecodeObj) UnmarshalObject(dec *Decoder, key string) error {
+func (t *testDecodeObj) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddString(&t.test)
@@ -26,7 +26,7 @@ func (t *testDecodeObj) NKeys() int {
 
 type testDecodeSlice []*testDecodeObj
 
-func (t *testDecodeSlice) UnmarshalArray(dec *Decoder) error {
+func (t *testDecodeSlice) UnmarshalJSONArray(dec *Decoder) error {
 	obj := &testDecodeObj{}
 	if err := dec.AddObject(obj); err != nil {
 		return err
@@ -497,10 +497,10 @@ func TestDecodeAllTypes(t *testing.T) {
 	}
 }
 
-func TestUnmarshalObjects(t *testing.T) {
+func TestUnmarshalJSONObjects(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerObject
+		v            UnmarshalerJSONObject
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -547,7 +547,7 @@ func TestUnmarshalObjects(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := UnmarshalObject(testCase.d, testCase.v)
+			err := UnmarshalJSONObject(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}

@@ -42,14 +42,14 @@ func BenchmarkEasyJsonEncodeObjMedium(b *testing.B) {
 func BenchmarkGoJayEncodeMediumStruct(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		if _, err := gojay.MarshalObject(benchmarks.NewMediumPayload()); err != nil {
+		if _, err := gojay.MarshalJSONObject(benchmarks.NewMediumPayload()); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
 func TestGoJayEncodeMediumStruct(t *testing.T) {
-	if output, err := gojay.MarshalObject(benchmarks.NewMediumPayload()); err != nil {
+	if output, err := gojay.MarshalJSONObject(benchmarks.NewMediumPayload()); err != nil {
 		t.Fatal(err)
 	} else {
 		log.Print(string(output))

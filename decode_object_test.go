@@ -27,7 +27,7 @@ type TestSubObj struct {
 	testSubSubObj2 *TestSubObj
 }
 
-func (t *TestSubObj) UnmarshalObject(dec *Decoder, key string) error {
+func (t *TestSubObj) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddInt(&t.test3)
@@ -49,7 +49,7 @@ func (t *TestSubObj) NKeys() int {
 	return 0
 }
 
-func (t *TestObj) UnmarshalObject(dec *Decoder, key string) error {
+func (t *TestObj) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddInt(&t.test)
@@ -196,7 +196,7 @@ type jsonObjectComplex struct {
 	testObjInvalidType *jsonObjectComplex
 }
 
-func (j *jsonObjectComplex) UnmarshalObject(dec *Decoder, key string) error {
+func (j *jsonObjectComplex) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddString(&j.Test)
@@ -222,7 +222,7 @@ func (j *jsonObjectComplex) NKeys() int {
 
 func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
-	err := UnmarshalObject(jsonComplex, &result)
+	err := UnmarshalJSONObject(jsonComplex, &result)
 	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 639`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
@@ -239,7 +239,7 @@ type jsonDecodePartial struct {
 	Test2 string
 }
 
-func (j *jsonDecodePartial) UnmarshalObject(dec *Decoder, key string) error {
+func (j *jsonDecodePartial) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "test":
 		return dec.AddString(&j.Test)
@@ -285,7 +285,7 @@ func TestDecoderObjectInvalidJSON(t *testing.T) {
 
 type myMap map[string]string
 
-func (m myMap) UnmarshalObject(dec *Decoder, k string) error {
+func (m myMap) UnmarshalJSONObject(dec *Decoder, k string) error {
 	str := ""
 	err := dec.AddString(&str)
 	if err != nil {

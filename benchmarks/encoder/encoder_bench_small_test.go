@@ -42,7 +42,7 @@ func BenchmarkJsonIterEncodeSmallStruct(b *testing.B) {
 func BenchmarkGoJayEncodeSmallStruct(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		if _, err := gojay.MarshalObject(benchmarks.NewSmallPayload()); err != nil {
+		if _, err := gojay.MarshalJSONObject(benchmarks.NewSmallPayload()); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -51,7 +51,7 @@ func BenchmarkGoJayEncodeSmallStruct(b *testing.B) {
 func BenchmarkGoJayEncodeSmallFunc(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		if _, err := gojay.MarshalObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
+		if _, err := gojay.MarshalJSONObject(gojay.EncodeObjectFunc(func(enc *gojay.Encoder) {
 			enc.AddIntKey("st", 1)
 			enc.AddIntKey("sid", 1)
 			enc.AddStringKey("tt", "test")
@@ -68,7 +68,7 @@ func BenchmarkGoJayEncodeSmallFunc(b *testing.B) {
 }
 
 func TestGoJayEncodeSmallStruct(t *testing.T) {
-	if output, err := gojay.MarshalObject(benchmarks.NewSmallPayload()); err != nil {
+	if output, err := gojay.MarshalJSONObject(benchmarks.NewSmallPayload()); err != nil {
 		t.Fatal(err)
 	} else {
 		log.Print(output)

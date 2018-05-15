@@ -101,7 +101,7 @@ type CBAvatar struct {
 	Url string
 }
 
-func (m *CBAvatar) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *CBAvatar) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "avatars":
 		return dec.AddString(&m.Url)
@@ -112,7 +112,7 @@ func (m *CBAvatar) NKeys() int {
 	return 1
 }
 
-func (m *CBAvatar) MarshalObject(enc *gojay.Encoder) {
+func (m *CBAvatar) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddStringKey("url", m.Url)
 }
 
@@ -122,13 +122,13 @@ func (m *CBAvatar) IsNil() bool {
 
 type Avatars []*CBAvatar
 
-func (t *Avatars) UnmarshalArray(dec *gojay.Decoder) error {
+func (t *Avatars) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	avatar := CBAvatar{}
 	*t = append(*t, &avatar)
 	return dec.AddObject(&avatar)
 }
 
-func (m *Avatars) MarshalArray(enc *gojay.Encoder) {
+func (m *Avatars) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *m {
 		enc.AddObject(e)
 	}
@@ -141,7 +141,7 @@ type CBGravatar struct {
 	Avatars Avatars
 }
 
-func (m *CBGravatar) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *CBGravatar) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "avatars":
 		return dec.AddArray(&m.Avatars)
@@ -152,7 +152,7 @@ func (m *CBGravatar) NKeys() int {
 	return 1
 }
 
-func (m *CBGravatar) MarshalObject(enc *gojay.Encoder) {
+func (m *CBGravatar) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddArrayKey("avatars", &m.Avatars)
 }
 
@@ -164,7 +164,7 @@ type CBGithub struct {
 	Followers int
 }
 
-func (m *CBGithub) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *CBGithub) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "followers":
 		return dec.AddInt(&m.Followers)
@@ -176,7 +176,7 @@ func (m *CBGithub) NKeys() int {
 	return 1
 }
 
-func (m *CBGithub) MarshalObject(enc *gojay.Encoder) {
+func (m *CBGithub) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddIntKey("followers", m.Followers)
 }
 
@@ -188,7 +188,7 @@ type CBName struct {
 	FullName string `json:"fullName"`
 }
 
-func (m *CBName) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *CBName) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "fullName":
 		return dec.AddString(&m.FullName)
@@ -200,7 +200,7 @@ func (m *CBName) NKeys() int {
 	return 1
 }
 
-func (m *CBName) MarshalObject(enc *gojay.Encoder) {
+func (m *CBName) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddStringKey("fullName", m.FullName)
 }
 
@@ -214,7 +214,7 @@ type CBPerson struct {
 	Gravatar *CBGravatar
 }
 
-func (m *CBPerson) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *CBPerson) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "name":
 		m.Name = &CBName{}
@@ -233,7 +233,7 @@ func (m *CBPerson) NKeys() int {
 	return 3
 }
 
-func (m *CBPerson) MarshalObject(enc *gojay.Encoder) {
+func (m *CBPerson) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddObjectKey("name", m.Name)
 	enc.AddObjectKey("github", m.Github)
 	enc.AddObjectKey("gravatar", m.Gravatar)
@@ -249,7 +249,7 @@ type MediumPayload struct {
 	Company string    `json:"company"`
 }
 
-func (m *MediumPayload) UnmarshalObject(dec *gojay.Decoder, key string) error {
+func (m *MediumPayload) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "person":
 		m.Person = &CBPerson{}
@@ -264,7 +264,7 @@ func (m *MediumPayload) NKeys() int {
 	return 2
 }
 
-func (m *MediumPayload) MarshalObject(enc *gojay.Encoder) {
+func (m *MediumPayload) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddObjectKey("person", m.Person)
 	// enc.AddStringKey("company", m.Company)
 }

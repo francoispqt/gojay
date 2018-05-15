@@ -9,7 +9,7 @@ import (
 
 type testSliceStrings []string
 
-func (t *testSliceStrings) UnmarshalArray(dec *Decoder) error {
+func (t *testSliceStrings) UnmarshalJSONArray(dec *Decoder) error {
 	str := ""
 	if err := dec.AddString(&str); err != nil {
 		return err
@@ -20,7 +20,7 @@ func (t *testSliceStrings) UnmarshalArray(dec *Decoder) error {
 
 type testSliceInts []*int
 
-func (t *testSliceInts) UnmarshalArray(dec *Decoder) error {
+func (t *testSliceInts) UnmarshalJSONArray(dec *Decoder) error {
 	i := 0
 	ptr := &i
 	*t = append(*t, ptr)
@@ -29,7 +29,7 @@ func (t *testSliceInts) UnmarshalArray(dec *Decoder) error {
 
 type testSliceObj []*TestObj
 
-func (t *testSliceObj) UnmarshalArray(dec *Decoder) error {
+func (t *testSliceObj) UnmarshalJSONArray(dec *Decoder) error {
 	obj := &TestObj{}
 	*t = append(*t, obj)
 	return dec.AddObject(obj)
@@ -37,7 +37,7 @@ func (t *testSliceObj) UnmarshalArray(dec *Decoder) error {
 
 type testChannelArray chan *TestObj
 
-func (c *testChannelArray) UnmarshalArray(dec *Decoder) error {
+func (c *testChannelArray) UnmarshalJSONArray(dec *Decoder) error {
 	obj := &TestObj{}
 	if err := dec.AddObject(obj); err != nil {
 		return err
@@ -70,7 +70,7 @@ func TestDecoderSliceArrayOfIntsBasic(t *testing.T) {
 		2
 	]`)
 	testArr := testSliceInts{}
-	err := UnmarshalArray(json, &testArr)
+	err := UnmarshalJSONArray(json, &testArr)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Len(t, testArr, 2, "testArr should be of len 2")
 	assert.Equal(t, 1, *testArr[0], "testArr[0] should be 1")
@@ -83,7 +83,7 @@ func TestDecoderSliceArrayOfIntsBigInts(t *testing.T) {
 		545344023293232032
 	]`)
 	testArr := testSliceInts{}
-	err := UnmarshalArray(json, &testArr)
+	err := UnmarshalJSONArray(json, &testArr)
 	assert.Nil(t, err, "Err must be nil")
 	assert.Len(t, testArr, 2, "testArr should be of len 2")
 	assert.Equal(t, 789034384533530523, *testArr[0], "testArr[0] should be 789034384533530523")
@@ -125,7 +125,7 @@ func TestDecoderSliceOfObjectsBasic(t *testing.T) {
 
 func TestDecodeSliceInvalidType(t *testing.T) {
 	result := testSliceObj{}
-	err := UnmarshalArray([]byte(`{}`), &result)
+	err := UnmarshalJSONArray([]byte(`{}`), &result)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.IsType(t, InvalidTypeError(""), err, "err should be of type InvalidTypeError")
 	assert.Equal(t, "Cannot unmarshall to array, wrong char '{' found at pos 0", err.Error(), "err should not be nil")
@@ -150,7 +150,7 @@ func TestDecoderChannelOfObjectsBasic(t *testing.T) {
 		}
 	]`)
 	testChan := testChannelArray(make(chan *TestObj, 3))
-	err := UnmarshalArray(json, &testChan)
+	err := UnmarshalJSONArray(json, &testChan)
 	assert.Nil(t, err, "Err must be nil")
 	ct := 0
 	l := len(testChan)
@@ -166,7 +166,7 @@ func TestDecoderChannelOfObjectsBasic(t *testing.T) {
 func TestDecoderSliceInvalidJSON(t *testing.T) {
 	json := []byte(`hello`)
 	testArr := testSliceInts{}
-	err := UnmarshalArray(json, &testArr)
+	err := UnmarshalJSONArray(json, &testArr)
 	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
 }
@@ -190,10 +190,10 @@ func TestDecoderSliceDecoderAPIError(t *testing.T) {
 	assert.IsType(t, InvalidJSONError(""), err, "err message must be 'Invalid JSON'")
 }
 
-func TestUnmarshalArrays(t *testing.T) {
+func TestUnmarshalJSONArrays(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerArray
+		v            UnmarshalerJSONArray
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -235,7 +235,7 @@ func TestUnmarshalArrays(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := UnmarshalArray(testCase.d, testCase.v)
+			err := UnmarshalJSONArray(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
