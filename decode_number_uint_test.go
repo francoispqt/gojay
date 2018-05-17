@@ -331,6 +331,13 @@ func TestDecoderUint16(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-overflow",
+			json:           "335346564",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
 			name:           "basic-negative2",
 			json:           "-24467",
 			expectedResult: 24467,
@@ -343,6 +350,18 @@ func TestDecoderUint16(t *testing.T) {
 		{
 			name:           "basic-big-overflow",
 			json:           " 4294967298",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 65537",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 66537",
 			expectedResult: 0,
 			err:            true,
 		},
@@ -486,6 +505,20 @@ func TestDecoderUint8(t *testing.T) {
 			name:           "basic-big",
 			json:           "200",
 			expectedResult: 200,
+		},
+		{
+			name:           "basic-overflow",
+			json:           "256",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "basic-overflow",
+			json:           "274",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
 		},
 		{
 			name:           "basic-big-overflow",

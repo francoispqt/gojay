@@ -32,7 +32,7 @@ func TestDecodeObjectComplex(t *testing.T) {
 		},
 		{
 			name: "complex",
-			json: `{"testSubObject":{"testStr":"some string","testInt":124465,"testUint16":120, "testUint8":15,"testInt16":-135,"testInt8":-23},"testSubSliceInts":[1,2]}`,
+			json: `{"testSubObject":{"testStr":"some string","testInt":124465,"testUint16":120, "testUint8":15,"testInt16":-135,"testInt8":-23},"testSubSliceInts":[1,2],"testStr":"some \\n string"}`,
 			expectedResult: testObjectComplex{
 				testSubObject: &testObject{
 					testStr:    "some string",
@@ -43,6 +43,7 @@ func TestDecodeObjectComplex(t *testing.T) {
 					testInt8:   -23,
 				},
 				testSubSliceInts: &testSliceInts{1, 2},
+				testStr:          "some \n string",
 			},
 			err: false,
 		},
