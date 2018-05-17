@@ -277,7 +277,7 @@ func TestDecoderStringInvalidType(t *testing.T) {
 	var v string
 	err := Unmarshal(json, &v)
 	assert.NotNil(t, err, "Err must not be nil as JSON is invalid")
-	assert.IsType(t, InvalidTypeError(""), err, "err message must be 'Invalid JSON'")
+	assert.IsType(t, InvalidUnmarshalError(""), err, "err message must be 'Invalid JSON'")
 }
 
 func TestDecoderStringDecoderAPI(t *testing.T) {

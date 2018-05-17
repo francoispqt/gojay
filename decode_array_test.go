@@ -1,11 +1,86 @@
 package gojay
 
 import (
+	"log"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+type testSliceInts []int
+
+func (t *testSliceInts) UnmarshalJSONArray(dec *Decoder) error {
+	i := 0
+	if err := dec.AddInt(&i); err != nil {
+		return err
+	}
+	*t = append(*t, i)
+	return nil
+}
+
+func TestSliceInts(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult testSliceInts
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-test",
+			json:           "[1,2,3,43567788543,45777655,432,0]",
+			expectedResult: testSliceInts{1, 2, 3, 43567788543, 45777655, 432, 0},
+		},
+		{
+			name:           "basic-test",
+			json:           "[1,2,3,43567788543,null,432,0]",
+			expectedResult: testSliceInts{1, 2, 3, 43567788543, 0, 432, 0},
+		},
+		{
+			name:           "empty",
+			json:           "[]",
+			expectedResult: testSliceInts{},
+		},
+		{
+			name:           "floats",
+			json:           "[1,2,3,43567788543,457.7765,432,0,0.45]",
+			expectedResult: testSliceInts{1, 2, 3, 43567788543, 457, 432, 0, 0},
+		},
+		{
+			name:           "invalid-type",
+			json:           `[1,2,3,43567788543,457.7765,432,0,"test"]`,
+			expectedResult: testSliceInts{1, 2, 3, 43567788543, 457, 432, 0, 0},
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `[1,2,3",43567788543,457.7765,432,0,"test"]`,
+			expectedResult: testSliceInts{1, 2, 3, 43567788543, 457, 432, 0, 0},
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
+
+	for _, testCase := range testCases {
+		s := make(testSliceInts, 0)
+		dec := BorrowDecoder(strings.NewReader(testCase.json))
+		defer dec.Release()
+		err := dec.Decode(&s)
+		if testCase.err {
+			assert.NotNil(t, err, "err should not be nil")
+			if testCase.errType != nil {
+				assert.IsType(t, testCase.errType, err, "err should be of the given type")
+			}
+			continue
+		}
+		log.Print(s)
+		for k, v := range testCase.expectedResult {
+			assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
+		}
+	}
+}
 
 type testSliceStrings []string
 
@@ -18,21 +93,280 @@ func (t *testSliceStrings) UnmarshalJSONArray(dec *Decoder) error {
 	return nil
 }
 
-type testSliceInts []*int
+func TestSliceStrings(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult testSliceStrings
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-test",
+			json:           `["hello world", "hey" , "foo","bar"]`,
+			expectedResult: testSliceStrings{"hello world", "hey", "foo", "bar"},
+		},
+		{
+			name:           "basic-test",
+			json:           `["hello world", "hey" , "foo","bar \\n escape"]`,
+			expectedResult: testSliceStrings{"hello world", "hey", "foo", "bar \n escape"},
+		},
+		{
+			name:           "basic-test",
+			json:           `["hello world", "hey" , null,"bar \\n escape"]`,
+			expectedResult: testSliceStrings{"hello world", "hey", "", "bar \n escape"},
+		},
+		{
+			name:           "invalid-type",
+			json:           `["foo",1,2,3,"test"]`,
+			expectedResult: testSliceStrings{},
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `["hello world]`,
+			expectedResult: testSliceStrings{},
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
 
-func (t *testSliceInts) UnmarshalJSONArray(dec *Decoder) error {
-	i := 0
-	ptr := &i
-	*t = append(*t, ptr)
-	return dec.AddInt(ptr)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := make(testSliceStrings, 0)
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			err := dec.Decode(&s)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			assert.Nil(t, err, "err should be nil")
+			for k, v := range testCase.expectedResult {
+				assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
+			}
+		})
+	}
 }
 
-type testSliceObj []*TestObj
+type testSliceBools []bool
 
-func (t *testSliceObj) UnmarshalJSONArray(dec *Decoder) error {
-	obj := &TestObj{}
+func (t *testSliceBools) UnmarshalJSONArray(dec *Decoder) error {
+	b := false
+	if err := dec.AddBool(&b); err != nil {
+		return err
+	}
+	*t = append(*t, b)
+	return nil
+}
+
+func TestSliceBools(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult testSliceBools
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-test",
+			json:           `[true, false, false, true, true, false]`,
+			expectedResult: testSliceBools{true, false, false, true, true, false},
+		},
+		{
+			name:           "basic-test2",
+			json:           `[true, false, false, true, null,null,true,false]`,
+			expectedResult: testSliceBools{true, false, false, true, false, false, true, false},
+		},
+		{
+			name:           "invalid-type",
+			json:           `["foo",1,2,3,"test"]`,
+			expectedResult: testSliceBools{},
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `["hello world]`,
+			expectedResult: testSliceBools{},
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := make(testSliceBools, 0)
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			err := dec.Decode(&s)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			log.Print(s, testCase.name)
+			assert.Nil(t, err, "err should be nil")
+			for k, v := range testCase.expectedResult {
+				assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
+			}
+		})
+	}
+}
+
+type testSliceSlicesSlices []testSliceInts
+
+func (t *testSliceSlicesSlices) UnmarshalJSONArray(dec *Decoder) error {
+	sl := make(testSliceInts, 0)
+	if err := dec.AddArray(&sl); err != nil {
+		return err
+	}
+	*t = append(*t, sl)
+	return nil
+}
+
+func TestSliceSlices(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult testSliceSlicesSlices
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name:           "basic-test",
+			json:           `[[1,2],[1,2],[1,2]]`,
+			expectedResult: testSliceSlicesSlices{testSliceInts{1, 2}, testSliceInts{1, 2}, testSliceInts{1, 2}},
+		},
+		{
+			name:           "basic-test",
+			json:           `[[1,2],null,[1,2]]`,
+			expectedResult: testSliceSlicesSlices{testSliceInts{1, 2}, testSliceInts{}, testSliceInts{1, 2}},
+		},
+		{
+			name:           "invalid-type",
+			json:           `["foo",1,2,3,"test"]`,
+			expectedResult: testSliceSlicesSlices{},
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `["hello world]`,
+			expectedResult: testSliceSlicesSlices{},
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := make(testSliceSlicesSlices, 0)
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			err := dec.Decode(&s)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			log.Print(s, testCase.name)
+			assert.Nil(t, err, "err should be nil")
+			for k, v := range testCase.expectedResult {
+				assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
+			}
+		})
+	}
+}
+
+type testSliceObjects []*testObject
+
+func (t *testSliceObjects) UnmarshalJSONArray(dec *Decoder) error {
+	obj := &testObject{}
 	*t = append(*t, obj)
 	return dec.AddObject(obj)
+}
+
+func TestSliceObjects(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult testSliceObjects
+		err            bool
+		errType        interface{}
+	}{
+		{
+			name: "basic-test",
+			json: `[{"testStr":"foo bar","testInt":123},{"testStr":"foo bar","testInt":123}]`,
+			expectedResult: testSliceObjects{
+				&testObject{
+					testStr: "foo bar",
+					testInt: 123,
+				},
+				&testObject{
+					testStr: "foo bar",
+					testInt: 123,
+				},
+			},
+		},
+		{
+			name: "basic-test",
+			json: `[{"testStr":"foo bar","testInt":123},null,{"testStr":"foo bar","testInt":123}]`,
+			expectedResult: testSliceObjects{
+				&testObject{
+					testStr: "foo bar",
+					testInt: 123,
+				},
+				&testObject{},
+				&testObject{
+					testStr: "foo bar",
+					testInt: 123,
+				},
+			},
+		},
+		{
+			name:           "invalid-type",
+			json:           `["foo",1,2,3,"test"]`,
+			expectedResult: testSliceObjects{},
+			err:            true,
+			errType:        InvalidUnmarshalError(""),
+		},
+		{
+			name:           "invalid-json",
+			json:           `["hello world]`,
+			expectedResult: testSliceObjects{},
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := make(testSliceObjects, 0)
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			err := dec.Decode(&s)
+			if testCase.err {
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			assert.Nil(t, err, "err should be nil")
+			for k, v := range testCase.expectedResult {
+				assert.Equal(t, *v, *s[k], "value at given index should be the same as expected results")
+			}
+		})
+	}
 }
 
 type testChannelArray chan *TestObj
@@ -46,16 +380,6 @@ func (c *testChannelArray) UnmarshalJSONArray(dec *Decoder) error {
 	return nil
 }
 
-func TestDecoderSliceOfStringsBasic(t *testing.T) {
-	json := []byte(`["string","string1"]`)
-	testArr := testSliceStrings{}
-	err := Unmarshal(json, &testArr)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Len(t, testArr, 2, "testArr should be of len 2")
-	assert.Equal(t, "string", testArr[0], "testArr[0] should be 'string'")
-	assert.Equal(t, "string1", testArr[1], "testArr[1] should be 'string1'")
-}
-
 func TestDecoderSliceNull(t *testing.T) {
 	json := []byte(`null`)
 	v := &testSliceStrings{}
@@ -64,70 +388,11 @@ func TestDecoderSliceNull(t *testing.T) {
 	assert.Equal(t, len(*v), 0, "v must be of len 0")
 }
 
-func TestDecoderSliceArrayOfIntsBasic(t *testing.T) {
-	json := []byte(`[
-		1,
-		2
-	]`)
-	testArr := testSliceInts{}
-	err := UnmarshalJSONArray(json, &testArr)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Len(t, testArr, 2, "testArr should be of len 2")
-	assert.Equal(t, 1, *testArr[0], "testArr[0] should be 1")
-	assert.Equal(t, 2, *testArr[1], "testArr[1] should be 2")
-}
-
-func TestDecoderSliceArrayOfIntsBigInts(t *testing.T) {
-	json := []byte(`[
-		789034384533530523,
-		545344023293232032
-	]`)
-	testArr := testSliceInts{}
-	err := UnmarshalJSONArray(json, &testArr)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Len(t, testArr, 2, "testArr should be of len 2")
-	assert.Equal(t, 789034384533530523, *testArr[0], "testArr[0] should be 789034384533530523")
-	assert.Equal(t, 545344023293232032, *testArr[1], "testArr[1] should be 545344023293232032")
-}
-
-func TestDecoderSliceOfObjectsBasic(t *testing.T) {
-	json := []byte(`[
-		{
-			"test": 245,
-			"test2": -246,
-			"test3": "string"
-		},
-		{
-			"test": 247,
-			"test2": 248,
-			"test3": "string"
-		},
-		{
-			"test": 777,
-			"test2": 456,
-			"test3": "string"
-		}
-	]`)
-	testArr := testSliceObj{}
-	err := Unmarshal(json, &testArr)
-	assert.Nil(t, err, "Err must be nil")
-	assert.Len(t, testArr, 3, "testArr should be of len 2")
-	assert.Equal(t, 245, testArr[0].test, "testArr[0] should be 245")
-	assert.Equal(t, -246, testArr[0].test2, "testArr[0] should be 246")
-	assert.Equal(t, "string", testArr[0].test3, "testArr[0].test3 should be 'string'")
-	assert.Equal(t, 247, testArr[1].test, "testArr[1] should be 247")
-	assert.Equal(t, 248, testArr[1].test2, "testArr[1] should be 248")
-	assert.Equal(t, "string", testArr[1].test3, "testArr[1].test3 should be 'string'")
-	assert.Equal(t, 777, testArr[2].test, "testArr[2] should be 777")
-	assert.Equal(t, 456, testArr[2].test2, "testArr[2] should be 456")
-	assert.Equal(t, "string", testArr[2].test3, "testArr[2].test3 should be 'string'")
-}
-
 func TestDecodeSliceInvalidType(t *testing.T) {
-	result := testSliceObj{}
+	result := testSliceObjects{}
 	err := UnmarshalJSONArray([]byte(`{}`), &result)
 	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidTypeError(""), err, "err should be of type InvalidTypeError")
+	assert.IsType(t, InvalidUnmarshalError(""), err, "err should be of type InvalidUnmarshalError")
 	assert.Equal(t, "Cannot unmarshall to array, wrong char '{' found at pos 0", err.Error(), "err should not be nil")
 }
 
@@ -241,46 +506,6 @@ func TestUnmarshalJSONArrays(t *testing.T) {
 	}
 }
 
-func TestDecodeArrayEmpty(t *testing.T) {
-	v := new(testDecodeSlice)
-	dec := NewDecoder(strings.NewReader(""))
-	err := dec.Decode(v)
-	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecodeArrayInvalidJSONError(t *testing.T) {
-	v := new(testSliceStrings)
-	dec := NewDecoder(strings.NewReader(`["test",""`))
-	err := dec.Decode(v)
-	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecodeArrayInvalidJSONError2(t *testing.T) {
-	v := new(testSliceStrings)
-	dec := NewDecoder(strings.NewReader(`["test","\\""]`))
-	err := dec.Decode(v)
-	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecodeArraySkipError(t *testing.T) {
-	v := new(testDecodeSlice)
-	dec := NewDecoder(strings.NewReader("34fef"))
-	err := dec.Decode(v)
-	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
-func TestDecodeArrayNullError(t *testing.T) {
-	v := new(testDecodeSlice)
-	dec := NewDecoder(strings.NewReader("nall"))
-	err := dec.Decode(v)
-	assert.NotNil(t, err, "err should not be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
-}
-
 func TestSkipArray(t *testing.T) {
 	testCases := []struct {
 		json         string
@@ -314,4 +539,28 @@ func TestSkipArray(t *testing.T) {
 		i, err := dec.skipArray()
 		test.expectations(t, i, err)
 	}
+}
+
+func TestDecodeArrayEmpty(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader(""))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArraySkipError(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader("34fef"))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+}
+
+func TestDecodeArrayNullError(t *testing.T) {
+	v := new(testDecodeSlice)
+	dec := NewDecoder(strings.NewReader("nall"))
+	err := dec.Decode(v)
+	assert.NotNil(t, err, "err should not be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 }

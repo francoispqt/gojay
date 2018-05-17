@@ -77,7 +77,7 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 // it will call the corresponding methods.
 //
 // If a struct, slice, or array is passed and does not implement these interfaces
-// it will return a a non nil InvalidTypeError error.
+// it will return a a non nil InvalidUnmarshalError error.
 // Example with an Marshaler:
 //	type TestStruct struct {
 //		id int

@@ -23,6 +23,7 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = true
+			dec.cursor++
 			return nil
 		case 'f':
 			dec.cursor++
@@ -31,6 +32,7 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = false
+			dec.cursor++
 			return nil
 		case 'n':
 			dec.cursor++

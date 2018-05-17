@@ -10,18 +10,10 @@ func (err InvalidJSONError) Error() string {
 	return string(err)
 }
 
-// InvalidTypeError is a type representing an error returned when
-// Decoding cannot unmarshal JSON to the receiver type for various reasons.
-type InvalidTypeError string
-
-func (err InvalidTypeError) Error() string {
-	return string(err)
-}
-
 const invalidUnmarshalErrorMsg = "Invalid type %s provided to Unmarshal"
 
 // InvalidUnmarshalError is a type representing an error returned when
-// Decoding did not find the proper way to decode
+// Decoding cannot unmarshal JSON to the receiver type for various reasons.
 type InvalidUnmarshalError string
 
 func (err InvalidUnmarshalError) Error() string {

@@ -7,42 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testObject struct {
-	testStr     string
-	testInt     int
-	testInt64   int64
-	testInt32   int32
-	testInt16   int16
-	testInt8    int8
-	testUint64  uint64
-	testUint32  uint32
-	testUint16  uint16
-	testUint8   uint8
-	testFloat64 float64
-	testFloat32 float32
-	testBool    bool
-}
-
-func (t *testObject) IsNil() bool {
-	return t == nil
-}
-
-func (t *testObject) MarshalJSONObject(enc *Encoder) {
-	enc.AddStringKey("testStr", t.testStr)
-	enc.AddIntKey("testInt", t.testInt)
-	enc.AddIntKey("testInt64", int(t.testInt64))
-	enc.AddIntKey("testInt32", int(t.testInt32))
-	enc.AddIntKey("testInt16", int(t.testInt16))
-	enc.AddIntKey("testInt8", int(t.testInt8))
-	enc.AddIntKey("testUint64", int(t.testUint64))
-	enc.AddIntKey("testUint32", int(t.testUint32))
-	enc.AddIntKey("testUint16", int(t.testUint16))
-	enc.AddIntKey("testUint8", int(t.testUint8))
-	enc.AddFloatKey("testFloat64", t.testFloat64)
-	enc.AddFloat32Key("testFloat32", t.testFloat32)
-	enc.AddBoolKey("testBool", t.testBool)
-}
-
 type testObjectWithUnknownType struct {
 	unknownType struct{}
 }
@@ -119,7 +83,7 @@ func TestEncoderObjectEncodeAPI(t *testing.T) {
 	t.Run("encode-basic", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
+		err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true, &testObject{}, testSliceInts{}})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -132,7 +96,7 @@ func TestEncoderObjectEncodeAPI(t *testing.T) {
 
 func TestEncoderObjectMarshalAPI(t *testing.T) {
 	t.Run("marshal-basic", func(t *testing.T) {
-		r, err := Marshal(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
+		r, err := Marshal(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true, &testObject{}, testSliceInts{}})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -415,7 +379,7 @@ func TestEncoderObjectEncodeAPIError(t *testing.T) {
 	t.Run("write-error", func(t *testing.T) {
 		w := TestWriterError("")
 		enc := NewEncoder(w)
-		err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true})
+		err := enc.EncodeObject(&testObject{})
 		assert.NotNil(t, err, "Error should not be nil")
 		assert.Equal(t, "Test Error", err.Error(), "err.Error() should be 'Test Error'")
 	})

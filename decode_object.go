@@ -88,7 +88,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			return dec.cursor, nil
 		default:
 			// can't unmarshall to struct
-			dec.err = InvalidTypeError(
+			dec.err = InvalidUnmarshalError(
 				fmt.Sprintf(
 					"Cannot unmarshal to struct, wrong char '%s' found at pos %d",
 					string(dec.data[dec.cursor]),
@@ -194,6 +194,7 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		case 't':
 			dec.cursor++
@@ -201,6 +202,7 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		// is false
 		case 'f':
@@ -209,6 +211,7 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		// is an object
 		case '{':

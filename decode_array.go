@@ -48,11 +48,12 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 			if err != nil {
 				return 0, err
 			}
+			dec.cursor++
 			return dec.cursor, nil
 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			// can't unmarshall to struct
 			// we skip array and set Error
-			dec.err = InvalidTypeError(
+			dec.err = InvalidUnmarshalError(
 				fmt.Sprintf(
 					"Cannot unmarshall to array, wrong char '%s' found at pos %d",
 					string(dec.data[dec.cursor]),
