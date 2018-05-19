@@ -42,6 +42,12 @@ func TestSliceInts(t *testing.T) {
 			expectedResult: testSliceInts{},
 		},
 		{
+			name:           "invalid-json",
+			json:           "[",
+			expectedResult: testSliceInts{},
+			err:            true,
+		},
+		{
 			name:           "floats",
 			json:           "[1,2,3,43567788543,457.7765,432,0,0.45]",
 			expectedResult: testSliceInts{1, 2, 3, 43567788543, 457, 432, 0, 0},

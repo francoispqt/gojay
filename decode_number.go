@@ -96,6 +96,7 @@ func (dec *Decoder) getExponent() int64 {
 			// if nothing return 0
 			// could raise error
 			if start == end {
+				dec.raiseInvalidJSONErr(dec.cursor)
 				return 0
 			}
 			return dec.atoi64(start, end)

@@ -14,4 +14,11 @@ func TestDecodeNumberExra(t *testing.T) {
 		assert.NotNil(t, err, "err should not be nil")
 		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 	})
+	t.Run("get-exponent-err", func(t *testing.T) {
+		v := 0
+		dec := NewDecoder(strings.NewReader("1.2Ea"))
+		err := dec.Decode(&v)
+		assert.NotNil(t, err, "err should not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
