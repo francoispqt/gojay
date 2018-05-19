@@ -1,13 +1,16 @@
 package gojay
 
-import "io"
+import (
+	"io"
+	"sync"
+)
 
 // NewEncoder returns a new StreamEncoder.
 // It takes an io.Writer implementation to output data.
 // It initiates the done channel returned by Done().
 func (s stream) NewEncoder(w io.Writer) *StreamEncoder {
 	enc := BorrowEncoder(w)
-	return &StreamEncoder{Encoder: enc, nConsumer: 1, done: make(chan struct{}, 1)}
+	return &StreamEncoder{Encoder: enc, nConsumer: 1, done: make(chan struct{}, 1), mux: &sync.RWMutex{}}
 }
 
 // BorrowEncoder borrows a StreamEncoder from the pool.

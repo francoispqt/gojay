@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type MarshalerStream interface {
 //
 // It implements conext.Context and provide a channel to notify interruption.
 type StreamEncoder struct {
+	mux *sync.RWMutex
 	*Encoder
 	nConsumer int
 	delimiter byte
@@ -39,10 +41,12 @@ func (s *StreamEncoder) EncodeStream(m MarshalerStream) {
 	// resulting in a weird JSON
 	go consume(s, s, m)
 	for i := 1; i < s.nConsumer; i++ {
+		s.mux.RLock()
 		ss := Stream.borrowEncoder(s.w)
 		ss.done = s.done
 		ss.buf = make([]byte, 0, 512)
 		ss.delimiter = s.delimiter
+		s.mux.RUnlock()
 		go consume(s, ss, m)
 	}
 	return
@@ -115,12 +119,14 @@ func (s *StreamEncoder) Value(key interface{}) interface{} {
 //
 // After calling cancel, Done() will return a closed channel.
 func (s *StreamEncoder) Cancel(err error) {
+	s.mux.Lock()
 	select {
 	case <-s.done:
 	default:
 		s.err = err
 		close(s.done)
 	}
+	s.mux.Unlock()
 }
 
 // AddObject adds an object to be encoded.
