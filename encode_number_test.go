@@ -95,6 +95,26 @@ func TestEncoderNumberEncodeAPIErrors(t *testing.T) {
 		assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
 
 	})
+	t.Run("encode-uint64-pool-error", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		enc.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err should not be nil")
+			assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+		}()
+		_ = enc.EncodeUint64(1)
+		assert.True(t, false, "should not be called as encoder should have panicked")
+	})
+	t.Run("encode-unt64-write-error", func(t *testing.T) {
+		w := TestWriterError("")
+		enc := NewEncoder(w)
+		err := enc.EncodeUint64(1)
+		assert.NotNil(t, err, "err should not be nil")
+		assert.Equal(t, "Test Error", err.Error(), "err should be of type InvalidUsagePooledEncoderError")
+
+	})
 	t.Run("encode-float64-pool-error", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
@@ -317,6 +337,109 @@ func TestAddNumberFunc(t *testing.T) {
 		enc := BorrowEncoder(builder)
 		enc.writeByte('[')
 		enc.AddInt64OmitEmpty(0)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `[`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+}
+
+func TestEncoderUint64(t *testing.T) {
+	builder := &strings.Builder{}
+	enc := BorrowEncoder(builder)
+	err := enc.Encode(uint64(145509))
+	assert.Nil(t, err, "err should be nil")
+	assert.Equal(t, "145509", builder.String(), "builder.String() should be 145509")
+}
+
+func TestUint64Add(t *testing.T) {
+	t.Run("uint64-key", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddUint64Key("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-key-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`{"test":1`))
+		enc.AddUint64Key("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":1,"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+
+	t.Run("uint64-key-omit-empty", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddUint64KeyOmitEmpty("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-key-omit-empty-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`{"test":1`))
+		enc.AddUint64KeyOmitEmpty("test", 10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{"test":1,"test":10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-key-omit-empty-3", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('{')
+		enc.AddUint64KeyOmitEmpty("test", 0)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `{`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('[')
+		enc.AddUint64(10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `[10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`[1`))
+		enc.AddUint64(10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `[1,10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+
+	t.Run("uint64-omit-empty", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('[')
+		enc.AddUint64OmitEmpty(10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `[10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-omit-empty-2", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeBytes([]byte(`[1`))
+		enc.AddUint64OmitEmpty(10)
+		_, err := enc.Write()
+		assert.Nil(t, err, "err should be nil")
+		assert.Equal(t, `[1,10`, builder.String(), `builder.String() should be equal to {"test":10"`)
+	})
+	t.Run("uint64-omit-empty-3", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := BorrowEncoder(builder)
+		enc.writeByte('[')
+		enc.AddUint64OmitEmpty(0)
 		_, err := enc.Write()
 		assert.Nil(t, err, "err should be nil")
 		assert.Equal(t, `[`, builder.String(), `builder.String() should be equal to {"test":10"`)

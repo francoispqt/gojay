@@ -32,6 +32,28 @@ func (enc *Encoder) AppendString(v string) {
 
 // AddString adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddString(v string) {
+	enc.String(v)
+}
+
+// AddStringOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddStringOmitEmpty(v string) {
+	enc.StringOmitEmpty(v)
+}
+
+// AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddStringKey(key, v string) {
+	enc.StringKey(key, v)
+}
+
+// AddStringKeyOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
+	enc.StringKeyOmitEmpty(key, v)
+}
+
+// String adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) String(v string) {
 	enc.grow(len(v) + 4)
 	r := enc.getPreviousRune()
 	if r != '[' {
@@ -43,9 +65,9 @@ func (enc *Encoder) AddString(v string) {
 	enc.writeByte('"')
 }
 
-// AddStringOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// StringOmitEmpty adds a string to be encoded or skips it if it is zero value.
 // Must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddStringOmitEmpty(v string) {
+func (enc *Encoder) StringOmitEmpty(v string) {
 	if v == "" {
 		return
 	}
@@ -59,8 +81,8 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 	enc.writeByte('"')
 }
 
-// AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) AddStringKey(key, v string) {
+// StringKey adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) StringKey(key, v string) {
 	enc.grow(len(key) + len(v) + 5)
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -74,9 +96,9 @@ func (enc *Encoder) AddStringKey(key, v string) {
 	enc.writeByte('"')
 }
 
-// AddStringKeyOmitEmpty adds a string to be encoded or skips it if it is zero value.
+// StringKeyOmitEmpty adds a string to be encoded or skips it if it is zero value.
 // Must be used inside an object as it will encode a key
-func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
+func (enc *Encoder) StringKeyOmitEmpty(key, v string) {
 	if v == "" {
 		return
 	}

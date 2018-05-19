@@ -29,6 +29,27 @@ func (enc *Encoder) encodeBool(v bool) ([]byte, error) {
 
 // AddBool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddBool(v bool) {
+	enc.Bool(v)
+}
+
+// AddBoolOmitEmpty adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddBoolOmitEmpty(v bool) {
+	enc.BoolOmitEmpty(v)
+}
+
+// AddBoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
+func (enc *Encoder) AddBoolKey(key string, v bool) {
+	enc.BoolKey(key, v)
+}
+
+// AddBoolKeyOmitEmpty adds a bool to be encoded and skips it if it is zero value.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) AddBoolKeyOmitEmpty(key string, v bool) {
+	enc.BoolKeyOmitEmpty(key, v)
+}
+
+// Bool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) Bool(v bool) {
 	enc.grow(5)
 	r := enc.getPreviousRune()
 	if r != '[' {
@@ -41,8 +62,8 @@ func (enc *Encoder) AddBool(v bool) {
 	}
 }
 
-// AddBoolOmitEmpty adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
-func (enc *Encoder) AddBoolOmitEmpty(v bool) {
+// BoolOmitEmpty adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) BoolOmitEmpty(v bool) {
 	if v == false {
 		return
 	}
@@ -54,8 +75,8 @@ func (enc *Encoder) AddBoolOmitEmpty(v bool) {
 	enc.writeString("true")
 }
 
-// AddBoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
-func (enc *Encoder) AddBoolKey(key string, value bool) {
+// BoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
+func (enc *Encoder) BoolKey(key string, value bool) {
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -67,9 +88,9 @@ func (enc *Encoder) AddBoolKey(key string, value bool) {
 	enc.buf = strconv.AppendBool(enc.buf, value)
 }
 
-// AddBoolKeyOmitEmpty adds a bool to be encoded and skips it if it is zero value.
+// BoolKeyOmitEmpty adds a bool to be encoded and skips it if it is zero value.
 // Must be used inside an object as it will encode a key.
-func (enc *Encoder) AddBoolKeyOmitEmpty(key string, v bool) {
+func (enc *Encoder) BoolKeyOmitEmpty(key string, v bool) {
 	if v == false {
 		return
 	}

@@ -31,7 +31,7 @@ func (enc *Encoder) Encode(v interface{}) error {
 	case int8:
 		return enc.EncodeInt(int(vt))
 	case uint64:
-		return enc.EncodeInt(int(vt))
+		return enc.EncodeUint64(vt)
 	case uint32:
 		return enc.EncodeInt(int(vt))
 	case uint16:
@@ -69,7 +69,7 @@ func (enc *Encoder) AddInterface(value interface{}) {
 	case int8:
 		enc.AddInt(int(vt))
 	case uint64:
-		enc.AddInt(int(vt))
+		enc.AddUint64(vt)
 	case uint32:
 		enc.AddInt(int(vt))
 	case uint16:

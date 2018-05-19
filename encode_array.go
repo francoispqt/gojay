@@ -24,6 +24,30 @@ func (enc *Encoder) encodeArray(v MarshalerJSONArray) ([]byte, error) {
 // AddArray adds an implementation of MarshalerJSONArray to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
 func (enc *Encoder) AddArray(v MarshalerJSONArray) {
+	enc.Array(v)
+}
+
+// AddArrayOmitEmpty adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement Marshaler
+func (enc *Encoder) AddArrayOmitEmpty(v MarshalerJSONArray) {
+	enc.ArrayOmitEmpty(v)
+}
+
+// AddArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
+// value must implement Marshaler
+func (enc *Encoder) AddArrayKey(key string, v MarshalerJSONArray) {
+	enc.ArrayKey(key, v)
+}
+
+// AddArrayKeyOmitEmpty adds an array or slice to be encoded and skips it if it is nil.
+// Must be called inside an object as it will encode a key.
+func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
+	enc.ArrayKeyOmitEmpty(key, v)
+}
+
+// Array adds an implementation of MarshalerJSONArray to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement Marshaler
+func (enc *Encoder) Array(v MarshalerJSONArray) {
 	if v.IsNil() {
 		enc.grow(3)
 		r := enc.getPreviousRune()
@@ -44,9 +68,9 @@ func (enc *Encoder) AddArray(v MarshalerJSONArray) {
 	enc.writeByte(']')
 }
 
-// AddArrayOmitEmpty adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// ArrayOmitEmpty adds an array or slice to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement Marshaler
-func (enc *Encoder) AddArrayOmitEmpty(v MarshalerJSONArray) {
+func (enc *Encoder) ArrayOmitEmpty(v MarshalerJSONArray) {
 	if v.IsNil() {
 		return
 	}
@@ -60,9 +84,9 @@ func (enc *Encoder) AddArrayOmitEmpty(v MarshalerJSONArray) {
 	enc.writeByte(']')
 }
 
-// AddArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
+// ArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
 // value must implement Marshaler
-func (enc *Encoder) AddArrayKey(key string, v MarshalerJSONArray) {
+func (enc *Encoder) ArrayKey(key string, v MarshalerJSONArray) {
 	if v.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
@@ -87,9 +111,9 @@ func (enc *Encoder) AddArrayKey(key string, v MarshalerJSONArray) {
 	enc.writeByte(']')
 }
 
-// AddArrayKeyOmitEmpty adds an array or slice to be encoded and skips it if it is nil.
+// ArrayKeyOmitEmpty adds an array or slice to be encoded and skips it if it is nil.
 // Must be called inside an object as it will encode a key.
-func (enc *Encoder) AddArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
+func (enc *Encoder) ArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
 	if v.IsNil() {
 		return
 	}

@@ -54,11 +54,11 @@ type user struct {
 func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
     switch key {
     case "id":
-        return dec.AddInt(&u.id)
+        return dec.Int(&u.id)
     case "name":
-        return dec.AddString(&u.name)
+        return dec.String(&u.name)
     case "email":
-        return dec.AddString(&u.email)
+        return dec.String(&u.email)
     }
     return nil
 }
@@ -145,27 +145,27 @@ if err := dec.Decode(&str); err != nil {
 `*gojay.Decoder` has multiple methods to decode to specific types:
 * Decode
 ```go
-func (dec *Decoder) Decode(v interface{}) error
+func (dec *gojay.Decoder) Decode(v interface{}) error
 ```
 * DecodeObject
 ```go
-func (dec *Decoder) DecodeObject(v UnmarshalerJSONObject) error
+func (dec *gojay.Decoder) DecodeObject(v UnmarshalerJSONObject) error
 ```
 * DecodeArray
 ```go
-func (dec *Decoder) DecodeArray(v UnmarshalerJSONArray) error
+func (dec *gojay.Decoder) DecodeArray(v UnmarshalerJSONArray) error
 ```
 * DecodeInt
 ```go
-func (dec *Decoder) DecodeInt(v *int) error
+func (dec *gojay.Decoder) DecodeInt(v *int) error
 ```
 * DecodeBool
 ```go
-func (dec *Decoder) DecodeBool(v *bool) error
+func (dec *gojay.Decoder) DecodeBool(v *bool) error
 ```
 * DecodeString
 ```go
-func (dec *Decoder) DecodeString(v *string) error
+func (dec *gojay.Decoder) DecodeString(v *string) error
 ```
 
 
@@ -175,7 +175,7 @@ func (dec *Decoder) DecodeString(v *string) error
 To unmarshal a JSON object to a structure, the structure must implement the UnmarshalerJSONObject interface:
 ```go
 type UnmarshalerJSONObject interface {
-	UnmarshalJSONObject(*Decoder, string) error
+	UnmarshalJSONObject(*gojay.Decoder, string) error
 	NKeys() int
 }
 ``` 
@@ -194,11 +194,11 @@ type user struct {
 func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
     switch k {
     case "id":
-        return dec.AddInt(&u.id)
+        return dec.Int(&u.id)
     case "name":
-        return dec.AddString(&u.name)
+        return dec.String(&u.name)
     case "email":
-        return dec.AddString(&u.email)
+        return dec.String(&u.email)
     }
     return nil
 }
@@ -215,7 +215,7 @@ type message map[string]string
 // Implementing Unmarshaler
 func (m message) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	str := ""
-	err := dec.AddString(&str)
+	err := dec.String(&str)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (m message) NKeys() int {
 To unmarshal a JSON object to a slice an array or a channel, it must implement the UnmarshalerJSONArray interface:
 ```go
 type UnmarshalerJSONArray interface {
-	UnmarshalJSONArray(*Decoder) error
+	UnmarshalJSONArray(*gojay.Decoder) error
 }
 ```
 UnmarshalJSONArray method takes one argument, a pointer to the Decoder (*gojay.Decoder). If the JSON data is not an array, the Unmarshal method will never be called. 
@@ -245,7 +245,7 @@ type testSlice []string
 // implement UnmarshalerJSONArray
 func (t *testStringArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	str := ""
-	if err := dec.AddString(&str); err != nil {
+	if err := dec.String(&str); err != nil {
 		return err
 	}
 	*t = append(*t, str)
@@ -259,7 +259,7 @@ type ChannelString chan string
 // implement UnmarshalerJSONArray
 func (c ChannelArray) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	str := ""
-	if err := dec.AddString(&str); err != nil {
+	if err := dec.String(&str); err != nil {
 		return err
 	}
 	c <- str
@@ -300,9 +300,9 @@ type user struct {
 }
 // implement MarshalerJSONObject
 func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
-    enc.AddIntKey("id", u.id)
-    enc.AddStringKey("name", u.name)
-    enc.AddStringKey("email", u.email)
+    enc.IntKey("id", u.id)
+    enc.StringKey("name", u.name)
+    enc.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
     return u == nil
@@ -390,35 +390,35 @@ if err := enc.Encode(str); err != nil {
 `*gojay.Encoder` has multiple methods to encoder specific types to JSON:
 * Encode
 ```go
-func (enc *Encoder) Encode(v interface{}) error
+func (enc *gojay.Encoder) Encode(v interface{}) error
 ```
 * EncodeObject
 ```go
-func (enc *Encoder) EncodeObject(v MarshalerJSONObject) error 
+func (enc *gojay.Encoder) EncodeObject(v MarshalerJSONObject) error 
 ```
 * EncodeArray
 ```go
-func (enc *Encoder) EncodeArray(v MarshalerJSONArray) error 
+func (enc *gojay.Encoder) EncodeArray(v MarshalerJSONArray) error 
 ```
 * EncodeInt
 ```go
-func (enc *Encoder) EncodeInt(n int) error 
+func (enc *gojay.Encoder) EncodeInt(n int) error 
 ```
 * EncodeInt64
 ```go
-func (enc *Encoder) EncodeInt64(n int64) error 
+func (enc *gojay.Encoder) EncodeInt64(n int64) error 
 ```
 * EncodeFloat
 ```go
-func (enc *Encoder) EncodeFloat(n float64) error
+func (enc *gojay.Encoder) EncodeFloat(n float64) error
 ```
 * EncodeBool
 ```go
-func (enc *Encoder) EncodeBool(v bool) error
+func (enc *gojay.Encoder) EncodeBool(v bool) error
 ```
 * EncodeString
 ```go
-func (enc *Encoder) EncodeString(s string) error
+func (enc *gojay.Encoder) EncodeString(s string) error
 ```
 
 ### Structs and Maps
@@ -426,7 +426,7 @@ func (enc *Encoder) EncodeString(s string) error
 To encode a structure, the structure must implement the MarshalerJSONObject interface:
 ```go
 type MarshalerJSONObject interface {
-	MarshalJSONObject(enc *Encoder)
+	MarshalJSONObject(enc *gojay.Encoder)
 	IsNil() bool
 }
 ```
@@ -443,9 +443,9 @@ type user struct {
 }
 // implement MarshalerJSONObject
 func (u *user) MarshalJSONObject(dec *gojay.Decoder, key string) {
-    dec.AddIntKey("id", u.id)
-    dec.AddStringKey("name", u.name)
-    dec.AddStringKey("email", u.email)
+    dec.IntKey("id", u.id)
+    dec.StringKey("name", u.name)
+    dec.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
     return u == nil
@@ -460,7 +460,7 @@ type message map[string]string
 // Implementing Marshaler
 func (m message) MarshalJSONObject(enc *gojay.Encoder) {
 	for k, v := range m {
-		enc.AddStringKey(k, v)
+		enc.StringKey(k, v)
 	}
 }
 
@@ -473,7 +473,7 @@ func (m message) IsNil() bool {
 To encode an array or a slice, the slice/array must implement the MarshalerJSONArray interface:
 ```go
 type MarshalerJSONArray interface {
-    MarshalJSONArray(enc *Encoder)
+    MarshalJSONArray(enc *gojay.Encoder)
     IsNil() bool
 }
 ```
@@ -485,9 +485,9 @@ Example of implementation:
 ```go
 type users []*user
 // implement MarshalerJSONArray
-func (u *users) MarshalJSONArray(dec *Decoder) {
+func (u *users) MarshalJSONArray(dec *gojay.Decoder) {
 	for _, e := range u {
-        enc.AddObject(e)
+        enc.Object(e)
     }
 }
 func (u *users) IsNil() bool {
@@ -534,7 +534,7 @@ type ChannelStream chan *user
 
 func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
 	u := &user{}
-	if err := dec.AddObject(u); err != nil {
+	if err := dec.Object(u); err != nil {
 		return err
 	}
 	c <- u
@@ -592,9 +592,9 @@ type user struct {
 }
 
 func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
-	enc.AddIntKey("id", u.id)
-	enc.AddStringKey("name", u.name)
-	enc.AddStringKey("email", u.email)
+	enc.IntKey("id", u.id)
+	enc.StringKey("name", u.name)
+	enc.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
 	return u == nil
@@ -608,7 +608,7 @@ func (s StreamChan) MarshalStream(enc *gojay.StreamEncoder) {
 	case <-enc.Done():
 		return
 	case o := <-s:
-		enc.AddObject(o)
+		enc.Object(o)
 	}
 }
 

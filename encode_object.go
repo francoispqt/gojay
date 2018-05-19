@@ -36,6 +36,32 @@ func (enc *Encoder) encodeObject(v MarshalerJSONObject) ([]byte, error) {
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
 func (enc *Encoder) AddObject(v MarshalerJSONObject) {
+	enc.Object(v)
+}
+
+// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectOmitEmpty(v MarshalerJSONObject) {
+	enc.ObjectOmitEmpty(v)
+}
+
+// AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectKey(key string, v MarshalerJSONObject) {
+	enc.ObjectKey(key, v)
+}
+
+// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectKeyOmitEmpty(key string, v MarshalerJSONObject) {
+	enc.ObjectKeyOmitEmpty(key, v)
+}
+
+// Object adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) Object(v MarshalerJSONObject) {
 	if v.IsNil() {
 		enc.grow(2)
 		r := enc.getPreviousRune()
@@ -56,10 +82,10 @@ func (enc *Encoder) AddObject(v MarshalerJSONObject) {
 	enc.writeByte('}')
 }
 
-// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// ObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
-func (enc *Encoder) AddObjectOmitEmpty(v MarshalerJSONObject) {
+func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 	if v.IsNil() {
 		return
 	}
@@ -73,9 +99,9 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerJSONObject) {
 	enc.writeByte('}')
 }
 
-// AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
+// ObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerJSONObject
-func (enc *Encoder) AddObjectKey(key string, value MarshalerJSONObject) {
+func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
 	if value.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
@@ -100,10 +126,10 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerJSONObject) {
 	enc.writeByte('}')
 }
 
-// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// ObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
-func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
+func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 	if value.IsNil() {
 		return
 	}
