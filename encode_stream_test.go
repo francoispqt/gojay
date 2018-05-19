@@ -301,8 +301,8 @@ func TestEncodeStream(t *testing.T) {
 		enc := Stream.NewEncoder(w).NConsumer(50).LineDelimited()
 		w.enc = enc
 		s := StreamChanObject(make(chan *testObject))
-		go enc.EncodeStream(s)
 		go feedStream(s, 5000)
+		go enc.EncodeStream(s)
 		select {
 		case <-enc.Done():
 			assert.Nil(t, enc.Err(), "enc.Err() should be nil")
