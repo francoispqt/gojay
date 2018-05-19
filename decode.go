@@ -6,13 +6,13 @@ import (
 	"reflect"
 )
 
-// UnmarshalArray parses the JSON-encoded data and stores the result in the value pointed to by v.
+// UnmarshalJSONArray parses the JSON-encoded data and stores the result in the value pointed to by v.
 //
-// v must implement UnmarshalerArray.
+// v must implement UnmarshalerJSONArray.
 //
 // If a JSON value is not appropriate for a given target type, or if a JSON number
-// overflows the target type, UnmarshalArray skips that field and completes the unmarshaling as best it can.
-func UnmarshalArray(data []byte, v UnmarshalerArray) error {
+// overflows the target type, UnmarshalJSONArray skips that field and completes the unmarshaling as best it can.
+func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
@@ -28,13 +28,13 @@ func UnmarshalArray(data []byte, v UnmarshalerArray) error {
 	return nil
 }
 
-// UnmarshalObject parses the JSON-encoded data and stores the result in the value pointed to by v.
+// UnmarshalJSONObject parses the JSON-encoded data and stores the result in the value pointed to by v.
 //
-// v must implement UnmarshalerObject.
+// v must implement UnmarshalerJSONObject.
 //
 // If a JSON value is not appropriate for a given target type, or if a JSON number
-// overflows the target type, UnmarshalObject skips that field and completes the unmarshaling as best it can.
-func UnmarshalObject(data []byte, v UnmarshalerObject) error {
+// overflows the target type, UnmarshalJSONObject skips that field and completes the unmarshaling as best it can.
+func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
 	defer dec.Release()
 	dec.data = make([]byte, len(data))
@@ -51,7 +51,7 @@ func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 }
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.
-// If v is nil, not a pointer, or not an implementation of UnmarshalerObject or UnmarshalerArray
+// If v is nil, not a pointer, or not an implementation of UnmarshalerJSONObject or UnmarshalerJSONArray
 // Unmarshal returns an InvalidUnmarshalError.
 //
 // Unmarshal uses the inverse of the encodings that Marshal uses, allocating maps, slices, and pointers as necessary, with the following additional rules:
@@ -60,9 +60,9 @@ func UnmarshalObject(data []byte, v UnmarshalerObject) error {
 // Otherwise, Unmarshal unmarshals the JSON into the value pointed at by the pointer.
 // If the pointer is nil, Unmarshal allocates a new value for it to point to.
 //
-// To Unmarshal JSON into a struct, Unmarshal requires the struct to implement UnmarshalerObject.
+// To Unmarshal JSON into a struct, Unmarshal requires the struct to implement UnmarshalerJSONObject.
 //
-// To unmarshal a JSON array into a slice, Unmarshal requires the slice to implement UnmarshalerArray.
+// To unmarshal a JSON array into a slice, Unmarshal requires the slice to implement UnmarshalerJSONArray.
 //
 // Unmarshal JSON does not allow yet to unmarshall an interface value
 // If a JSON value is not appropriate for a given target type, or if a JSON number
@@ -82,21 +82,41 @@ func Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt(vt)
+	case *int8:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeInt8(vt)
+	case *int16:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeInt16(vt)
 	case *int32:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt32(vt)
-	case *uint32:
-		dec = borrowDecoder(nil, 0)
-		dec.length = len(data)
-		dec.data = data
-		err = dec.decodeUint32(vt)
 	case *int64:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt64(vt)
+	case *uint8:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint8(vt)
+	case *uint16:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint16(vt)
+	case *uint32:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint32(vt)
 	case *uint64:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
@@ -107,18 +127,23 @@ func Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeFloat64(vt)
+	case *float32:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeFloat32(vt)
 	case *bool:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeBool(vt)
-	case UnmarshalerObject:
+	case UnmarshalerJSONObject:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
 		_, err = dec.decodeObject(vt)
-	case UnmarshalerArray:
+	case UnmarshalerJSONArray:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = make([]byte, len(data))
@@ -134,17 +159,17 @@ func Unmarshal(data []byte, v interface{}) error {
 	return dec.err
 }
 
-// UnmarshalerObject is the interface to implement for a struct to be
+// UnmarshalerJSONObject is the interface to implement for a struct to be
 // decoded
-type UnmarshalerObject interface {
-	UnmarshalObject(*Decoder, string) error
+type UnmarshalerJSONObject interface {
+	UnmarshalJSONObject(*Decoder, string) error
 	NKeys() int
 }
 
-// UnmarshalerArray is the interface to implement for a slice or an array to be
+// UnmarshalerJSONArray is the interface to implement for a slice or an array to be
 // decoded
-type UnmarshalerArray interface {
-	UnmarshalArray(*Decoder) error
+type UnmarshalerJSONArray interface {
+	UnmarshalJSONArray(*Decoder) error
 }
 
 // A Decoder reads and decodes JSON values from an input stream.
@@ -167,41 +192,143 @@ func (dec *Decoder) Decode(v interface{}) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
+	var err error
 	switch vt := v.(type) {
 	case *string:
-		return dec.decodeString(vt)
+		err = dec.decodeString(vt)
 	case *int:
-		return dec.decodeInt(vt)
+		err = dec.decodeInt(vt)
+	case *int8:
+		err = dec.decodeInt8(vt)
+	case *int16:
+		err = dec.decodeInt16(vt)
 	case *int32:
-		return dec.decodeInt32(vt)
-	case *uint32:
-		return dec.decodeUint32(vt)
+		err = dec.decodeInt32(vt)
 	case *int64:
-		return dec.decodeInt64(vt)
+		err = dec.decodeInt64(vt)
+	case *uint8:
+		err = dec.decodeUint8(vt)
+	case *uint16:
+		err = dec.decodeUint16(vt)
+	case *uint32:
+		err = dec.decodeUint32(vt)
 	case *uint64:
-		return dec.decodeUint64(vt)
+		err = dec.decodeUint64(vt)
 	case *float64:
-		return dec.decodeFloat64(vt)
+		err = dec.decodeFloat64(vt)
+	case *float32:
+		err = dec.decodeFloat32(vt)
 	case *bool:
-		return dec.decodeBool(vt)
-	case UnmarshalerObject:
-		_, err := dec.decodeObject(vt)
-		return err
-	case UnmarshalerArray:
-		_, err := dec.decodeArray(vt)
-		return err
+		err = dec.decodeBool(vt)
+	case UnmarshalerJSONObject:
+		_, err = dec.decodeObject(vt)
+	case UnmarshalerJSONArray:
+		_, err = dec.decodeArray(vt)
 	case *EmbeddedJSON:
-		return dec.decodeEmbeddedJSON(vt)
+		err = dec.decodeEmbeddedJSON(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
+	if err != nil {
+		return err
+	}
+	return dec.err
 }
 
 // ADD VALUES FUNCTIONS
 
 // AddInt decodes the next key to an *int.
-// If next key value overflows int, an InvalidTypeError error will be returned.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddInt(v *int) error {
+	return dec.Int(v)
+}
+
+// AddInt8 decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt8(v *int8) error {
+	return dec.Int8(v)
+}
+
+// AddInt16 decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt16(v *int16) error {
+	return dec.Int16(v)
+}
+
+// AddInt32 decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt32(v *int32) error {
+	return dec.Int32(v)
+}
+
+// AddInt64 decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt64(v *int64) error {
+	return dec.Int64(v)
+}
+
+// AddUint8 decodes the next key to an *int.
+// If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddUint8(v *uint8) error {
+	return dec.Uint8(v)
+}
+
+// AddUint16 decodes the next key to an *int.
+// If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddUint16(v *uint16) error {
+	return dec.Uint16(v)
+}
+
+// AddUint32 decodes the next key to an *int.
+// If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddUint32(v *uint32) error {
+	return dec.Uint32(v)
+}
+
+// AddUint64 decodes the next key to an *int.
+// If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddUint64(v *uint64) error {
+	return dec.Uint64(v)
+}
+
+// AddFloat decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat(v *float64) error {
+	return dec.Float(v)
+}
+
+// AddFloat32 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat32(v *float32) error {
+	return dec.Float32(v)
+}
+
+// AddBool decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
+// If next key is null, bool will be false.
+func (dec *Decoder) AddBool(v *bool) error {
+	return dec.Bool(v)
+}
+
+// AddString decodes the next key to a *string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+func (dec *Decoder) AddString(v *string) error {
+	return dec.String(v)
+}
+
+// AddObject decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
+	return dec.Object(v)
+}
+
+// AddArray decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
+	return dec.Array(v)
+}
+
+// Int decodes the next key to an *int.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int(v *int) error {
 	err := dec.decodeInt(v)
 	if err != nil {
 		return err
@@ -210,9 +337,97 @@ func (dec *Decoder) AddInt(v *int) error {
 	return nil
 }
 
-// AddFloat decodes the next key to a *float64.
-// If next key value overflows float64, an InvalidTypeError error will be returned.
-func (dec *Decoder) AddFloat(v *float64) error {
+// Int8 decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int8(v *int8) error {
+	err := dec.decodeInt8(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int16 decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int16(v *int16) error {
+	err := dec.decodeInt16(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int32 decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int32(v *int32) error {
+	err := dec.decodeInt32(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int64 decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int64(v *int64) error {
+	err := dec.decodeInt64(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Uint8 decodes the next key to an *int.
+// If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Uint8(v *uint8) error {
+	err := dec.decodeUint8(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Uint16 decodes the next key to an *int.
+// If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Uint16(v *uint16) error {
+	err := dec.decodeUint16(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Uint32 decodes the next key to an *int.
+// If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Uint32(v *uint32) error {
+	err := dec.decodeUint32(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Uint64 decodes the next key to an *int.
+// If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Uint64(v *uint64) error {
+	err := dec.decodeUint64(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Float decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float(v *float64) error {
 	err := dec.decodeFloat64(v)
 	if err != nil {
 		return err
@@ -221,10 +436,21 @@ func (dec *Decoder) AddFloat(v *float64) error {
 	return nil
 }
 
-// AddBool decodes the next key to a *bool.
-// If next key is neither null nor a JSON boolean, an InvalidTypeError will be returned.
+// Float32 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float32(v *float32) error {
+	err := dec.decodeFloat32(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Bool decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
-func (dec *Decoder) AddBool(v *bool) error {
+func (dec *Decoder) Bool(v *bool) error {
 	err := dec.decodeBool(v)
 	if err != nil {
 		return err
@@ -233,9 +459,9 @@ func (dec *Decoder) AddBool(v *bool) error {
 	return nil
 }
 
-// AddString decodes the next key to a *string.
-// If next key is not a JSON string nor null, InvalidTypeError will be returned.
-func (dec *Decoder) AddString(v *string) error {
+// String decodes the next key to a *string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+func (dec *Decoder) String(v *string) error {
 	err := dec.decodeString(v)
 	if err != nil {
 		return err
@@ -244,8 +470,8 @@ func (dec *Decoder) AddString(v *string) error {
 	return nil
 }
 
-// AddObject decodes the next key to a UnmarshalerObject.
-func (dec *Decoder) AddObject(value UnmarshalerObject) error {
+// Object decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
 	initialKeysDone := dec.keysDone
 	initialChild := dec.child
 	dec.keysDone = 0
@@ -262,8 +488,8 @@ func (dec *Decoder) AddObject(value UnmarshalerObject) error {
 	return nil
 }
 
-// AddArray decodes the next key to a UnmarshalerArray.
-func (dec *Decoder) AddArray(value UnmarshalerArray) error {
+// Array decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) Array(value UnmarshalerJSONArray) error {
 	newCursor, err := dec.decodeArray(value)
 	if err != nil {
 		return err

@@ -9,7 +9,7 @@ import (
 
 type TestEncodingArrStrings []string
 
-func (t TestEncodingArrStrings) MarshalArray(enc *Encoder) {
+func (t TestEncodingArrStrings) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddString(e)
 	}
@@ -20,7 +20,7 @@ func (t TestEncodingArrStrings) IsNil() bool {
 
 type TestEncodingArr []*TestEncoding
 
-func (t TestEncodingArr) MarshalArray(enc *Encoder) {
+func (t TestEncodingArr) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddObject(e)
 	}
@@ -31,7 +31,7 @@ func (t TestEncodingArr) IsNil() bool {
 
 type testEncodingArrInterfaces []interface{}
 
-func (t testEncodingArrInterfaces) MarshalArray(enc *Encoder) {
+func (t testEncodingArrInterfaces) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddInterface(e)
 	}
@@ -118,7 +118,7 @@ func TestEncoderArrayMarshalAPI(t *testing.T) {
 				testBool: true,
 			},
 		}
-		r, err := MarshalArray(v)
+		r, err := MarshalJSONArray(v)
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -178,7 +178,7 @@ func TestEncoderArrayEncodeAPI(t *testing.T) {
 
 type TestEncodingIntOmitEmpty []int
 
-func (t TestEncodingIntOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingIntOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddIntOmitEmpty(e)
 	}
@@ -189,7 +189,7 @@ func (t TestEncodingIntOmitEmpty) IsNil() bool {
 
 type TestEncodingStringOmitEmpty []string
 
-func (t TestEncodingStringOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingStringOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddStringOmitEmpty(e)
 	}
@@ -200,7 +200,7 @@ func (t TestEncodingStringOmitEmpty) IsNil() bool {
 
 type TestEncodingFloatOmitEmpty []float64
 
-func (t TestEncodingFloatOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingFloatOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddFloatOmitEmpty(e)
 	}
@@ -211,7 +211,7 @@ func (t TestEncodingFloatOmitEmpty) IsNil() bool {
 
 type TestEncodingFloat32OmitEmpty []float32
 
-func (t TestEncodingFloat32OmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingFloat32OmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddFloat32OmitEmpty(e)
 	}
@@ -222,7 +222,7 @@ func (t TestEncodingFloat32OmitEmpty) IsNil() bool {
 
 type TestEncodingBoolOmitEmpty []bool
 
-func (t TestEncodingBoolOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingBoolOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddBoolOmitEmpty(e)
 	}
@@ -233,7 +233,7 @@ func (t TestEncodingBoolOmitEmpty) IsNil() bool {
 
 type TestEncodingArrOmitEmpty []TestEncodingBoolOmitEmpty
 
-func (t TestEncodingArrOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingArrOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddArrayOmitEmpty(e)
 	}
@@ -246,7 +246,7 @@ type TestObjEmpty struct {
 	empty bool
 }
 
-func (t *TestObjEmpty) MarshalObject(enc *Encoder) {
+func (t *TestObjEmpty) MarshalJSONObject(enc *Encoder) {
 }
 
 func (t *TestObjEmpty) IsNil() bool {
@@ -255,7 +255,7 @@ func (t *TestObjEmpty) IsNil() bool {
 
 type TestEncodingObjOmitEmpty []*TestObjEmpty
 
-func (t TestEncodingObjOmitEmpty) MarshalArray(enc *Encoder) {
+func (t TestEncodingObjOmitEmpty) MarshalJSONArray(enc *Encoder) {
 	for _, e := range t {
 		enc.AddObjectOmitEmpty(e)
 	}

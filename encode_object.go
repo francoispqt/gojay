@@ -6,7 +6,7 @@ var objKeyArr = []byte(`":[`)
 var objKey = []byte(`":`)
 
 // EncodeObject encodes an object to JSON
-func (enc *Encoder) EncodeObject(v MarshalerObject) error {
+func (enc *Encoder) EncodeObject(v MarshalerJSONObject) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
 	}
@@ -23,19 +23,45 @@ func (enc *Encoder) EncodeObject(v MarshalerObject) error {
 	return nil
 }
 
-func (enc *Encoder) encodeObject(v MarshalerObject) ([]byte, error) {
+func (enc *Encoder) encodeObject(v MarshalerJSONObject) ([]byte, error) {
 	enc.grow(500)
 	enc.writeByte('{')
 	if !v.IsNil() {
-		v.MarshalObject(enc)
+		v.MarshalJSONObject(enc)
 	}
 	enc.writeByte('}')
 	return enc.buf, enc.err
 }
 
 // AddObject adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
-// value must implement MarshalerObject
-func (enc *Encoder) AddObject(v MarshalerObject) {
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObject(v MarshalerJSONObject) {
+	enc.Object(v)
+}
+
+// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectOmitEmpty(v MarshalerJSONObject) {
+	enc.ObjectOmitEmpty(v)
+}
+
+// AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectKey(key string, v MarshalerJSONObject) {
+	enc.ObjectKey(key, v)
+}
+
+// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectKeyOmitEmpty(key string, v MarshalerJSONObject) {
+	enc.ObjectKeyOmitEmpty(key, v)
+}
+
+// Object adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) Object(v MarshalerJSONObject) {
 	if v.IsNil() {
 		enc.grow(2)
 		r := enc.getPreviousRune()
@@ -52,14 +78,14 @@ func (enc *Encoder) AddObject(v MarshalerObject) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
-	v.MarshalObject(enc)
+	v.MarshalJSONObject(enc)
 	enc.writeByte('}')
 }
 
-// AddObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// ObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
-// value must implement MarshalerObject
-func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
+// value must implement MarshalerJSONObject
+func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 	if v.IsNil() {
 		return
 	}
@@ -69,13 +95,13 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerObject) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
-	v.MarshalObject(enc)
+	v.MarshalJSONObject(enc)
 	enc.writeByte('}')
 }
 
-// AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
-// value must implement MarshalerObject
-func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
+// ObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
+// value must implement MarshalerJSONObject
+func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
 	if value.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
@@ -96,14 +122,14 @@ func (enc *Encoder) AddObjectKey(key string, value MarshalerObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
-	value.MarshalObject(enc)
+	value.MarshalJSONObject(enc)
 	enc.writeByte('}')
 }
 
-// AddObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
+// ObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
-// value must implement MarshalerObject
-func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
+// value must implement MarshalerJSONObject
+func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 	if value.IsNil() {
 		return
 	}
@@ -115,7 +141,7 @@ func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
-	value.MarshalObject(enc)
+	value.MarshalJSONObject(enc)
 	enc.writeByte('}')
 }
 
@@ -128,12 +154,12 @@ func (enc *Encoder) AddObjectKeyOmitEmpty(key string, value MarshalerObject) {
 //	}))
 type EncodeObjectFunc func(*Encoder)
 
-// MarshalObject implements MarshalerObject.
-func (f EncodeObjectFunc) MarshalObject(enc *Encoder) {
+// MarshalJSONObject implements MarshalerJSONObject.
+func (f EncodeObjectFunc) MarshalJSONObject(enc *Encoder) {
 	f(enc)
 }
 
-// IsNil implements MarshalerObject.
+// IsNil implements MarshalerJSONObject.
 func (f EncodeObjectFunc) IsNil() bool {
 	return f == nil
 }

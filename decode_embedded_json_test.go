@@ -15,7 +15,7 @@ type Request struct {
 	more   int
 }
 
-func (r *Request) UnmarshalObject(dec *Decoder, key string) error {
+func (r *Request) UnmarshalJSONObject(dec *Decoder, key string) error {
 	switch key {
 	case "id":
 		return dec.AddString(&r.id)

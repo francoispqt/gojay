@@ -6,9 +6,7 @@ import (
 )
 
 var decPool = sync.Pool{
-	New: func() interface{} {
-		return NewDecoder(nil)
-	},
+	New: newDecoderPool,
 }
 
 func init() {
@@ -30,6 +28,9 @@ func NewDecoder(r io.Reader) *Decoder {
 		length:   0,
 		isPooled: 0,
 	}
+}
+func newDecoderPool() interface{} {
+	return NewDecoder(nil)
 }
 
 // BorrowDecoder borrows a Decoder from the pool.

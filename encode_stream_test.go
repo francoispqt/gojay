@@ -301,8 +301,8 @@ func TestEncodeStream(t *testing.T) {
 		enc := Stream.NewEncoder(w).NConsumer(50).LineDelimited()
 		w.enc = enc
 		s := StreamChanObject(make(chan *testObject))
-		go enc.EncodeStream(s)
 		go feedStream(s, 5000)
+		go enc.EncodeStream(s)
 		select {
 		case <-enc.Done():
 			assert.Nil(t, enc.Err(), "enc.Err() should be nil")
@@ -310,6 +310,22 @@ func TestEncodeStream(t *testing.T) {
 			for _, b := range w.result {
 				assert.Equal(t, expectedStr, string(b), "every byte buffer should be equal to expected string")
 			}
+		}
+	})
+
+	t.Run("multiple-consumer-object-chan-closed", func(t *testing.T) {
+		// create our writer
+		w := &TestWriter{target: 5000, mux: &sync.RWMutex{}}
+		enc := Stream.NewEncoder(w).NConsumer(50).LineDelimited()
+		w.enc = enc
+		s := StreamChanObject(make(chan *testObject))
+		close(enc.done)
+		go feedStream(s, 5000)
+		go enc.EncodeStream(s)
+		select {
+		case <-enc.Done():
+			assert.Nil(t, enc.Err(), "enc.Err() should be nil")
+			assert.Len(t, w.result, 0, "w.result should be 0")
 		}
 	})
 

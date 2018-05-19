@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type MarshalerStream interface {
 //
 // It implements conext.Context and provide a channel to notify interruption.
 type StreamEncoder struct {
+	mux *sync.RWMutex
 	*Encoder
 	nConsumer int
 	delimiter byte
@@ -39,11 +41,19 @@ func (s *StreamEncoder) EncodeStream(m MarshalerStream) {
 	// resulting in a weird JSON
 	go consume(s, s, m)
 	for i := 1; i < s.nConsumer; i++ {
-		ss := Stream.borrowEncoder(s.w)
-		ss.done = s.done
-		ss.buf = make([]byte, 0, 512)
-		ss.delimiter = s.delimiter
-		go consume(s, ss, m)
+		s.mux.RLock()
+		select {
+		case <-s.done:
+		default:
+			ss := Stream.borrowEncoder(s.w)
+			ss.mux.Lock()
+			ss.done = s.done
+			ss.buf = make([]byte, 0, 512)
+			ss.delimiter = s.delimiter
+			go consume(s, ss, m)
+			ss.mux.Unlock()
+		}
+		s.mux.RUnlock()
 	}
 	return
 }
@@ -115,22 +125,24 @@ func (s *StreamEncoder) Value(key interface{}) interface{} {
 //
 // After calling cancel, Done() will return a closed channel.
 func (s *StreamEncoder) Cancel(err error) {
+	s.mux.RLock()
 	select {
 	case <-s.done:
 	default:
 		s.err = err
 		close(s.done)
 	}
+	s.mux.RUnlock()
 }
 
 // AddObject adds an object to be encoded.
-// value must implement MarshalerObject.
-func (s *StreamEncoder) AddObject(v MarshalerObject) {
+// value must implement MarshalerJSONObject.
+func (s *StreamEncoder) AddObject(v MarshalerJSONObject) {
 	if v.IsNil() {
 		return
 	}
 	s.Encoder.writeByte('{')
-	v.MarshalObject(s.Encoder)
+	v.MarshalJSONObject(s.Encoder)
 	s.Encoder.writeByte('}')
 	s.Encoder.writeByte(s.delimiter)
 }
@@ -143,10 +155,10 @@ func (s *StreamEncoder) AddString(v string) {
 	s.Encoder.writeByte(s.delimiter)
 }
 
-// AddArray adds an implementation of MarshalerArray to be encoded.
-func (s *StreamEncoder) AddArray(v MarshalerArray) {
+// AddArray adds an implementation of MarshalerJSONArray to be encoded.
+func (s *StreamEncoder) AddArray(v MarshalerJSONArray) {
 	s.Encoder.writeByte('[')
-	v.MarshalArray(s.Encoder)
+	v.MarshalJSONArray(s.Encoder)
 	s.Encoder.writeByte(']')
 	s.Encoder.writeByte(s.delimiter)
 }

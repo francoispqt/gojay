@@ -41,14 +41,14 @@ func BenchmarkEasyJsonEncodeObjLarge(b *testing.B) {
 func BenchmarkGoJayEncodeLargeStruct(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		if _, err := gojay.MarshalObject(benchmarks.NewLargePayload()); err != nil {
+		if _, err := gojay.MarshalJSONObject(benchmarks.NewLargePayload()); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
 func TestGoJayEncodeLargeStruct(t *testing.T) {
-	if output, err := gojay.MarshalObject(benchmarks.NewLargePayload()); err != nil {
+	if output, err := gojay.MarshalJSONObject(benchmarks.NewLargePayload()); err != nil {
 		t.Fatal(err)
 	} else {
 		log.Print(string(output))

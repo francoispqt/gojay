@@ -6,9 +6,7 @@ import (
 )
 
 var streamDecPool = sync.Pool{
-	New: func() interface{} {
-		return Stream.NewDecoder(nil)
-	},
+	New: newStreamDecoderPool,
 }
 
 // NewDecoder returns a new StreamDecoder.
@@ -21,6 +19,9 @@ func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
 		done:    make(chan struct{}, 1),
 	}
 	return streamDec
+}
+func newStreamDecoderPool() interface{} {
+	return Stream.NewDecoder(nil)
 }
 
 // BorrowDecoder borrows a StreamDecoder from the pool.

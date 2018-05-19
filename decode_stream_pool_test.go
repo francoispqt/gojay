@@ -51,3 +51,8 @@ func TestDecodeStreamDecodePooledDecoderError2(t *testing.T) {
 	// make sure they are the same
 	assert.True(t, false, "should not be called as decoder should have panicked")
 }
+
+func TestStreamDecoderNewPool(t *testing.T) {
+	dec := newStreamDecoderPool()
+	assert.IsType(t, &StreamDecoder{}, dec, "dec should be a *StreamDecoder")
+}

@@ -11,7 +11,7 @@ type message struct {
 	bar string
 }
 
-func (m *message) UnmarshalObject(dec *gojay.Decoder, k string) error {
+func (m *message) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	switch k {
 	case "foo":
 		return dec.AddString(&m.foo)
@@ -25,7 +25,7 @@ func (m *message) NKeys() int {
 	return 2
 }
 
-func (m *message) MarshalObject(dec *gojay.Encoder) {
+func (m *message) MarshalJSONObject(dec *gojay.Encoder) {
 	dec.AddStringKey("foo", m.foo)
 	dec.AddStringKey("bar", m.bar)
 }

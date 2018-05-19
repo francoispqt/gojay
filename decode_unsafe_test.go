@@ -46,6 +46,36 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 			},
 		},
 		{
+			v:    new(int8),
+			d:    []byte(`1`),
+			name: "test decode int8",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*int8)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, int8(1), *vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(int16),
+			d:    []byte(`1`),
+			name: "test decode int16",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*int16)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, int16(1), *vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(int32),
+			d:    []byte(`1`),
+			name: "test decode int32",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*int32)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, int32(1), *vt, "v must be equal to 1")
+			},
+		},
+		{
 			v:    new(int64),
 			d:    []byte(`1`),
 			name: "test decode int64",
@@ -106,6 +136,26 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 			},
 		},
 		{
+			v:    new(uint8),
+			d:    []byte(`1`),
+			name: "test decode int8",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*uint8)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, uint8(1), *vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(uint16),
+			d:    []byte(`1`),
+			name: "test decode uint16",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*uint16)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, uint16(1), *vt, "v must be equal to 1")
+			},
+		},
+		{
 			v:    new(float64),
 			d:    []byte(`1.15`),
 			name: "test decode float64",
@@ -123,6 +173,16 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 				vt := v.(*float64)
 				assert.Nil(t, err, "err must be nil")
 				assert.Equal(t, float64(0), *vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(float32),
+			d:    []byte(`1.15`),
+			name: "test decode float64",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(*float32)
+				assert.Nil(t, err, "err must be nil")
+				assert.Equal(t, float32(1.15), *vt, "v must be equal to 1")
 			},
 		},
 		{
@@ -220,6 +280,15 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 				assert.Equal(t, fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(v).String()), err.Error(), "err message should be equal to invalidUnmarshalErrorMsg")
 			},
 		},
+		{
+			v:    new(int),
+			d:    []byte(`1a2`),
+			name: "test decode invalid json",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must not be nil")
+				assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+			},
+		},
 	}
 	for _, testCase := range testCases {
 		testCase := testCase
@@ -233,7 +302,7 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 func TestUnmarshalUnsafeObjects(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerObject
+		v            UnmarshalerJSONObject
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -280,7 +349,7 @@ func TestUnmarshalUnsafeObjects(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := Unsafe.UnmarshalObject(testCase.d, testCase.v)
+			err := Unsafe.UnmarshalJSONObject(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
@@ -289,7 +358,7 @@ func TestUnmarshalUnsafeObjects(t *testing.T) {
 func TestUnmarshalUnsafeArrays(t *testing.T) {
 	testCases := []struct {
 		name         string
-		v            UnmarshalerArray
+		v            UnmarshalerJSONArray
 		d            []byte
 		expectations func(err error, v interface{}, t *testing.T)
 	}{
@@ -331,7 +400,7 @@ func TestUnmarshalUnsafeArrays(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		t.Run(testCase.name, func(*testing.T) {
-			err := Unsafe.UnmarshalArray(testCase.d, testCase.v)
+			err := Unsafe.UnmarshalJSONArray(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
