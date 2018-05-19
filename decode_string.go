@@ -172,7 +172,7 @@ func (dec *Decoder) parseEscapedString() error {
 			}
 		}
 	}
-	return nil
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getString() (int, int, error) {

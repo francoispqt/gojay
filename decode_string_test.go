@@ -97,6 +97,12 @@ func TestDecoderString(t *testing.T) {
 		},
 		{
 			name:           "escape-control-char",
+			json:           `"\`,
+			expectedResult: "",
+			err:            true,
+		},
+		{
+			name:           "escape-control-char",
 			json:           `"\\r"`,
 			expectedResult: "\r",
 			err:            false,

@@ -78,6 +78,84 @@ func (t *testObject) NKeys() int {
 	return 13
 }
 
+type testObject0Keys struct {
+	testStr       string
+	testInt       int
+	testInt64     int64
+	testInt32     int32
+	testInt16     int16
+	testInt8      int8
+	testUint64    uint64
+	testUint32    uint32
+	testUint16    uint16
+	testUint8     uint8
+	testFloat64   float64
+	testFloat32   float32
+	testBool      bool
+	testSubObject *testObject0Keys
+	testSubArray  testSliceInts
+}
+
+// make sure it implements interfaces
+var _ MarshalerJSONObject = &testObject0Keys{}
+var _ UnmarshalerJSONObject = &testObject0Keys{}
+
+func (t *testObject0Keys) IsNil() bool {
+	return t == nil
+}
+
+func (t *testObject0Keys) MarshalJSONObject(enc *Encoder) {
+	enc.AddStringKey("testStr", t.testStr)
+	enc.AddIntKey("testInt", t.testInt)
+	enc.AddIntKey("testInt64", int(t.testInt64))
+	enc.AddIntKey("testInt32", int(t.testInt32))
+	enc.AddIntKey("testInt16", int(t.testInt16))
+	enc.AddIntKey("testInt8", int(t.testInt8))
+	enc.AddIntKey("testUint64", int(t.testUint64))
+	enc.AddIntKey("testUint32", int(t.testUint32))
+	enc.AddIntKey("testUint16", int(t.testUint16))
+	enc.AddIntKey("testUint8", int(t.testUint8))
+	enc.AddFloatKey("testFloat64", t.testFloat64)
+	enc.AddFloat32Key("testFloat32", t.testFloat32)
+	enc.AddBoolKey("testBool", t.testBool)
+}
+
+func (t *testObject0Keys) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "testStr":
+		return dec.AddString(&t.testStr)
+	case "testInt":
+		return dec.AddInt(&t.testInt)
+	case "testInt64":
+		return dec.AddInt64(&t.testInt64)
+	case "testInt32":
+		return dec.AddInt32(&t.testInt32)
+	case "testInt16":
+		return dec.AddInt16(&t.testInt16)
+	case "testInt8":
+		return dec.AddInt8(&t.testInt8)
+	case "testUint64":
+		return dec.AddUint64(&t.testUint64)
+	case "testUint32":
+		return dec.AddUint32(&t.testUint32)
+	case "testUint16":
+		return dec.AddUint16(&t.testUint16)
+	case "testUint8":
+		return dec.AddUint8(&t.testUint8)
+	case "testFloat64":
+		return dec.AddFloat(&t.testFloat64)
+	case "testFloat32":
+		return dec.AddFloat32(&t.testFloat32)
+	case "testBool":
+		return dec.AddBool(&t.testBool)
+	}
+	return nil
+}
+
+func (t *testObject0Keys) NKeys() int {
+	return 0
+}
+
 type testObjectComplex struct {
 	testSubObject    *testObject
 	testSubSliceInts *testSliceInts
@@ -116,3 +194,72 @@ func (t *testObjectComplex) NKeys() int {
 // make sure it implements interfaces
 var _ MarshalerJSONObject = &testObjectComplex{}
 var _ UnmarshalerJSONObject = &testObjectComplex{}
+
+type TestObj struct {
+	test        int
+	test2       int
+	test3       string
+	test4       string
+	test5       float64
+	testArr     testSliceObjects
+	testSubObj  *TestSubObj
+	testSubObj2 *TestSubObj
+}
+
+type TestSubObj struct {
+	test3          int
+	test4          int
+	test5          string
+	testSubSubObj  *TestSubObj
+	testSubSubObj2 *TestSubObj
+}
+
+func (t *TestSubObj) UnmarshalJSONObject(dec *Decoder, key string) error {
+	switch key {
+	case "test":
+		return dec.AddInt(&t.test3)
+	case "test2":
+		return dec.AddInt(&t.test4)
+	case "test3":
+		return dec.AddString(&t.test5)
+	case "testSubSubObj":
+		t.testSubSubObj = &TestSubObj{}
+		return dec.AddObject(t.testSubSubObj)
+	case "testSubSubObj2":
+		t.testSubSubObj2 = &TestSubObj{}
+		return dec.AddObject(t.testSubSubObj2)
+	}
+	return nil
+}
+
+func (t *TestSubObj) NKeys() int {
+	return 0
+}
+
+func (t *TestObj) UnmarshalJSONObject(dec *Decoder, key string) error {
+	switch key {
+	case "test":
+		return dec.AddInt(&t.test)
+	case "test2":
+		return dec.AddInt(&t.test2)
+	case "test3":
+		return dec.AddString(&t.test3)
+	case "test4":
+		return dec.AddString(&t.test4)
+	case "test5":
+		return dec.AddFloat(&t.test5)
+	case "testSubObj":
+		t.testSubObj = &TestSubObj{}
+		return dec.AddObject(t.testSubObj)
+	case "testSubObj2":
+		t.testSubObj2 = &TestSubObj{}
+		return dec.AddObject(t.testSubObj2)
+	case "testArr":
+		return dec.AddArray(&t.testArr)
+	}
+	return nil
+}
+
+func (t *TestObj) NKeys() int {
+	return 8
+}

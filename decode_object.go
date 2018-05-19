@@ -97,14 +97,13 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			return dec.cursor, nil
 		}
 	}
-	return 0, dec.raiseInvalidJSONErr(dec.length - 1)
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) skipObject() (int, error) {
 	var objectsOpen = 1
 	var objectsClosed = 0
-	// var stringOpen byte = 0
-	for j := dec.cursor; j < dec.length; j++ {
+	for j := dec.cursor; j < dec.length || dec.read(); j++ {
 		switch dec.data[j] {
 		case '}':
 			objectsClosed++
@@ -117,7 +116,7 @@ func (dec *Decoder) skipObject() (int, error) {
 			objectsOpen++
 		case '"':
 			j++
-			for ; j < dec.length; j++ {
+			for ; j < dec.length || dec.read(); j++ {
 				if dec.data[j] != '"' {
 					continue
 				}
@@ -127,7 +126,7 @@ func (dec *Decoder) skipObject() (int, error) {
 				// loop backward and count how many anti slash found
 				// to see if string is effectively escaped
 				ct := 1
-				for i := j; i > 0; i-- {
+				for i := j - 1; i > 0; i-- {
 					if dec.data[i] != '\\' {
 						break
 					}
@@ -135,14 +134,14 @@ func (dec *Decoder) skipObject() (int, error) {
 				}
 				// is pair number of slashes, quote is not escaped
 				if ct&1 == 0 {
-					break
+					continue
 				}
 			}
 		default:
 			continue
 		}
 	}
-	return 0, nil
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) nextKey() (string, bool, error) {
@@ -177,7 +176,7 @@ func (dec *Decoder) nextKey() (string, bool, error) {
 			return "", false, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 	}
-	return "", false, dec.raiseInvalidJSONErr(dec.length - 1)
+	return "", false, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) skipData() error {
