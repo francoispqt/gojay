@@ -87,7 +87,7 @@ func (dec *Decoder) parseEscapedString() error {
 				diff := dec.cursor - start
 				dec.data = append(append(dec.data[:start], str...), dec.data[dec.cursor:]...)
 				dec.length = len(dec.data)
-				dec.cursor = dec.cursor - diff
+				dec.cursor = dec.cursor - diff + len(str)
 				return nil
 			case 'b':
 				// number of slash must be even
