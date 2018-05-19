@@ -42,12 +42,16 @@ func (s *StreamEncoder) EncodeStream(m MarshalerStream) {
 	go consume(s, s, m)
 	for i := 1; i < s.nConsumer; i++ {
 		s.mux.RLock()
-		ss := Stream.borrowEncoder(s.w)
-		ss.done = s.done
-		ss.buf = make([]byte, 0, 512)
-		ss.delimiter = s.delimiter
+		select {
+		case <-s.done:
+		default:
+			ss := Stream.borrowEncoder(s.w)
+			ss.done = s.done
+			ss.buf = make([]byte, 0, 512)
+			ss.delimiter = s.delimiter
+			go consume(s, ss, m)
+		}
 		s.mux.RUnlock()
-		go consume(s, ss, m)
 	}
 	return
 }
