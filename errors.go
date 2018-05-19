@@ -15,10 +15,14 @@ func (err InvalidJSONError) Error() string {
 }
 
 func (dec *Decoder) raiseInvalidJSONErr(pos int) error {
+	var c byte
+	if len(dec.data) > pos {
+		c = dec.data[pos]
+	}
 	dec.err = InvalidJSONError(
 		fmt.Sprintf(
 			invalidJSONCharErrorMsg,
-			dec.data[pos],
+			c,
 			pos,
 		),
 	)

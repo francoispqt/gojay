@@ -45,6 +45,13 @@ func TestDecoderUint64(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "basic-big",
 			json:           "18446744073709551615",
 			expectedResult: 18446744073709551615,
@@ -185,6 +192,13 @@ func TestDecoderUint32(t *testing.T) {
 		{
 			name:           "basic-null-err",
 			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -338,6 +352,20 @@ func TestDecoderUint16(t *testing.T) {
 		{
 			name:           "basic-null-err",
 			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -512,6 +540,13 @@ func TestDecoderUint8(t *testing.T) {
 		{
 			name:           "basic-null-err",
 			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),

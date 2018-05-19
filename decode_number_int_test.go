@@ -45,6 +45,13 @@ func TestDecoderInt(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "basic-big",
 			json:           "9223372036854775807",
 			expectedResult: 9223372036854775807,
@@ -284,6 +291,13 @@ func TestDecoderInt64(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "basic-big",
 			json:           "9223372036854775807",
 			expectedResult: 9223372036854775807,
@@ -515,6 +529,13 @@ func TestDecoderInt32(t *testing.T) {
 		{
 			name:           "basic-null-err",
 			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -763,6 +784,13 @@ func TestDecoderInt16(t *testing.T) {
 		{
 			name:           "basic-null-err",
 			json:           "nxll",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -1022,6 +1050,13 @@ func TestDecoderInt8(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-skip-data-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "basic-negative2",
 			json:           "-123",
 			expectedResult: -123,
@@ -1108,7 +1143,17 @@ func TestDecoderInt8(t *testing.T) {
 		},
 		{
 			name:           "basic-exponent-positive-negative-exp4",
-			json:           "8e-005",
+			json:           "8e-1 ",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e1 ",
+			expectedResult: 80,
+		},
+		{
+			name:           "basic-exponent-positive-negative-exp4",
+			json:           "8e-1",
 			expectedResult: 0,
 		},
 		{

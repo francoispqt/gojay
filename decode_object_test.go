@@ -431,13 +431,6 @@ func TestDecodeObjectBasic0Keys(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
-			name:           "basic-err-invalid-type",
-			json:           ``,
-			expectedResult: testObject0Keys{},
-			err:            true,
-			errType:        InvalidJSONError(""),
-		},
-		{
 			name: "basic-err",
 			json: `{
 						"testStr": "hello world!",
@@ -707,6 +700,24 @@ func TestDecodeObjectBasic0Keys(t *testing.T) {
 			dec := BorrowDecoder(strings.NewReader(testCase.json))
 			defer dec.Release()
 			err := dec.Decode(&s)
+			if testCase.err {
+				t.Log(err)
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			assert.Nil(t, err, "err should be nil")
+			if !testCase.skipCheckResult {
+				assert.Equal(t, testCase.expectedResult, s, "value at given index should be the same as expected results")
+			}
+		})
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := testObject0Keys{}
+			err := UnmarshalJSONObject([]byte(testCase.json), &s)
 			if testCase.err {
 				t.Log(err)
 				assert.NotNil(t, err, "err should not be nil")

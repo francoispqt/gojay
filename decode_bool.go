@@ -83,7 +83,7 @@ func (dec *Decoder) assertTrue() error {
 	if i == 3 {
 		return nil
 	}
-	return InvalidJSONError("Invalid JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) assertNull() error {
@@ -116,7 +116,7 @@ func (dec *Decoder) assertNull() error {
 	if i == 3 {
 		return nil
 	}
-	return InvalidJSONError("Invalid JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) assertFalse() error {
@@ -153,5 +153,5 @@ func (dec *Decoder) assertFalse() error {
 	if i == 4 {
 		return nil
 	}
-	return InvalidJSONError("Invalid JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }

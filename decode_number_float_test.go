@@ -46,6 +46,13 @@ func TestDecoderFloat64(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "basic-null-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "basic-exponent-positive-positive-exp4",
 			json:           "8e+005",
 			expectedResult: 800000,
@@ -233,6 +240,13 @@ func TestDecoderFloat32(t *testing.T) {
 			name:           "basic-null",
 			json:           "null",
 			expectedResult: 0,
+		},
+		{
+			name:           "basic-null-err",
+			json:           "trua",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "basic-null-err",

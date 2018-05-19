@@ -19,13 +19,7 @@ func (u decUnsafe) UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error
 	dec.data = data
 	dec.length = len(data)
 	_, err := dec.decodeArray(v)
-	if err != nil {
-		return err
-	}
-	if dec.err != nil {
-		return dec.err
-	}
-	return nil
+	return err
 }
 
 func (u decUnsafe) UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
@@ -34,13 +28,7 @@ func (u decUnsafe) UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) err
 	dec.data = data
 	dec.length = len(data)
 	_, err := dec.decodeObject(v)
-	if err != nil {
-		return err
-	}
-	if dec.err != nil {
-		return dec.err
-	}
-	return nil
+	return err
 }
 
 func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
