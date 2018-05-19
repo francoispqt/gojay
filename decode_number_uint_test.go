@@ -451,6 +451,14 @@ func TestDecoderUint16(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, uint16(33), v, "v must be equal to 33")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v uint16
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, uint16(33), v, "v must be equal to 33")
+	})
 	t.Run("decoder-api-json-error", func(t *testing.T) {
 		var v uint16
 		dec := NewDecoder(strings.NewReader(``))
@@ -609,6 +617,14 @@ func TestDecoderUint8(t *testing.T) {
 		dec := NewDecoder(strings.NewReader(`33`))
 		defer dec.Release()
 		err := dec.DecodeUint8(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, uint8(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v uint8
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, uint8(33), v, "v must be equal to 33")
 	})

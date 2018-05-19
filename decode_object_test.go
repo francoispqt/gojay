@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"io"
-	"log"
 	"strings"
 	"testing"
 
@@ -10,16 +9,300 @@ import (
 )
 
 func TestDecodeObjectBasic(t *testing.T) {
+	testCases := []struct {
+		name            string
+		json            string
+		expectedResult  testObject
+		err             bool
+		errType         interface{}
+		skipCheckResult bool
+	}{
+		{
+			name: "basic",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{
+				testStr:     "hello world!",
+				testInt:     4535,
+				testBool:    true,
+				testFloat32: 2.345,
+				testFloat64: 123.677,
+				testInt8:    23,
+				testInt16:   1245,
+				testInt32:   456778,
+				testInt64:   1446685358,
+				testUint8:   255,
+				testUint16:  3455,
+				testUint32:  343443,
+				testUint64:  545665757,
+			},
+			err: false,
+		},
+		{
+			name: "basic-err",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 453q5,
+						"testBool": trae,
+						"testFloat32": 2q.345,
+						"testFloat64": 12x3.677,
+						"testInt8": 2s3,
+						"testInt16": 1245,
+						"testInt32": 4567q78,
+						"testInt64": 14466e85358,
+						"testUint8": 2s55,
+						"testUint16": 345i5,
+						"testUint32": 343q443,
+						"testUint64": 5456657z57
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err2",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 4567x78,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-float32",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2q.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-float64",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 1x23.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err3",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 2q3,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-int16",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1x245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-int64",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446q685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-uint8",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 2x55,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-uint16",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3x455,
+						"testUint32": 343443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-uint32",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 3x43443,
+						"testUint64": 545665757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+		{
+			name: "basic-err-uint64",
+			json: `{
+						"testStr": "hello world!",
+						"testInt": 4535,
+						"testBool": true,
+						"testFloat32": 2.345,
+						"testFloat64": 123.677,
+						"testInt8": 23,
+						"testInt16": 1245,
+						"testInt32": 456778,
+						"testInt64": 1446685358,
+						"testUint8": 255,
+						"testUint16": 3455,
+						"testUint32": 343443,
+						"testUint64": 5456x65757
+					}`,
+			expectedResult: testObject{},
+			err:            true,
+		},
+	}
 
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := testObject{}
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			err := dec.Decode(&s)
+			if testCase.err {
+				t.Log(err)
+				assert.NotNil(t, err, "err should not be nil")
+				if testCase.errType != nil {
+					assert.IsType(t, testCase.errType, err, "err should be of the given type")
+				}
+				return
+			}
+			assert.Nil(t, err, "err should be nil")
+			if !testCase.skipCheckResult {
+				assert.Equal(t, testCase.expectedResult, s, "value at given index should be the same as expected results")
+			}
+		})
+	}
 }
 
 func TestDecodeObjectComplex(t *testing.T) {
 	testCases := []struct {
-		name           string
-		json           string
-		expectedResult testObjectComplex
-		err            bool
-		errType        interface{}
+		name            string
+		json            string
+		expectedResult  testObjectComplex
+		err             bool
+		errType         interface{}
+		skipCheckResult bool
 	}{
 		{
 			name: "basic",
@@ -47,6 +330,14 @@ func TestDecodeObjectComplex(t *testing.T) {
 			},
 			err: false,
 		},
+		{
+			name: "complex-json-err",
+			json: `{"testSubObject":{"testStr":"some string,"testInt":124465,"testUint16":120, "testUint8":15,"testInt16":-135,"testInt8":-23},"testSubSliceInts":[1,2],"testStr":"some \\n string"}`,
+			expectedResult: testObjectComplex{
+				testSubObject: &testObject{},
+			},
+			err: true,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -59,15 +350,17 @@ func TestDecodeObjectComplex(t *testing.T) {
 			defer dec.Release()
 			err := dec.Decode(&s)
 			if testCase.err {
+				t.Log(err)
 				assert.NotNil(t, err, "err should not be nil")
 				if testCase.errType != nil {
 					assert.IsType(t, testCase.errType, err, "err should be of the given type")
 				}
 				return
 			}
-			log.Print(s, testCase.name)
 			assert.Nil(t, err, "err should be nil")
-			assert.Equal(t, testCase.expectedResult, s, "value at given index should be the same as expected results")
+			if !testCase.skipCheckResult {
+				assert.Equal(t, testCase.expectedResult, s, "value at given index should be the same as expected results")
+			}
 		})
 	}
 }
@@ -288,7 +581,7 @@ func TestDecodeObjComplex(t *testing.T) {
 	result := jsonObjectComplex{}
 	err := UnmarshalJSONObject(jsonComplex, &result)
 	assert.NotNil(t, err, "err should not be as invalid type as been encountered nil")
-	assert.Equal(t, `Cannot unmarshal to struct, wrong char '"' found at pos 639`, err.Error(), "err should not be as invalid type as been encountered nil")
+	assert.Equal(t, `Cannot unmarshal JSON to type '*gojay.jsonObjectComplex'`, err.Error(), "err should not be as invalid type as been encountered nil")
 	assert.Equal(t, `{"test":"1","test1":2}`, result.Test, "result.Test is not expected value")
 	assert.Equal(t, "\\\\\\\\\n", result.Test2, "result.Test2 is not expected value")
 	assert.Equal(t, 1, result.Test3, "result.test3 is not expected value")

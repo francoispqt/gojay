@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -41,13 +40,7 @@ func (dec *Decoder) decodeString(v *string) error {
 			dec.cursor++
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to string, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -70,7 +63,7 @@ func (dec *Decoder) parseEscapedString() error {
 			case '"':
 				// nSlash must be odd
 				if nSlash&1 != 1 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				diff := (nSlash - 1) >> 1
 				dec.data = append(dec.data[:start+diff-1], dec.data[dec.cursor-1:]...)
@@ -102,7 +95,7 @@ func (dec *Decoder) parseEscapedString() error {
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				if nSlash&1 != 0 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				var diff int
 				diff = nSlash >> 1
@@ -116,7 +109,7 @@ func (dec *Decoder) parseEscapedString() error {
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				if nSlash&1 != 0 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				var diff int
 				diff = nSlash >> 1
@@ -130,7 +123,7 @@ func (dec *Decoder) parseEscapedString() error {
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				if nSlash&1 != 0 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				var diff int
 				diff = nSlash >> 1
@@ -144,7 +137,7 @@ func (dec *Decoder) parseEscapedString() error {
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				if nSlash&1 != 0 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				var diff int
 				diff = nSlash >> 1
@@ -158,7 +151,7 @@ func (dec *Decoder) parseEscapedString() error {
 				// divide nSlash - 1 by 2 and leave last one
 				// else divide nSlash by 2 and leave the letter
 				if nSlash&1 != 0 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				var diff int
 				diff = nSlash >> 1
@@ -169,7 +162,7 @@ func (dec *Decoder) parseEscapedString() error {
 			default:
 				// nSlash must be even
 				if nSlash&1 == 1 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				diff := nSlash >> 1
 				dec.data = append(dec.data[:start+diff-1], dec.data[dec.cursor-1:]...)
@@ -204,7 +197,7 @@ func (dec *Decoder) getString() (int, int, error) {
 			continue
 		}
 	}
-	return 0, 0, InvalidJSONError("Invalid JSON while parsing string")
+	return 0, 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) skipEscapedString() error {
@@ -218,7 +211,7 @@ func (dec *Decoder) skipEscapedString() error {
 			case '"':
 				// nSlash must be odd
 				if nSlash&1 != 1 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				return nil
 			case 'n', 'r', 't':
@@ -226,13 +219,13 @@ func (dec *Decoder) skipEscapedString() error {
 			default:
 				// nSlash must be even
 				if nSlash&1 == 1 {
-					return InvalidJSONError("Invalid JSON unescaped character")
+					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				return nil
 			}
 		}
 	}
-	return InvalidJSONError("Invalid JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) skipString() error {
@@ -254,5 +247,5 @@ func (dec *Decoder) skipString() error {
 			continue
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing string")
+	return dec.raiseInvalidJSONErr(len(dec.data) - 1)
 }

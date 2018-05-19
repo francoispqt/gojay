@@ -1,7 +1,5 @@
 package gojay
 
-import "fmt"
-
 // DecodeFloat64 reads the next JSON-encoded value from its input and stores it in the float64 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
@@ -39,13 +37,7 @@ func (dec *Decoder) decodeFloat64(v *float64) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to float, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -53,7 +45,7 @@ func (dec *Decoder) decodeFloat64(v *float64) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing float")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getFloat(b byte) (float64, error) {
@@ -114,7 +106,7 @@ func (dec *Decoder) getFloat(b byte) (float64, error) {
 			return float64(dec.atoi64(start, end)), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return float64(dec.atoi64(start, end)), nil
 }
@@ -156,13 +148,7 @@ func (dec *Decoder) decodeFloat32(v *float32) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to float, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -170,7 +156,7 @@ func (dec *Decoder) decodeFloat32(v *float32) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing float")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getFloat32(b byte) (float32, error) {
@@ -231,7 +217,7 @@ func (dec *Decoder) getFloat32(b byte) (float32, error) {
 			return float32(dec.atoi32(start, end)), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return float32(dec.atoi32(start, end)), nil
 }

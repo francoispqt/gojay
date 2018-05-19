@@ -1,7 +1,5 @@
 package gojay
 
-import "fmt"
-
 // DecodeBool reads the next JSON-encoded value from its input and stores it in the boolean pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
@@ -44,13 +42,7 @@ func (dec *Decoder) decodeBool(v *bool) error {
 			dec.cursor++
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to bool, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -67,15 +59,15 @@ func (dec *Decoder) assertTrue() error {
 		switch i {
 		case 0:
 			if dec.data[dec.cursor] != 'r' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 1:
 			if dec.data[dec.cursor] != 'u' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 2:
 			if dec.data[dec.cursor] != 'e' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 3:
 			switch dec.data[dec.cursor] {
@@ -83,7 +75,7 @@ func (dec *Decoder) assertTrue() error {
 				dec.cursor--
 				return nil
 			default:
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		}
 		i++
@@ -100,15 +92,15 @@ func (dec *Decoder) assertNull() error {
 		switch i {
 		case 0:
 			if dec.data[dec.cursor] != 'u' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 1:
 			if dec.data[dec.cursor] != 'l' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 2:
 			if dec.data[dec.cursor] != 'l' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 3:
 			switch dec.data[dec.cursor] {
@@ -116,7 +108,7 @@ func (dec *Decoder) assertNull() error {
 				dec.cursor--
 				return nil
 			default:
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		}
 		i++
@@ -133,19 +125,19 @@ func (dec *Decoder) assertFalse() error {
 		switch i {
 		case 0:
 			if dec.data[dec.cursor] != 'a' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 1:
 			if dec.data[dec.cursor] != 'l' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 2:
 			if dec.data[dec.cursor] != 's' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 3:
 			if dec.data[dec.cursor] != 'e' {
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		case 4:
 			switch dec.data[dec.cursor] {
@@ -153,7 +145,7 @@ func (dec *Decoder) assertFalse() error {
 				dec.cursor--
 				return nil
 			default:
-				return InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+				return dec.raiseInvalidJSONErr(dec.cursor)
 			}
 		}
 		i++

@@ -188,6 +188,14 @@ func TestDecoderFloat64(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, 1.25, v, "v must be equal to 1.25")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v float64
+		dec := NewDecoder(strings.NewReader(`1.25`))
+		defer dec.Release()
+		err := dec.DecodeFloat64(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, 1.25, v, "v must be equal to 1.25")
+	})
 	t.Run("decoder-api-json-error", func(t *testing.T) {
 		var v float64
 		dec := NewDecoder(strings.NewReader(``))
@@ -373,6 +381,14 @@ func TestDecoderFloat32(t *testing.T) {
 		dec := NewDecoder(strings.NewReader(`1.25`))
 		defer dec.Release()
 		err := dec.DecodeFloat32(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, float32(1.25), v, "v must be equal to 1.25")
+	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v float32
+		dec := NewDecoder(strings.NewReader(`1.25`))
+		defer dec.Release()
+		err := dec.Decode(&v)
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, float32(1.25), v, "v must be equal to 1.25")
 	})

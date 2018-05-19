@@ -1,6 +1,10 @@
 package gojay
 
-const invalidJSONCharErrorMsg = "Invalid JSON character %c found at position %d"
+import (
+	"fmt"
+)
+
+const invalidJSONCharErrorMsg = "Invalid JSON, wrong char '%c' found at position %d"
 
 // InvalidJSONError is a type representing an error returned when
 // Decoding encounters invalid JSON.
@@ -10,7 +14,18 @@ func (err InvalidJSONError) Error() string {
 	return string(err)
 }
 
-const invalidUnmarshalErrorMsg = "Invalid type %s provided to Unmarshal"
+func (dec *Decoder) raiseInvalidJSONErr(pos int) error {
+	dec.err = InvalidJSONError(
+		fmt.Sprintf(
+			invalidJSONCharErrorMsg,
+			dec.data[pos],
+			pos,
+		),
+	)
+	return dec.err
+}
+
+const invalidUnmarshalErrorMsg = "Cannot unmarshal JSON to type '%T'"
 
 // InvalidUnmarshalError is a type representing an error returned when
 // Decoding cannot unmarshal JSON to the receiver type for various reasons.
@@ -18,6 +33,15 @@ type InvalidUnmarshalError string
 
 func (err InvalidUnmarshalError) Error() string {
 	return string(err)
+}
+
+func (dec *Decoder) makeInvalidUnmarshalErr(v interface{}) error {
+	return InvalidUnmarshalError(
+		fmt.Sprintf(
+			invalidUnmarshalErrorMsg,
+			v,
+		),
+	)
 }
 
 const invalidMarshalErrorMsg = "Invalid type %s provided to Marshal"

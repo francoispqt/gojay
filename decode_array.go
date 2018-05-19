@@ -1,9 +1,5 @@
 package gojay
 
-import (
-	"fmt"
-)
-
 // DecodeArray reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
 //
 // v must implement UnmarshalerJSONArray.
@@ -40,7 +36,7 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 				}
 				n++
 			}
-			return 0, InvalidJSONError("Invalid JSON could not find array closing bracket")
+			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		case 'n':
 			// is null
 			dec.cursor++
@@ -53,23 +49,17 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			// can't unmarshall to struct
 			// we skip array and set Error
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to array, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(arr)
 			err := dec.skipData()
 			if err != nil {
 				return 0, err
 			}
 			return dec.cursor, nil
 		default:
-			return 0, InvalidJSONError("Invalid JSON")
+			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) skipArray() (int, error) {
@@ -114,5 +104,5 @@ func (dec *Decoder) skipArray() (int, error) {
 			continue
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }

@@ -100,13 +100,7 @@ func (dec *Decoder) decodeInt16(v *int16) error {
 			dec.cursor++
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -114,7 +108,7 @@ func (dec *Decoder) decodeInt16(v *int16) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getInt16(b byte) (int16, error) {
@@ -176,7 +170,7 @@ func (dec *Decoder) getInt16(b byte) (int16, error) {
 			return dec.atoi16(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoi16(start, end), nil
 }
@@ -213,11 +207,10 @@ func (dec *Decoder) getInt16WithExp(init int16, cursor int) (int16, error) {
 			}
 			return init * int16(pow10uint64[exp+1]), nil
 		default:
-			dec.err = InvalidJSONError("Invalid JSON")
-			return 0, dec.err
+			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 // DecodeInt8 reads the next JSON-encoded value from its input and stores it in the int8 pointed to by v.
@@ -259,13 +252,7 @@ func (dec *Decoder) decodeInt8(v *int8) error {
 			dec.cursor++
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -273,7 +260,7 @@ func (dec *Decoder) decodeInt8(v *int8) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getInt8(b byte) (int8, error) {
@@ -335,7 +322,7 @@ func (dec *Decoder) getInt8(b byte) (int8, error) {
 			return dec.atoi8(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoi8(start, end), nil
 }
@@ -372,11 +359,11 @@ func (dec *Decoder) getInt8WithExp(init int8, cursor int) (int8, error) {
 			}
 			return init * int8(pow10uint64[exp+1]), nil
 		default:
-			dec.err = InvalidJSONError("Invalid JSON")
+			dec.err = dec.raiseInvalidJSONErr(dec.cursor)
 			return 0, dec.err
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 // DecodeInt32 reads the next JSON-encoded value from its input and stores it in the int32 pointed to by v.
@@ -416,13 +403,7 @@ func (dec *Decoder) decodeInt32(v *int32) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -430,7 +411,7 @@ func (dec *Decoder) decodeInt32(v *int32) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getInt32(b byte) (int32, error) {
@@ -492,7 +473,7 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 			return dec.atoi32(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoi32(start, end), nil
 }
@@ -529,11 +510,11 @@ func (dec *Decoder) getInt32WithExp(init int32, cursor int) (int32, error) {
 			}
 			return init * int32(pow10uint64[exp+1]), nil
 		default:
-			dec.err = InvalidJSONError("Invalid JSON")
+			dec.err = dec.raiseInvalidJSONErr(dec.cursor)
 			return 0, dec.err
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 // DecodeInt64 reads the next JSON-encoded value from its input and stores it in the int64 pointed to by v.
@@ -574,13 +555,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -588,7 +563,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getInt64(b byte) (int64, error) {
@@ -650,7 +625,7 @@ func (dec *Decoder) getInt64(b byte) (int64, error) {
 			return dec.getInt64WithExp(dec.atoi64(start, end), j+1)
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoi64(start, end), nil
 }
@@ -687,11 +662,10 @@ func (dec *Decoder) getInt64WithExp(init int64, cursor int) (int64, error) {
 			}
 			return init * int64(pow10uint64[exp+1]), nil
 		default:
-			dec.err = InvalidJSONError("Invalid JSON")
-			return 0, dec.err
+			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON")
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) atoi64(start, end int) int64 {
@@ -708,18 +682,18 @@ func (dec *Decoder) atoi64(start, end int) int64 {
 		for i := start + 1; i < end; i++ {
 			intv := int64(digits[dec.data[i]])
 			if val > maxInt64toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows int64")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxInt64-val < intv {
-				dec.err = InvalidUnmarshalError("Overflows int64")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += intv
 		}
 	} else {
-		dec.err = InvalidUnmarshalError("Overflows int64")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		return 0
 	}
 	return val
@@ -739,18 +713,18 @@ func (dec *Decoder) atoi32(start, end int) int32 {
 		for i := start + 1; i < end; i++ {
 			intv := int32(digits[dec.data[i]])
 			if val > maxInt32toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxInt32-val < intv {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += intv
 		}
 	} else {
-		dec.err = InvalidUnmarshalError("Overflows int32")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		return 0
 	}
 	return val
@@ -770,18 +744,18 @@ func (dec *Decoder) atoi16(start, end int) int16 {
 		for i := start + 1; i < end; i++ {
 			intv := int16(digits[dec.data[i]])
 			if val > maxInt16toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxInt16-val < intv {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += intv
 		}
 	} else {
-		dec.err = InvalidUnmarshalError("Overflows int32")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		return 0
 	}
 	return val
@@ -801,18 +775,18 @@ func (dec *Decoder) atoi8(start, end int) int8 {
 		for i := start + 1; i < end; i++ {
 			intv := int8(digits[dec.data[i]])
 			if val > maxInt8toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxInt8-val < intv {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += intv
 		}
 	} else {
-		dec.err = InvalidUnmarshalError("Overflows int32")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		return 0
 	}
 	return val

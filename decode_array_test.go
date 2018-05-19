@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"log"
 	"strings"
 	"testing"
 
@@ -75,7 +74,6 @@ func TestSliceInts(t *testing.T) {
 			}
 			continue
 		}
-		log.Print(s)
 		for k, v := range testCase.expectedResult {
 			assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
 		}
@@ -211,7 +209,6 @@ func TestSliceBools(t *testing.T) {
 				}
 				return
 			}
-			log.Print(s, testCase.name)
 			assert.Nil(t, err, "err should be nil")
 			for k, v := range testCase.expectedResult {
 				assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
@@ -278,7 +275,6 @@ func TestSliceSlices(t *testing.T) {
 				}
 				return
 			}
-			log.Print(s, testCase.name)
 			assert.Nil(t, err, "err should be nil")
 			for k, v := range testCase.expectedResult {
 				assert.Equal(t, v, s[k], "value at given index should be the same as expected results")
@@ -393,7 +389,7 @@ func TestDecodeSliceInvalidType(t *testing.T) {
 	err := UnmarshalJSONArray([]byte(`{}`), &result)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.IsType(t, InvalidUnmarshalError(""), err, "err should be of type InvalidUnmarshalError")
-	assert.Equal(t, "Cannot unmarshall to array, wrong char '{' found at pos 0", err.Error(), "err should not be nil")
+	assert.Equal(t, "Cannot unmarshal JSON to type '*gojay.testSliceObjects'", err.Error(), "err should not be nil")
 }
 
 func TestDecoderChannelOfObjectsBasic(t *testing.T) {

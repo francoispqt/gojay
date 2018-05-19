@@ -230,6 +230,14 @@ func TestDecoderInt(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, int(33), v, "v must be equal to 33")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v int
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int(33), v, "v must be equal to 33")
+	})
 	t.Run("decoder-api-invalid-json", func(t *testing.T) {
 		var v int
 		dec := NewDecoder(strings.NewReader(``))
@@ -283,6 +291,12 @@ func TestDecoderInt64(t *testing.T) {
 		{
 			name:           "basic-big-overflow",
 			json:           " 9223372036854775808",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 9223372036854775827",
 			expectedResult: 0,
 			err:            true,
 		},
@@ -446,6 +460,14 @@ func TestDecoderInt64(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, int64(33), v, "v must be equal to 33")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v int64
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int64(33), v, "v must be equal to 33")
+	})
 	t.Run("decoder-api-invalid-json", func(t *testing.T) {
 		var v int64
 		dec := NewDecoder(strings.NewReader(``))
@@ -504,6 +526,12 @@ func TestDecoderInt32(t *testing.T) {
 		{
 			name:           "basic-big-overflow",
 			json:           " 2147483648",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           " 2147483657",
 			expectedResult: 0,
 			err:            true,
 		},
@@ -674,6 +702,14 @@ func TestDecoderInt32(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, int32(33), v, "v must be equal to 33")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v int32
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int32(33), v, "v must be equal to 33")
+	})
 	t.Run("decoder-api-invalid-json", func(t *testing.T) {
 		var v int32
 		dec := NewDecoder(strings.NewReader(``))
@@ -728,6 +764,18 @@ func TestDecoderInt16(t *testing.T) {
 			name:           "basic-big",
 			json:           " 24566",
 			expectedResult: 24566,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "66535",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "32768",
+			expectedResult: 0,
+			err:            true,
 		},
 		{
 			name:           "basic-big-overflow",
@@ -902,6 +950,14 @@ func TestDecoderInt16(t *testing.T) {
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, int16(33), v, "v must be equal to 33")
 	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v int16
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int16(33), v, "v must be equal to 33")
+	})
 	t.Run("decoder-api-invalid-json", func(t *testing.T) {
 		var v int16
 		dec := NewDecoder(strings.NewReader(``))
@@ -960,6 +1016,18 @@ func TestDecoderInt8(t *testing.T) {
 		{
 			name:           "basic-big-overflow",
 			json:           " 2147483648",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "137",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "128",
 			expectedResult: 0,
 			err:            true,
 		},
@@ -1117,6 +1185,14 @@ func TestDecoderInt8(t *testing.T) {
 		dec := NewDecoder(strings.NewReader(`33`))
 		defer dec.Release()
 		err := dec.DecodeInt8(&v)
+		assert.Nil(t, err, "Err must be nil")
+		assert.Equal(t, int8(33), v, "v must be equal to 33")
+	})
+	t.Run("decoder-api2", func(t *testing.T) {
+		var v int8
+		dec := NewDecoder(strings.NewReader(`33`))
+		defer dec.Release()
+		err := dec.Decode(&v)
 		assert.Nil(t, err, "Err must be nil")
 		assert.Equal(t, int8(33), v, "v must be equal to 33")
 	})

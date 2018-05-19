@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"testing"
@@ -147,6 +146,12 @@ func TestDecoderString(t *testing.T) {
 		{
 			name:           "utf16-surrogate-err2",
 			json:           `"\uD834\uDZ1E`,
+			expectedResult: ``,
+			err:            true,
+		},
+		{
+			name:           "utf16-surrogate-err3",
+			json:           `"\uD834`,
 			expectedResult: ``,
 			err:            true,
 		},
@@ -373,7 +378,6 @@ func TestSkipString(t *testing.T) {
 			if testCase.errType != nil {
 				assert.IsType(t, testCase.errType, err, "err should be of expected type")
 			}
-			log.Print(err)
 		} else {
 			assert.Nil(t, err, "err should be nil")
 		}

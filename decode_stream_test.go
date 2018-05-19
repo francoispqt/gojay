@@ -168,7 +168,7 @@ func TestStreamDecodingObjectsParallel(t *testing.T) {
 			expectations: func(err error, result []*TestObj, t *testing.T) {
 				assert.NotNil(t, err, "err is not nil as JSON is invalid")
 				assert.IsType(t, InvalidJSONError(""), err, "err is of type InvalidJSONError")
-				assert.Equal(t, "Invalid JSON", err.Error(), "err message is Invalid JSON")
+				assert.Equal(t, "Invalid JSON, wrong char 'i' found at position 6", err.Error(), "err message is Invalid JSON")
 			},
 		},
 	}
@@ -276,7 +276,7 @@ func TestStreamDecodingStringsParallel(t *testing.T) {
 				assert.NotNil(t, err, "err should not be nil")
 
 				assert.IsType(t, InvalidJSONError(""), err, "err is of type InvalidJSONError")
-				assert.Equal(t, "Invalid JSON", err.Error(), "err message is Invalid JSON")
+				assert.Equal(t, "Invalid JSON, wrong char 'w' found at position 6", err.Error(), "err message is Invalid JSON")
 			},
 		},
 	}

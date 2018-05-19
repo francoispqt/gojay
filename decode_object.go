@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -36,6 +35,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 					}
 					err = j.UnmarshalJSONObject(dec, k)
 					if err != nil {
+						dec.err = err
 						return 0, err
 					} else if dec.called&1 == 0 {
 						err := dec.skipData()
@@ -57,6 +57,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 					}
 					err = j.UnmarshalJSONObject(dec, k)
 					if err != nil {
+						dec.err = err
 						return 0, err
 					} else if dec.called&1 == 0 {
 						err := dec.skipData()
@@ -87,14 +88,8 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			dec.cursor++
 			return dec.cursor, nil
 		default:
-			// can't unmarshall to struct
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshal to struct, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			// can't unmarshal to struct
+			dec.err = dec.makeInvalidUnmarshalErr(j)
 			err := dec.skipData()
 			if err != nil {
 				return 0, err
@@ -102,7 +97,7 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			return dec.cursor, nil
 		}
 	}
-	return 0, InvalidJSONError("Invalid JSON while parsing object")
+	return 0, dec.raiseInvalidJSONErr(dec.length - 1)
 }
 
 func (dec *Decoder) skipObject() (int, error) {
@@ -173,13 +168,16 @@ func (dec *Decoder) nextKey() (string, bool, error) {
 				d := dec.data[start : end-1]
 				return *(*string)(unsafe.Pointer(&d)), false, nil
 			}
-			return "", false, InvalidJSONError("Invalid JSON while parsing object key")
+			return "", false, dec.raiseInvalidJSONErr(dec.cursor)
 		case '}':
 			dec.cursor = dec.cursor + 1
 			return "", true, nil
+		default:
+			// can't unmarshall to struct
+			return "", false, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 	}
-	return "", false, InvalidJSONError("Invalid JSON while parsing object key")
+	return "", false, dec.raiseInvalidJSONErr(dec.length - 1)
 }
 
 func (dec *Decoder) skipData() error {
@@ -235,9 +233,9 @@ func (dec *Decoder) skipData() error {
 			dec.cursor = end
 			return err
 		}
-		return InvalidJSONError("Invalid JSON")
+		return dec.raiseInvalidJSONErr(dec.cursor)
 	}
-	return InvalidJSONError("Invalid JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 // DecodeObjectFunc is a custom func type implementating UnarshaleObject.

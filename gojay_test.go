@@ -50,6 +50,8 @@ func (t *testObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 		return dec.AddInt(&t.testInt)
 	case "testInt64":
 		return dec.AddInt64(&t.testInt64)
+	case "testInt32":
+		return dec.AddInt32(&t.testInt32)
 	case "testInt16":
 		return dec.AddInt16(&t.testInt16)
 	case "testInt8":

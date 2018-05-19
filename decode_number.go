@@ -74,7 +74,7 @@ func (dec *Decoder) skipNumber() (int, error) {
 			continue
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return end, InvalidJSONError("Invalid JSON while parsing number")
+		return end, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return end, nil
 }

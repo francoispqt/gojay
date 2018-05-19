@@ -1,7 +1,6 @@
 package gojay
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -44,13 +43,7 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -58,7 +51,7 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getUint8(b byte) (uint8, error) {
@@ -77,7 +70,7 @@ func (dec *Decoder) getUint8(b byte) (uint8, error) {
 			return dec.atoui8(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoui8(start, end), nil
 }
@@ -121,13 +114,7 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -135,7 +122,7 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getUint16(b byte) (uint16, error) {
@@ -154,7 +141,7 @@ func (dec *Decoder) getUint16(b byte) (uint16, error) {
 			return dec.atoui16(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoui16(start, end), nil
 }
@@ -198,13 +185,7 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -212,7 +193,7 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getUint32(b byte) (uint32, error) {
@@ -231,7 +212,7 @@ func (dec *Decoder) getUint32(b byte) (uint32, error) {
 			return dec.atoui32(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoui32(start, end), nil
 }
@@ -274,13 +255,7 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 			}
 			return nil
 		default:
-			dec.err = InvalidUnmarshalError(
-				fmt.Sprintf(
-					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
-					string(dec.data[dec.cursor]),
-					dec.cursor,
-				),
-			)
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
@@ -288,7 +263,7 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 			return nil
 		}
 	}
-	return InvalidJSONError("Invalid JSON while parsing int")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 func (dec *Decoder) getUint64(b byte) (uint64, error) {
@@ -305,7 +280,7 @@ func (dec *Decoder) getUint64(b byte) (uint64, error) {
 			return dec.atoui64(start, end), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return 0, InvalidJSONError("Invalid JSON while parsing number")
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
 	return dec.atoui64(start, end), nil
 }
@@ -323,18 +298,18 @@ func (dec *Decoder) atoui64(start, end int) uint64 {
 		for i := start + 1; i < end; i++ {
 			uintv := uint64(digits[dec.data[i]])
 			if val > maxUint64toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows uint64")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxUint64-val < uintv {
-				dec.err = InvalidUnmarshalError("Overflows uint64")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += uintv
 		}
 	} else {
-		dec.err = InvalidUnmarshalError("Overflows uint64")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		return 0
 	}
 	return val
@@ -354,18 +329,18 @@ func (dec *Decoder) atoui32(start, end int) uint32 {
 		for i := start + 1; i < end; i++ {
 			uintv := uint32(digits[dec.data[i]])
 			if val > maxUint32toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows uint32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxUint32-val < uintv {
-				dec.err = InvalidUnmarshalError("Overflows int32")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += uintv
 		}
 	} else if ll > maxUint32Length {
-		dec.err = InvalidUnmarshalError("Overflows uint32")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		val = 0
 	}
 	return val
@@ -385,18 +360,18 @@ func (dec *Decoder) atoui16(start, end int) uint16 {
 		for i := start + 1; i < end; i++ {
 			uintv := uint16(digits[dec.data[i]])
 			if val > maxUint16toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows uint16")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxUint16-val < uintv {
-				dec.err = InvalidUnmarshalError("Overflows uint16")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += uintv
 		}
 	} else if ll > maxUint16Length {
-		dec.err = InvalidUnmarshalError("Overflows uint16")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		val = 0
 	}
 	return val
@@ -416,18 +391,18 @@ func (dec *Decoder) atoui8(start, end int) uint8 {
 		for i := start + 1; i < end; i++ {
 			uintv := uint8(digits[dec.data[i]])
 			if val > maxUint8toMultiply {
-				dec.err = InvalidUnmarshalError("Overflows uint8")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val = (val << 3) + (val << 1)
 			if math.MaxUint8-val < uintv {
-				dec.err = InvalidUnmarshalError("Overflows uint8")
+				dec.err = dec.makeInvalidUnmarshalErr(val)
 				return 0
 			}
 			val += uintv
 		}
 	} else if ll > maxUint8Length {
-		dec.err = InvalidUnmarshalError("Overflows uint8")
+		dec.err = dec.makeInvalidUnmarshalErr(val)
 		val = 0
 	}
 	return val

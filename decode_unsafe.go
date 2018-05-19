@@ -57,21 +57,41 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt(vt)
+	case *int8:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeInt8(vt)
+	case *int16:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeInt16(vt)
 	case *int32:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt32(vt)
-	case *uint32:
-		dec = borrowDecoder(nil, 0)
-		dec.length = len(data)
-		dec.data = data
-		err = dec.decodeUint32(vt)
 	case *int64:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeInt64(vt)
+	case *uint8:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint8(vt)
+	case *uint16:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint16(vt)
+	case *uint32:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeUint32(vt)
 	case *uint64:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
@@ -82,6 +102,11 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 		dec.length = len(data)
 		dec.data = data
 		err = dec.decodeFloat64(vt)
+	case *float32:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = data
+		err = dec.decodeFloat32(vt)
 	case *bool:
 		dec = borrowDecoder(nil, 0)
 		dec.length = len(data)
