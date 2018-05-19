@@ -56,6 +56,12 @@ func TestDecoderUint64(t *testing.T) {
 			err:            true,
 		},
 		{
+			name:           "basic-big-overflow",
+			json:           "18446744073709551625",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "basic-big-overflow2",
 			json:           "184467440737095516161",
 			expectedResult: 0,
@@ -196,6 +202,12 @@ func TestDecoderUint32(t *testing.T) {
 		{
 			name:           "basic-big-overflow",
 			json:           " 4294967298",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-big-overflow",
+			json:           "4294967395",
 			expectedResult: 0,
 			err:            true,
 		},
