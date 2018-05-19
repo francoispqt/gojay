@@ -2,7 +2,7 @@ package benchmarks
 
 import "github.com/francoispqt/gojay"
 
-// Reponse from Clearbit API. Size: 2.4kb
+// Response from Clearbit API. Size: 2.4kb
 var MediumFixture = []byte(`{
 	"person": {
 	  "id": "d50887ca-a6ce-4e59-b89f-14f0b5d03b03",

@@ -12,7 +12,7 @@ func TestDecodeStreamDecodePooledDecoderError(t *testing.T) {
 	dec.Release()
 	defer func() {
 		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.NotNil(t, err, "err shouldnt be nil")
 		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 	}()
 	var v = 0
@@ -27,7 +27,7 @@ func TestDecodeStreamDecodePooledDecoderError1(t *testing.T) {
 	dec.Release()
 	defer func() {
 		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.NotNil(t, err, "err shouldnt be nil")
 		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 	}()
 	var v = testSliceStrings{}
@@ -42,7 +42,7 @@ func TestDecodeStreamDecodePooledDecoderError2(t *testing.T) {
 	dec.Release()
 	defer func() {
 		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.NotNil(t, err, "err shouldnt be nil")
 		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 		assert.Equal(t, "Invalid usage of pooled decoder", err.(InvalidUsagePooledDecoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 	}()

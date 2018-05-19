@@ -253,7 +253,7 @@ func TestDecoderBoolPoolError(t *testing.T) {
 	dec.Release()
 	defer func() {
 		err := recover()
-		assert.NotNil(t, err, "err shouldnot be nil")
+		assert.NotNil(t, err, "err shouldnt be nil")
 		assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 	}()
 	_ = dec.DecodeBool(&v)

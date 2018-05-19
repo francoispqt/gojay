@@ -137,7 +137,7 @@ func TestDecoderUint64(t *testing.T) {
 		dec.Release()
 		defer func() {
 			err := recover()
-			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.NotNil(t, err, "err shouldnt be nil")
 			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 		}()
 		_ = dec.DecodeUint64(&result)
@@ -297,7 +297,7 @@ func TestDecoderUint32(t *testing.T) {
 		dec.Release()
 		defer func() {
 			err := recover()
-			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.NotNil(t, err, "err shouldnt be nil")
 			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 		}()
 		_ = dec.DecodeUint32(&result)
@@ -477,7 +477,7 @@ func TestDecoderUint16(t *testing.T) {
 		dec.Release()
 		defer func() {
 			err := recover()
-			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.NotNil(t, err, "err shouldnt be nil")
 			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 		}()
 		_ = dec.DecodeUint16(&result)
@@ -653,7 +653,7 @@ func TestDecoderUint8(t *testing.T) {
 		dec.Release()
 		defer func() {
 			err := recover()
-			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.NotNil(t, err, "err shouldnt be nil")
 			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
 		}()
 		_ = dec.DecodeUint8(&result)

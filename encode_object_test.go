@@ -395,7 +395,7 @@ func TestEncoderObjectEncodeAPIError(t *testing.T) {
 		enc.Release()
 		defer func() {
 			err := recover()
-			assert.NotNil(t, err, "err shouldnot be nil")
+			assert.NotNil(t, err, "err shouldnt be nil")
 			assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
 			assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
 		}()
