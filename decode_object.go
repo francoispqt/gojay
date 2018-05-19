@@ -237,7 +237,7 @@ func (dec *Decoder) skipData() error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeObjectFunc is a custom func type implementating UnarshaleObject.
+// DecodeObjectFunc is a custom func type implementing UnarshaleObject.
 // Use it to cast a func(*Decoder) to Unmarshal an object.
 //
 //	str := ""

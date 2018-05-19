@@ -145,7 +145,7 @@ func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 	enc.writeByte('}')
 }
 
-// EncodeObjectFunc is a custom func type implementating MarshaleObject.
+// EncodeObjectFunc is a custom func type implementing MarshaleObject.
 // Use it to cast a func(*Encoder) to Marshal an object.
 //
 //	enc := gojay.NewEncoder(io.Writer)
