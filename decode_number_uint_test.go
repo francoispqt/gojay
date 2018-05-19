@@ -169,7 +169,7 @@ func TestDecoderUint32(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "1039405",
+			json:           " 1039405 ",
 			expectedResult: 1039405,
 		},
 		{
@@ -322,7 +322,7 @@ func TestDecoderUint16(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "3224",
+			json:           " 3224 ",
 			expectedResult: 3224,
 		},
 		{
@@ -496,7 +496,7 @@ func TestDecoderUint8(t *testing.T) {
 		},
 		{
 			name:           "basic-positive2",
-			json:           "255",
+			json:           " 255 ",
 			expectedResult: 255,
 		},
 		{
