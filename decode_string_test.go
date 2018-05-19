@@ -139,6 +139,12 @@ func TestDecoderString(t *testing.T) {
 		},
 		{
 			name:           "utf16-surrogate",
+			json:           `"\uD834\uD834"`,
+			expectedResult: "�\x00\x00\x00",
+			err:            false,
+		},
+		{
+			name:           "utf16-surrogate",
 			json:           `"\uD834"`,
 			expectedResult: `�`,
 			err:            false,
