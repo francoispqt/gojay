@@ -1,5 +1,7 @@
 package gojay
 
+const hex = "0123456789abcdef"
+
 // grow grows b's capacity, if necessary, to guarantee space for
 // another n bytes. After grow(n), at least n bytes can be written to b
 // without another allocation. If n is negative, grow panics.
@@ -36,9 +38,14 @@ func (enc *Encoder) writeString(s string) {
 func (enc *Encoder) writeStringEscape(s string) {
 	l := len(s)
 	for i := 0; i < l; i++ {
-		switch s[i] {
+		c := s[i]
+		if c >= 0x20 && c != '\\' && c != '"' {
+			enc.writeByte(c)
+			continue
+		}
+		switch c {
 		case '\\', '"':
-			enc.writeTwoBytes('\\', s[i])
+			enc.writeTwoBytes('\\', c)
 		case '\n':
 			enc.writeTwoBytes('\\', 'n')
 		case '\f':
@@ -50,8 +57,9 @@ func (enc *Encoder) writeStringEscape(s string) {
 		case '\t':
 			enc.writeTwoBytes('\\', 't')
 		default:
-			enc.writeByte(s[i])
+			enc.writeString(`\u00`)
+			enc.writeTwoBytes(hex[c>>4], hex[c&0xF])
 		}
+		continue
 	}
-
 }

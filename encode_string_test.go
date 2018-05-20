@@ -92,6 +92,18 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
+	t.Run("escaped-control-char", func(t *testing.T) {
+		str := "\u001b"
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeString(str)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`"\u001b"`,
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
 	t.Run("escaped-sequence3", func(t *testing.T) {
 		str := "hello \f world 𝄞"
 		builder := &strings.Builder{}
