@@ -679,41 +679,41 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_small.go)
 
-|             | ns/op | bytes/op | allocs/op |
-|-------------|-------|--------------|-----------|
-| Std Library | 2547  | 496          | 4         |
-| JsonIter    | 2046  | 312          | 12        |
-| JsonParser  | 1408  | 0            | 0         |
-| EasyJson    | 929   | 240          | 2         |
-| GoJay       | 807   | 256          | 2         |
-| GoJay-unsafe| 712   | 112          | 1         |
+|                 | ns/op     | bytes/op     | allocs/op |
+|-----------------|-----------|--------------|-----------|
+| Std Library     | 2547      | 496          | 4         |
+| JsonIter        | 2046      | 312          | 12        |
+| JsonParser      | 1408      | 0            | 0         |
+| EasyJson        | 929       | 240          | 2         |
+| **GoJay**       | **807**   | **256**      | **2**     |
+| **GoJay-unsafe**| **712**   | **112**      | **1**     |
 
 ### Medium Payload
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/decoder/decoder_bench_medium_test.go)
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_medium.go)
 
-|             | ns/op | bytes/op | allocs/op |
-|-------------|-------|--------------|-----------|
-| Std Library | 30148 | 2152         | 496       |
-| JsonIter    | 16309 | 2976         | 80        |
-| JsonParser  | 7793  | 0            | 0         |
-| EasyJson    | 7957  | 232          | 6         |
-| GoJay       | 4984  | 2448         | 8         |
-| GoJay-unsafe| 4809  | 144          | 7         |
+|                 | ns/op     | bytes/op | allocs/op |
+|-----------------|-----------|----------|-----------|
+| Std Library     | 30148     | 2152     | 496       |
+| JsonIter        | 16309     | 2976     | 80        |
+| JsonParser      | 7793      | 0        | 0         |
+| EasyJson        | 7957      | 232      | 6         |
+| **GoJay**       | **4984**  | **2448** | **8**     |
+| **GoJay-unsafe**| **4809**  | **144**  | **7**     |
 
 ### Large Payload
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/decoder/decoder_bench_large_test.go)
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_large.go)
 
-|             | ns/op | bytes/op     | allocs/op |
-|-------------|-------|--------------|-----------|
-| JsonIter    | 210078| 41712       | 1136       |
-| EasyJson    | 106626| 160          | 2         |
-| JsonParser  | 66813 | 0            | 0         |
-| GoJay       | 52153 | 31241        | 77        |
-| GoJay-unsafe| 48277 | 2561         | 76        |
+|                 | ns/op     | bytes/op    | allocs/op |
+|-----------------|-----------|-------------|-----------|
+| JsonIter        | 210078    | 41712       | 1136      |
+| EasyJson        | 106626    | 160         | 2         |
+| JsonParser      | 66813     | 0           | 0         |
+| **GoJay**       | **52153** | **31241**   | **77**    |
+| **GoJay-unsafe**| **48277** | **2561**    | **76**    |
 
 ## Encode
 
@@ -724,37 +724,37 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_small.go)
 
-|             | ns/op | bytes/op     | allocs/op |
-|-------------|-------|--------------|-----------|
-| Std Library | 1280  | 464          | 3         |
-| EasyJson    | 871   | 944          | 6         |
-| JsonIter    | 866   | 272          | 3         |
-| GoJay       | 543   | 112          | 1         |
-| GoJay-func  | 347   | 0            | 0         |
+|                | ns/op    | bytes/op     | allocs/op |
+|----------------|----------|--------------|-----------|
+| Std Library    | 1280     | 464          | 3         |
+| EasyJson       | 871      | 944          | 6         |
+| JsonIter       | 866      | 272          | 3         |
+| **GoJay**      | **543**  | **112**      | **1**     |
+| **GoJay-func** | **347**  | **0**        | **0**     |
 
 ### Medium Struct
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/encoder/encoder_bench_medium_test.go)
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_medium.go)
 
-|             | ns/op | bytes/op     | allocs/op |
-|-------------|-------|--------------|-----------|
-| Std Library | 5006  | 1496         | 25        |
-| JsonIter    | 2232  | 1544         | 20        |
-| EasyJson    | 1997  | 1544         | 19        |
-| GoJay       | 1522  | 312          | 14        |
+|             | ns/op    | bytes/op     | allocs/op |
+|-------------|----------|--------------|-----------|
+| Std Library | 5006     | 1496         | 25        |
+| JsonIter    | 2232     | 1544         | 20        |
+| EasyJson    | 1997     | 1544         | 19        |
+| **GoJay**   | **1522** | **312**      | **14**    |
 
 ### Large Struct
 [benchmark code is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/encoder/encoder_bench_large_test.go)
 
 [benchmark data is here](https://github.com/francoispqt/gojay/blob/master/benchmarks/benchmarks_large.go)
 
-|             | ns/op | bytes/op     | allocs/op |
-|-------------|-------|--------------|-----------|
-| Std Library | 66441 | 20576        | 332       |
-| JsonIter    | 35247 | 20255        | 328       |
-| EasyJson    | 32053 | 15474        | 327       |
-| GoJay       | 27847 | 9802         | 318       |
+|             | ns/op     | bytes/op     | allocs/op |
+|-------------|-----------|--------------|-----------|
+| Std Library | 66441     | 20576        | 332       |
+| JsonIter    | 35247     | 20255        | 328       |
+| EasyJson    | 32053     | 15474        | 327       |
+| **GoJay**   | **27847** | **9802**     | **318**   |
 
 # Contributing
 
