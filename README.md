@@ -50,7 +50,7 @@ type user struct {
     name string
     email string
 }
-// implement UnmarshalerJSONObject
+// implement gojay.UnmarshalerJSONObject
 func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
     switch key {
     case "id":
@@ -104,12 +104,12 @@ func Unmarshal(data []byte, v interface{}) error
 
 * UnmarshalJSONObject 
 ```go
-func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error
+func UnmarshalJSONObject(data []byte, v gojay.UnmarshalerJSONObject) error
 ```
 
 * UnmarshalJSONArray
 ```go
-func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error
+func UnmarshalJSONArray(data []byte, v gojay.UnmarshalerJSONArray) error
 ```
 
 
@@ -149,11 +149,11 @@ func (dec *gojay.Decoder) Decode(v interface{}) error
 ```
 * DecodeObject
 ```go
-func (dec *gojay.Decoder) DecodeObject(v UnmarshalerJSONObject) error
+func (dec *gojay.Decoder) DecodeObject(v gojay.UnmarshalerJSONObject) error
 ```
 * DecodeArray
 ```go
-func (dec *gojay.Decoder) DecodeArray(v UnmarshalerJSONArray) error
+func (dec *gojay.Decoder) DecodeArray(v gojay.UnmarshalerJSONArray) error
 ```
 * DecodeInt
 ```go
@@ -172,16 +172,16 @@ func (dec *gojay.Decoder) DecodeString(v *string) error
 ### Structs and Maps
 #### UnmarshalerJSONObject Interface
 
-To unmarshal a JSON object to a structure, the structure must implement the UnmarshalerJSONObject interface:
+To unmarshal a JSON object to a structure, the structure must implement the `UnmarshalerJSONObject` interface:
 ```go
 type UnmarshalerJSONObject interface {
 	UnmarshalJSONObject(*gojay.Decoder, string) error
 	NKeys() int
 }
 ``` 
-UnmarshalJSONObject method takes two arguments, the first one is a pointer to the Decoder (*gojay.Decoder) and the second one is the string value of the current key being parsed. If the JSON data is not an object, the UnmarshalJSONObject method will never be called. 
+`UnmarshalJSONObject` method takes two arguments, the first one is a pointer to the Decoder (*gojay.Decoder) and the second one is the string value of the current key being parsed. If the JSON data is not an object, the UnmarshalJSONObject method will never be called. 
 
-NKeys method must return the number of keys to Unmarshal in the JSON object or 0. If zero is returned, all keys will be parsed. 
+`NKeys` method must return the number of keys to Unmarshal in the JSON object or 0. If zero is returned, all keys will be parsed. 
 
 Example of implementation for a struct: 
 ```go 
@@ -275,7 +275,7 @@ Example of encoding strings:
 func main() {
     json := []byte(`"Jay"`)
     var v string
-    err := Unmarshal(json, &v)
+    err := gojay.Unmarshal(json, &v)
     if err != nil {
         log.Fatal(err)
     }
@@ -348,12 +348,12 @@ func Marshal(v interface{}) ([]byte, error)
 
 * MarshalJSONObject 
 ```go
-func MarshalJSONObject(v MarshalerJSONObject) ([]byte, error)
+func MarshalJSONObject(v gojay.MarshalerJSONObject) ([]byte, error)
 ```
 
 * MarshalJSONArray
 ```go
-func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error)
+func MarshalJSONArray(v gojay.MarshalerJSONArray) ([]byte, error)
 ```
 
 ### Encode API
@@ -394,11 +394,11 @@ func (enc *gojay.Encoder) Encode(v interface{}) error
 ```
 * EncodeObject
 ```go
-func (enc *gojay.Encoder) EncodeObject(v MarshalerJSONObject) error 
+func (enc *gojay.Encoder) EncodeObject(v gojay.MarshalerJSONObject) error 
 ```
 * EncodeArray
 ```go
-func (enc *gojay.Encoder) EncodeArray(v MarshalerJSONArray) error 
+func (enc *gojay.Encoder) EncodeArray(v gojay.MarshalerJSONArray) error 
 ```
 * EncodeInt
 ```go
@@ -430,7 +430,7 @@ type MarshalerJSONObject interface {
 	IsNil() bool
 }
 ```
-MarshalJSONObject method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all the keys in the JSON Object by calling Decoder's methods. 
+`MarshalJSONObject` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all the keys in the JSON Object by calling Decoder's methods. 
 
 IsNil method returns a boolean indicating if the interface underlying value is nil or not. It is used to safely ensure that the underlying value is not nil without using Reflection. 
 
@@ -477,9 +477,9 @@ type MarshalerJSONArray interface {
     IsNil() bool
 }
 ```
-MarshalJSONArray method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
+`MarshalJSONArray` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
 
-IsNil method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature. 
+`IsNil` method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature. 
 
 Example of implementation: 
 ```go
@@ -578,7 +578,7 @@ To encode a stream of data, you must call `EncodeStream` and pass it a `Marshale
 
 ```go
 type MarshalerStream interface {
-	MarshalStream(enc *StreamEncoder)
+	MarshalStream(enc *gojay.StreamEncoder)
 }
 ```
 
