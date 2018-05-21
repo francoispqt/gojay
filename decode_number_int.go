@@ -21,7 +21,7 @@ func (dec *Decoder) decodeInt(v *int) error {
 			continue
 		// we don't look for 0 as leading zeros are invalid per RFC
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getInt64(c)
+			val, err := dec.getInt64()
 			if err != nil {
 				return err
 			}
@@ -29,7 +29,7 @@ func (dec *Decoder) decodeInt(v *int) error {
 			return nil
 		case '-':
 			dec.cursor = dec.cursor + 1
-			val, err := dec.getInt64(dec.data[dec.cursor])
+			val, err := dec.getInt64()
 			if err != nil {
 				return err
 			}
@@ -151,6 +151,9 @@ func (dec *Decoder) getInt16(b byte) (int16, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					val := floatVal * float64(pow10uint64[exp+1])
 					return int16(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
@@ -194,6 +197,9 @@ func (dec *Decoder) getInt16WithExp(init int16, cursor int) (int16, error) {
 					uintv := uint16(digits[dec.data[cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
 				case ' ', '\t', '\n', '}', ',', ']':
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					if sign == -1 {
 						return init * (1 / int16(pow10uint64[exp+1])), nil
 					}
@@ -201,6 +207,9 @@ func (dec *Decoder) getInt16WithExp(init int16, cursor int) (int16, error) {
 				default:
 					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
 				}
+			}
+			if int(exp+1) >= len(pow10uint64) {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			if sign == -1 {
 				return init * (1 / int16(pow10uint64[exp+1])), nil
@@ -303,6 +312,9 @@ func (dec *Decoder) getInt8(b byte) (int8, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					val := floatVal * float64(pow10uint64[exp+1])
 					return int8(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
@@ -310,7 +322,7 @@ func (dec *Decoder) getInt8(b byte) (int8, error) {
 					return dec.atoi8(start, end), nil
 				default:
 					dec.cursor = j
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
 			}
 			return dec.atoi8(start, end), nil
@@ -346,13 +358,19 @@ func (dec *Decoder) getInt8WithExp(init int8, cursor int) (int8, error) {
 					uintv := uint8(digits[dec.data[cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
 				case ' ', '\t', '\n', '}', ',', ']':
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					if sign == -1 {
 						return init * (1 / int8(pow10uint64[exp+1])), nil
 					}
 					return init * int8(pow10uint64[exp+1]), nil
 				default:
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
+			}
+			if int(exp+1) >= len(pow10uint64) {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			if sign == -1 {
 				return init * (1 / int8(pow10uint64[exp+1])), nil
@@ -461,7 +479,7 @@ func (dec *Decoder) getInt32(b byte) (int32, error) {
 					return dec.atoi32(start, end), nil
 				default:
 					dec.cursor = j
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
 			}
 			return dec.atoi32(start, end), nil
@@ -497,13 +515,19 @@ func (dec *Decoder) getInt32WithExp(init int32, cursor int) (int32, error) {
 					uintv := uint32(digits[dec.data[cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
 				case ' ', '\t', '\n', '}', ',', ']':
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					if sign == -1 {
 						return init * (1 / int32(pow10uint64[exp+1])), nil
 					}
 					return init * int32(pow10uint64[exp+1]), nil
 				default:
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
+			}
+			if int(exp+1) >= len(pow10uint64) {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			if sign == -1 {
 				return init * (1 / int32(pow10uint64[exp+1])), nil
@@ -533,7 +557,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getInt64(c)
+			val, err := dec.getInt64()
 			if err != nil {
 				return err
 			}
@@ -541,7 +565,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 			return nil
 		case '-':
 			dec.cursor = dec.cursor + 1
-			val, err := dec.getInt64(dec.data[dec.cursor])
+			val, err := dec.getInt64()
 			if err != nil {
 				return err
 			}
@@ -566,7 +590,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-func (dec *Decoder) getInt64(b byte) (int64, error) {
+func (dec *Decoder) getInt64() (int64, error) {
 	var end = dec.cursor
 	var start = dec.cursor
 	// look for following numbers
@@ -609,6 +633,9 @@ func (dec *Decoder) getInt64(b byte) (int64, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					val := floatVal * float64(pow10uint64[exp+1])
 					return int64(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
@@ -616,7 +643,7 @@ func (dec *Decoder) getInt64(b byte) (int64, error) {
 					return dec.atoi64(start, end), nil
 				default:
 					dec.cursor = j
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
 			}
 			return dec.atoi64(start, end), nil
@@ -649,13 +676,19 @@ func (dec *Decoder) getInt64WithExp(init int64, cursor int) (int64, error) {
 					uintv := uint64(digits[dec.data[cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
 				case ' ', '\t', '\n', '}', ',', ']':
+					if int(exp+1) >= len(pow10uint64) {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					if sign == -1 {
 						return init * (1 / int64(pow10uint64[exp+1])), nil
 					}
 					return init * int64(pow10uint64[exp+1]), nil
 				default:
-					return 0, InvalidJSONError(fmt.Sprintf(invalidJSONCharErrorMsg, dec.data[dec.cursor], dec.cursor))
+					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
+			}
+			if int(exp+1) >= len(pow10uint64) {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			if sign == -1 {
 				return init * (1 / int64(pow10uint64[exp+1])), nil

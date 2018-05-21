@@ -189,6 +189,20 @@ func TestDecoderInt(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "error3",
+			json:           "0.E----",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error3",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "invalid-type",
 			json:           `"string"`,
 			expectedResult: 0,
@@ -381,6 +395,13 @@ func TestDecoderInt64(t *testing.T) {
 			name:           "basic-exponent-positive-negative-exp3",
 			json:           "3e-3",
 			expectedResult: 0,
+		},
+		{
+			name:           "error3",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "basic-exponent-positive-negative-exp4",
@@ -659,6 +680,13 @@ func TestDecoderInt32(t *testing.T) {
 			json:           "3e",
 			expectedResult: 0,
 			err:            true,
+		},
+		{
+			name:           "error3",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "basic-float",
@@ -947,6 +975,13 @@ func TestDecoderInt16(t *testing.T) {
 			err:            true,
 		},
 		{
+			name:           "error3",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "invalid-type",
 			json:           `"string"`,
 			expectedResult: 0,
@@ -1170,6 +1205,13 @@ func TestDecoderInt8(t *testing.T) {
 			name:           "basic-exponent-negative-positive-exp3",
 			json:           "-3e01",
 			expectedResult: -30,
+		},
+		{
+			name:           "error3",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "basic-exponent-negative-positive-exp4",

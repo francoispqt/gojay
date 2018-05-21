@@ -85,7 +85,7 @@ func (dec *Decoder) getExponent() int64 {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] { // is positive
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			end = dec.cursor
+			end = dec.cursor + 1
 		case '-':
 			dec.cursor++
 			return -dec.getExponent()
@@ -99,8 +99,12 @@ func (dec *Decoder) getExponent() int64 {
 				dec.raiseInvalidJSONErr(dec.cursor)
 				return 0
 			}
-			return dec.atoi64(start, end)
+			return dec.atoi64(start, end-1)
 		}
 	}
-	return dec.atoi64(start, end)
+	if start == end {
+		dec.raiseInvalidJSONErr(dec.cursor)
+		return 0
+	}
+	return dec.atoi64(start, end-1)
 }
