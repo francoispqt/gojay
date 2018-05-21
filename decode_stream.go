@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type stream struct{}
 //
 // It implements conext.Context and provide a channel to notify interruption.
 type StreamDecoder struct {
+	mux sync.RWMutex
 	*Decoder
 	done     chan struct{}
 	deadline *time.Time
@@ -64,7 +66,10 @@ func (dec *StreamDecoder) DecodeStream(c UnmarshalerStream) error {
 		}
 	}
 	close(dec.done)
-	return InvalidJSONError("Invalid JSON while parsing line delimited JSON")
+	dec.mux.Lock()
+	err := dec.raiseInvalidJSONErr(dec.cursor)
+	dec.mux.Unlock()
+	return err
 }
 
 // context.Context implementation
@@ -96,6 +101,8 @@ func (dec *StreamDecoder) SetDeadline(t time.Time) {
 func (dec *StreamDecoder) Err() error {
 	select {
 	case <-dec.done:
+		dec.mux.RLock()
+		defer dec.mux.RUnlock()
 		return dec.err
 	default:
 		return nil
