@@ -56,7 +56,7 @@ func (dec *Decoder) parseUnicode() ([]byte, error) {
 	// check if code can be a surrogate utf16
 	if utf16.IsSurrogate(r) {
 		if dec.cursor >= dec.length && !dec.read() {
-			return nil, InvalidJSONError("Invalid JSON")
+			return nil, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 		c := dec.data[dec.cursor]
 		if c != '\\' {
@@ -65,7 +65,7 @@ func (dec *Decoder) parseUnicode() ([]byte, error) {
 		}
 		dec.cursor++
 		if dec.cursor >= dec.length && !dec.read() {
-			return nil, InvalidJSONError("Invalid JSON")
+			return nil, dec.raiseInvalidJSONErr(dec.cursor)
 		}
 		c = dec.data[dec.cursor]
 		if c != 'u' {

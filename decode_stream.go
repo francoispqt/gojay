@@ -64,7 +64,7 @@ func (dec *StreamDecoder) DecodeStream(c UnmarshalerStream) error {
 		}
 	}
 	close(dec.done)
-	return InvalidJSONError("Invalid JSON while parsing line delimited JSON")
+	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
 // context.Context implementation
