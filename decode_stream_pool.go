@@ -17,6 +17,7 @@ func (s stream) NewDecoder(r io.Reader) *StreamDecoder {
 	streamDec := &StreamDecoder{
 		Decoder: dec,
 		done:    make(chan struct{}, 1),
+		mux:     sync.RWMutex{},
 	}
 	return streamDec
 }
