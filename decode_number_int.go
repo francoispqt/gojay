@@ -168,7 +168,7 @@ func (dec *Decoder) getInt16() (int16, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
-					if exp+1 >= int64(len(pow10uint64)) || exp < 0 {
+					if +exp+1 >= int64(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					val := floatVal * float64(pow10uint64[exp+1])
@@ -347,7 +347,7 @@ func (dec *Decoder) getInt8() (int8, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
-					if exp+1 >= int64(len(pow10uint64)) || exp < 0 {
+					if +exp+1 >= int64(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					val := floatVal * float64(pow10uint64[exp+1])
@@ -525,7 +525,7 @@ func (dec *Decoder) getInt32() (int32, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
-					if exp+1 >= int64(len(pow10uint64)) || exp < 0 {
+					if +exp+1 >= int64(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					val := floatVal * float64(pow10uint64[exp+1])
@@ -707,7 +707,7 @@ func (dec *Decoder) getInt64() (int64, error) {
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
 					exp := dec.getExponent()
-					if exp+1 >= int64(len(pow10uint64)) || exp < 0 {
+					if +exp+1 >= int64(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					val := floatVal * float64(pow10uint64[exp+1])
