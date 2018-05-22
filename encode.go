@@ -1,9 +1,10 @@
 package gojay
 
 import (
-	"fmt"
 	"io"
+	"fmt"
 	"reflect"
+	"encoding/json"
 )
 
 // MarshalJSONObject returns the JSON encoding of v.
@@ -97,6 +98,38 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 // 		fmt.Println(b) // {"id":123456}
 //	}
 func Marshal(v interface{}) ([]byte, error) {
+	return marshal(v, false)
+}
+
+// MarshalAny returns the JSON encoding of v.
+//
+// MarshalAny takes interface v and encodes it according to its type.
+// Basic example with a string:
+// 	b, err := gojay.Marshal("test")
+//	fmt.Println(b) // "test"
+//
+// If v implements Marshaler or Marshaler interface
+// it will call the corresponding methods.
+//
+// If it cannot find any supported type it will be marshalled though default Go "json" package.
+// Warning, this function can be slower, than a default "Marshal"
+//
+//	type TestStruct struct {
+//		id int
+//	}
+//
+// 	func main() {
+//		test := &TestStruct{
+//			id: 123456,
+//		}
+//		b, _ := gojay.Marshal(test)
+// 		fmt.Println(b) // {"id": 123456}
+//	}
+func MarshalAny(v interface{}) ([]byte, error) {
+	return marshal(v, true)
+}
+
+func marshal(v interface{}, any bool) ([]byte, error) {
 	switch vt := v.(type) {
 	case MarshalerJSONObject:
 		enc := BorrowEncoder(nil)
@@ -163,6 +196,10 @@ func Marshal(v interface{}) ([]byte, error) {
 		defer enc.Release()
 		return enc.encodeEmbeddedJSON(vt)
 	default:
+		if any {
+			return json.Marshal(vt)
+		}
+
 		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
 }
