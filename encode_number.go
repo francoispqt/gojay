@@ -21,6 +21,48 @@ func (enc *Encoder) encodeInt(n int) ([]byte, error) {
 	return enc.buf, nil
 }
 
+// EncodeUint encodes uint to JSON
+func (enc *Encoder) EncodeUint(n uint) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+
+	_, _ = enc.encodeUint(n)
+	_, err := enc.Write()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// encodeUint encodes uint to JSON
+func (enc *Encoder) encodeUint(n uint) ([]byte, error) {
+	enc.buf = strconv.AppendUint(enc.buf, uint64(n), 10)
+	return enc.buf, nil
+}
+
+// EncodeUint64 encodes an uint64 to JSON
+func (enc *Encoder) EncodeUint64(n uint64) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+
+	_, _ = enc.encodeUint64(n)
+	_, err := enc.Write()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// encodeUint64 encodes uint64 to JSON
+func (enc *Encoder) encodeUint64(n uint64) ([]byte, error) {
+	enc.buf = strconv.AppendUint(enc.buf, n, 10)
+	return enc.buf, nil
+}
+
 // EncodeInt64 encodes an int64 to JSON
 func (enc *Encoder) EncodeInt64(n int64) error {
 	if enc.isPooled == 1 {
@@ -183,6 +225,30 @@ func (enc *Encoder) AddIntKey(key string, v int) {
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendInt(enc.buf, int64(v), 10)
+}
+
+func (enc *Encoder) AddUintKey(key string, v uint) {
+	enc.AddUint64Key(key, uint64(v))
+}
+
+func (enc *Encoder) AddUint64KeyOmitEmpty(key string, v uint64) {
+	if v == 0 {
+		return
+	}
+
+	enc.AddUint64Key(key, v)
+}
+
+func (enc *Encoder) AddUint64Key(key string, v uint64) {
+	enc.grow(10 + len(key))
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKey)
+	enc.buf = strconv.AppendUint(enc.buf, v, 10)
 }
 
 // AddIntKeyOmitEmpty adds an int to be encoded and skips it if its value is 0.

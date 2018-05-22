@@ -31,13 +31,13 @@ func (enc *Encoder) Encode(v interface{}) error {
 	case int8:
 		return enc.EncodeInt(int(vt))
 	case uint64:
-		return enc.EncodeInt(int(vt))
+		return enc.EncodeUint64(vt)
 	case uint32:
-		return enc.EncodeInt(int(vt))
+		return enc.EncodeUint(uint(vt))
 	case uint16:
-		return enc.EncodeInt(int(vt))
+		return enc.EncodeUint(uint(vt))
 	case uint8:
-		return enc.EncodeInt(int(vt))
+		return enc.EncodeUint(uint(vt))
 	case float64:
 		return enc.EncodeFloat(vt)
 	case float32:

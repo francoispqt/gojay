@@ -5,28 +5,41 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"math"
+	"fmt"
 )
 
 func TestEncoderNumberEncodeAPI(t *testing.T) {
 	t.Run("encoder-int", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		err := enc.EncodeInt(1)
+		err := enc.EncodeInt(int(math.MaxInt32))
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
-			`1`,
+			fmt.Sprintf("%d", math.MaxInt32),
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
 	t.Run("encode-int64", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		err := enc.EncodeInt64(int64(1))
+		err := enc.EncodeInt64(math.MaxInt64)
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
-			`1`,
+			fmt.Sprintf("%d", math.MaxInt64),
+			builder.String(),
+			"Result of marshalling is different as the one expected")
+	})
+	t.Run("encode-uint64", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.Encode(uint64(math.MaxUint64))
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			fmt.Sprintf("%d", uint64(math.MaxUint64)),
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
