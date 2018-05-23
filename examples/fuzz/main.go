@@ -6,6 +6,7 @@ import (
 
 type user struct {
 	id    int
+	age   float64
 	name  string
 	email string
 }
@@ -15,6 +16,8 @@ func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "id":
 		return dec.Int(&u.id)
+	case "age":
+		return dec.Float(&u.age)
 	case "name":
 		return dec.String(&u.name)
 	case "email":
