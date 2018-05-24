@@ -26,12 +26,12 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 			}
 			*v = val
 			return nil
-		case '-': // if negative, we just set it to 0
+		case '-': // if negative, we just set it to 0 and set error
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -96,11 +96,11 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 			*v = val
 			return nil
 		case '-':
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -165,11 +165,11 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 			*v = val
 			return nil
 		case '-':
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -233,11 +233,11 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 			*v = val
 			return nil
 		case '-':
+			dec.err = dec.makeInvalidUnmarshalErr(v)
 			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++

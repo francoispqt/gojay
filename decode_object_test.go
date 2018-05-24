@@ -450,7 +450,7 @@ func TestDecodeObjectBasic(t *testing.T) {
 				testUint32:  343443,
 				testUint64:  545665757,
 			},
-			err: false,
+			err: true,
 		},
 	}
 

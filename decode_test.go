@@ -99,7 +99,7 @@ func TestUnmarshalAllTypes(t *testing.T) {
 			name: "test decode uint64 negative",
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint64)
-				assert.Nil(t, err, "err must be nil")
+				assert.NotNil(t, err, "err must not be nil")
 				assert.Equal(t, uint64(0), *vt, "v must be equal to 1")
 			},
 		},
@@ -129,7 +129,7 @@ func TestUnmarshalAllTypes(t *testing.T) {
 			name: "test decode uint32 negative",
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint32)
-				assert.Nil(t, err, "err must be nil")
+				assert.NotNil(t, err, "err must not be nil")
 				assert.Equal(t, uint32(0), *vt, "v must be equal to 1")
 			},
 		},
@@ -337,7 +337,7 @@ func TestDecodeAllTypes(t *testing.T) {
 			name: "test decode uint64 negative",
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint64)
-				assert.Nil(t, err, "err must be nil")
+				assert.NotNil(t, err, "err must not be nil")
 				assert.Equal(t, uint64(0), *vt, "v must be equal to 1")
 			},
 		},
@@ -367,7 +367,7 @@ func TestDecodeAllTypes(t *testing.T) {
 			name: "test decode uint32 negative",
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint32)
-				assert.Nil(t, err, "err must be nil")
+				assert.NotNil(t, err, "err must not be nil")
 				assert.Equal(t, uint32(0), *vt, "v must be equal to 1")
 			},
 		},
