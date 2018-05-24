@@ -30,7 +30,7 @@ func TestDecoderUint64(t *testing.T) {
 		{
 			name:           "basic-negative",
 			json:           "-2",
-			expectedResult: 2,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-null",
@@ -77,7 +77,7 @@ func TestDecoderUint64(t *testing.T) {
 		{
 			name:           "basic-negative2",
 			json:           "-2349557",
-			expectedResult: 2349557,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-float",
@@ -87,7 +87,7 @@ func TestDecoderUint64(t *testing.T) {
 		{
 			name:           "basic-float2",
 			json:           "-7.8876",
-			expectedResult: 7,
+			expectedResult: 0,
 		},
 		{
 			name:           "error1",
@@ -182,7 +182,7 @@ func TestDecoderUint32(t *testing.T) {
 		{
 			name:           "basic-negative",
 			json:           "-2",
-			expectedResult: 2,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-null",
@@ -206,7 +206,7 @@ func TestDecoderUint32(t *testing.T) {
 		{
 			name:           "basic-negative2",
 			json:           "-2349557",
-			expectedResult: 2349557,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-big",
@@ -239,7 +239,7 @@ func TestDecoderUint32(t *testing.T) {
 		{
 			name:           "basic-float2",
 			json:           "-7.8876",
-			expectedResult: 7,
+			expectedResult: 0,
 		},
 		{
 			name:           "error",
@@ -342,7 +342,7 @@ func TestDecoderUint16(t *testing.T) {
 		{
 			name:           "basic-negative",
 			json:           "-2",
-			expectedResult: 2,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-null",
@@ -380,7 +380,7 @@ func TestDecoderUint16(t *testing.T) {
 		{
 			name:           "basic-negative2",
 			json:           "-24467",
-			expectedResult: 24467,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-big",
@@ -419,7 +419,7 @@ func TestDecoderUint16(t *testing.T) {
 		{
 			name:           "basic-float2",
 			json:           "-7.8876",
-			expectedResult: 7,
+			expectedResult: 0,
 		},
 		{
 			name:           "error",
@@ -530,7 +530,7 @@ func TestDecoderUint8(t *testing.T) {
 		{
 			name:           "basic-negative",
 			json:           "-2",
-			expectedResult: 2,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-null",
@@ -554,7 +554,7 @@ func TestDecoderUint8(t *testing.T) {
 		{
 			name:           "basic-negative2",
 			json:           "-234",
-			expectedResult: 234,
+			expectedResult: 0,
 		},
 		{
 			name:           "basic-big",
@@ -595,7 +595,7 @@ func TestDecoderUint8(t *testing.T) {
 		{
 			name:           "basic-float2",
 			json:           "-7.8876",
-			expectedResult: 7,
+			expectedResult: 0,
 		},
 		{
 			name:           "error",

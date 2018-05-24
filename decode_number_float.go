@@ -92,9 +92,12 @@ func (dec *Decoder) getFloat() (float64, error) {
 					}
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
-					exp := dec.getExponent()
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
 					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
-					if pExp >= int64(len(pow10uint64)) {
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					// if exponent is negative
@@ -123,9 +126,12 @@ func (dec *Decoder) getFloat() (float64, error) {
 			// we get part before decimal as integer
 			beforeDecimal := uint64(dec.atoi64(start, end))
 			// get exponent
-			exp := dec.getExponent()
+			exp, err := dec.getExponent()
+			if err != nil {
+				return 0, err
+			}
 			pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
-			if pExp >= int64(len(pow10uint64)) {
+			if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// if exponent is negative
@@ -235,9 +241,12 @@ func (dec *Decoder) getFloat32() (float32, error) {
 					}
 					pow := pow10uint64[expI]
 					floatVal := float32(beforeDecimal+afterDecimal) / float32(pow)
-					exp := dec.getExponent()
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
 					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
-					if pExp >= int64(len(pow10uint64)) {
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					// if exponent is negative
@@ -266,10 +275,13 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			// we get part before decimal as integer
 			beforeDecimal := uint32(dec.atoi32(start, end))
 			// get exponent
-			exp := dec.getExponent()
+			exp, err := dec.getExponent()
+			if err != nil {
+				return 0, err
+			}
 			pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1
 			// log.Print(exp, " after")
-			if pExp >= int64(len(pow10uint64)) {
+			if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// if exponent is negative

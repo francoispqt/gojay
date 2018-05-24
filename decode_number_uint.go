@@ -20,20 +20,18 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getUint8(c)
+			val, err := dec.getUint8()
 			if err != nil {
 				return err
 			}
 			*v = val
 			return nil
-		case '-':
-			dec.cursor = dec.cursor + 1
-			val, err := dec.getUint8(dec.data[dec.cursor])
+		case '-': // if negative, we just set it to 0
+			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			// unsigned int so we don't bother with the sign
-			*v = val
+			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -54,7 +52,7 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-func (dec *Decoder) getUint8(b byte) (uint8, error) {
+func (dec *Decoder) getUint8() (uint8, error) {
 	var end = dec.cursor
 	var start = dec.cursor
 	// look for following numbers
@@ -91,20 +89,18 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getUint16(c)
+			val, err := dec.getUint16()
 			if err != nil {
 				return err
 			}
 			*v = val
 			return nil
 		case '-':
-			dec.cursor = dec.cursor + 1
-			val, err := dec.getUint16(dec.data[dec.cursor])
+			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			// unsigned int so we don't bother with the sign
-			*v = val
+			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -125,7 +121,7 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-func (dec *Decoder) getUint16(b byte) (uint16, error) {
+func (dec *Decoder) getUint16() (uint16, error) {
 	var end = dec.cursor
 	var start = dec.cursor
 	// look for following numbers
@@ -162,20 +158,18 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getUint32(c)
+			val, err := dec.getUint32()
 			if err != nil {
 				return err
 			}
 			*v = val
 			return nil
 		case '-':
-			dec.cursor = dec.cursor + 1
-			val, err := dec.getUint32(dec.data[dec.cursor])
+			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			// unsigned int so we don't bother with the sign
-			*v = val
+			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -196,7 +190,7 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-func (dec *Decoder) getUint32(b byte) (uint32, error) {
+func (dec *Decoder) getUint32() (uint32, error) {
 	var end = dec.cursor
 	var start = dec.cursor
 	// look for following numbers
@@ -232,20 +226,18 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 		case ' ', '\n', '\t', '\r', ',':
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			val, err := dec.getUint64(c)
+			val, err := dec.getUint64()
 			if err != nil {
 				return err
 			}
 			*v = val
 			return nil
 		case '-':
-			dec.cursor = dec.cursor + 1
-			val, err := dec.getUint64(dec.data[dec.cursor])
+			err := dec.skipData()
 			if err != nil {
 				return err
 			}
-			// unsigned int so we don't bother with the sign
-			*v = val
+			*v = 0
 			return nil
 		case 'n':
 			dec.cursor++
@@ -266,7 +258,7 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-func (dec *Decoder) getUint64(b byte) (uint64, error) {
+func (dec *Decoder) getUint64() (uint64, error) {
 	var end = dec.cursor
 	var start = dec.cursor
 	// look for following numbers

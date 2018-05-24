@@ -410,6 +410,48 @@ func TestDecodeObjectBasic(t *testing.T) {
 			},
 			err: false,
 		},
+		{
+			name: "basic-skip-data",
+			json: `{
+				"testStr": "hello world!",
+				"testInt": 4535,
+				"testBool": true,
+				"testFloat32": 2.345,
+				"testFloat64": 123.677,
+				"testInt8": 23,
+				"skipObject": {
+					"escapedString": "string with escaped \\n new line"
+				},
+				"testInt16": 1245,
+				"testInt32": 456778,
+				"testInt64": 1446685358,
+				"testUint8": -255,
+				"skipArray": [[],[],{}],
+				"testUint16": 3455,
+				"skipBool": true,
+				"skipNull": null,
+				"testUint32": 343443,
+				"testUint64": 545665757,
+				"skipString": "skipping string with escaped \\n new line",
+				"skipInt": 3,
+			}`,
+			expectedResult: testObject{
+				testStr:     "hello world!",
+				testInt:     4535,
+				testBool:    true,
+				testFloat32: 2.345,
+				testFloat64: 123.677,
+				testInt8:    23,
+				testInt16:   1245,
+				testInt32:   456778,
+				testInt64:   1446685358,
+				testUint8:   0,
+				testUint16:  3455,
+				testUint32:  343443,
+				testUint64:  545665757,
+			},
+			err: false,
+		},
 	}
 
 	for _, testCase := range testCases {

@@ -80,6 +80,12 @@ func TestDecoderFloat64(t *testing.T) {
 			err:            true,
 		},
 		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "exp-err",
 			json:           "0e-20",
 			expectedResult: 0,
@@ -197,6 +203,12 @@ func TestDecoderFloat64(t *testing.T) {
 		},
 		{
 			name:           "basic-exp-too-big",
+			json:           "0e9223372036000000000 ",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-exp-too-big",
 			json:           "1.00232492420002423545849009",
 			expectedResult: 0,
 			err:            true,
@@ -213,6 +225,18 @@ func TestDecoderFloat64(t *testing.T) {
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "exponent-err",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exponent-err",
+			json:           "0e",
+			expectedResult: 0,
+			err:            true,
 		},
 		{
 			name:           "error",
@@ -382,6 +406,12 @@ func TestDecoderFloat32(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "basic-negative-err",
 			json:           "-q",
 			expectedResult: 0,
@@ -511,6 +541,12 @@ func TestDecoderFloat32(t *testing.T) {
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "exponent-err",
+			json:           "0e",
+			expectedResult: 0,
+			err:            true,
 		},
 		{
 			name:           "invalid-type",

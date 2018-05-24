@@ -102,7 +102,7 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint64)
 				assert.Nil(t, err, "err must be nil")
-				assert.Equal(t, uint64(1), *vt, "v must be equal to 1")
+				assert.Equal(t, uint64(0), *vt, "v must be equal to 1")
 			},
 		},
 		{
@@ -132,7 +132,7 @@ func TestUnmarshalUnsafeAllTypes(t *testing.T) {
 			expectations: func(err error, v interface{}, t *testing.T) {
 				vt := v.(*uint32)
 				assert.Nil(t, err, "err must be nil")
-				assert.Equal(t, uint32(1), *vt, "v must be equal to 1")
+				assert.Equal(t, uint32(0), *vt, "v must be equal to 1")
 			},
 		},
 		{
