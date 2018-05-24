@@ -83,7 +83,7 @@ func (dec *Decoder) getFloat() (float64, error) {
 					end = i
 					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
 					continue
-				} else if c == 'e' || c == 'E' {
+				} else if (c == 'e' || c == 'E') && j < i-1 {
 					afterDecimal := dec.atoi64(start, end)
 					dec.cursor = i + 1
 					expI := end - start + 2
@@ -92,18 +92,25 @@ func (dec *Decoder) getFloat() (float64, error) {
 					}
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					// if exponent is negative
 					if exp < 0 {
-						return float64(floatVal) * (1 / float64(pow10uint64[exp*-1+1])), nil
+						return float64(floatVal) * (1 / float64(pow10uint64[pExp])), nil
 					}
-					return float64(floatVal) * float64(pow10uint64[exp+1]), nil
+					return float64(floatVal) * float64(pow10uint64[pExp]), nil
 				}
 				dec.cursor = i
 				break
+			}
+			if end >= dec.length || end <= start {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// then we add both integers
 			// then we divide the number by the power found
@@ -119,15 +126,19 @@ func (dec *Decoder) getFloat() (float64, error) {
 			// we get part before decimal as integer
 			beforeDecimal := uint64(dec.atoi64(start, end))
 			// get exponent
-			exp := dec.getExponent()
-			if +exp+1 >= int64(len(pow10uint64)) {
+			exp, err := dec.getExponent()
+			if err != nil {
+				return 0, err
+			}
+			pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+			if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// if exponent is negative
 			if exp < 0 {
-				return float64(beforeDecimal) * (1 / float64(pow10uint64[exp*-1+1])), nil
+				return float64(beforeDecimal) * (1 / float64(pow10uint64[pExp])), nil
 			}
-			return float64(beforeDecimal) * float64(pow10uint64[exp+1]), nil
+			return float64(beforeDecimal) * float64(pow10uint64[pExp]), nil
 		case ' ', '\n', '\t', '\r', ',', '}', ']': // does not have decimal
 			dec.cursor = j
 			return float64(dec.atoi64(start, end)), nil
@@ -221,7 +232,7 @@ func (dec *Decoder) getFloat32() (float32, error) {
 					end = i
 					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
 					continue
-				} else if c == 'e' || c == 'E' {
+				} else if (c == 'e' || c == 'E') && j < i-1 {
 					afterDecimal := dec.atoi32(start, end)
 					dec.cursor = i + 1
 					expI := end - start + 2
@@ -230,18 +241,25 @@ func (dec *Decoder) getFloat32() (float32, error) {
 					}
 					pow := pow10uint64[expI]
 					floatVal := float32(beforeDecimal+afterDecimal) / float32(pow)
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					// if exponent is negative
 					if exp < 0 {
-						return float32(floatVal) * (1 / float32(pow10uint64[exp*-1+1])), nil
+						return float32(floatVal) * (1 / float32(pow10uint64[pExp])), nil
 					}
-					return float32(floatVal) * float32(pow10uint64[exp+1]), nil
+					return float32(floatVal) * float32(pow10uint64[pExp]), nil
 				}
 				dec.cursor = i
 				break
+			}
+			if end >= dec.length || end <= start {
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// then we add both integers
 			// then we divide the number by the power found
@@ -257,15 +275,20 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			// we get part before decimal as integer
 			beforeDecimal := uint32(dec.atoi32(start, end))
 			// get exponent
-			exp := dec.getExponent()
-			if +exp+1 >= int64(len(pow10uint64)) {
+			exp, err := dec.getExponent()
+			if err != nil {
+				return 0, err
+			}
+			pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1
+			// log.Print(exp, " after")
+			if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// if exponent is negative
 			if exp < 0 {
-				return float32(beforeDecimal) * (1 / float32(pow10uint64[exp*-1+1])), nil
+				return float32(beforeDecimal) * (1 / float32(pow10uint64[pExp])), nil
 			}
-			return float32(beforeDecimal) * float32(pow10uint64[exp+1]), nil
+			return float32(beforeDecimal) * float32(pow10uint64[pExp]), nil
 		case ' ', '\n', '\t', '\r', ',', '}', ']': // does not have decimal
 			dec.cursor = j
 			return float32(dec.atoi32(start, end)), nil

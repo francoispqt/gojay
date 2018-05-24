@@ -15,6 +15,7 @@ func TestDecoderFloat64(t *testing.T) {
 		name           string
 		json           string
 		expectedResult float64
+		skipResult     bool
 		err            bool
 		errType        interface{}
 	}{
@@ -65,6 +66,48 @@ func TestDecoderFloat64(t *testing.T) {
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "basic-err1",
+			json:           "0.",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-err2",
+			json:           "-1.",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exp-err",
+			json:           "0e-20",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exp-err3",
+			json:           "-9e-60",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:       "exp-err4",
+			json:       "0.e-2",
+			skipResult: true,
+			err:        true,
+		},
+		{
+			name:       "exp-err5",
+			json:       "-5.E-2",
+			skipResult: true,
+			err:        true,
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp4",
@@ -160,6 +203,12 @@ func TestDecoderFloat64(t *testing.T) {
 		},
 		{
 			name:           "basic-exp-too-big",
+			json:           "0e9223372036000000000 ",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-exp-too-big",
 			json:           "1.00232492420002423545849009",
 			expectedResult: 0,
 			err:            true,
@@ -176,6 +225,18 @@ func TestDecoderFloat64(t *testing.T) {
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "exponent-err",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exponent-err",
+			json:           "0e",
+			expectedResult: 0,
+			err:            true,
 		},
 		{
 			name:           "error",
@@ -210,7 +271,9 @@ func TestDecoderFloat64(t *testing.T) {
 			} else {
 				assert.Nil(t, err, "Err must be nil")
 			}
-			assert.Equal(t, testCase.expectedResult*1000000, math.Round(v*1000000), fmt.Sprintf("v must be equal to %f", testCase.expectedResult))
+			if !testCase.skipResult {
+				assert.Equal(t, testCase.expectedResult*1000000, math.Round(v*1000000), fmt.Sprintf("v must be equal to %f", testCase.expectedResult))
+			}
 		})
 	}
 	t.Run("pool-error", func(t *testing.T) {
@@ -256,6 +319,7 @@ func TestDecoderFloat32(t *testing.T) {
 		name           string
 		json           string
 		expectedResult float32
+		skipResult     bool
 		err            bool
 		errType        interface{}
 	}{
@@ -273,6 +337,47 @@ func TestDecoderFloat32(t *testing.T) {
 			name:           "basic-exponent-positive-positive-exp3",
 			json:           "3e+3",
 			expectedResult: 3000,
+		},
+		{
+			name:           "basic-null",
+			json:           "null",
+			expectedResult: 0,
+		},
+		{
+			name:           "basic-err1",
+			json:           "0.",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "basic-err2",
+			json:           "-1.",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exp-err",
+			json:           "0e-20",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "exp-err3",
+			json:           "-9e-60",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:       "exp-err4",
+			json:       "0.e-2",
+			skipResult: true,
+			err:        true,
+		},
+		{
+			name:       "exp-err5",
+			json:       "-5.E-2",
+			skipResult: true,
+			err:        true,
 		},
 		{
 			name:           "basic-null",
@@ -299,6 +404,12 @@ func TestDecoderFloat32(t *testing.T) {
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
 		},
 		{
 			name:           "basic-negative-err",
@@ -432,6 +543,12 @@ func TestDecoderFloat32(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "exponent-err",
+			json:           "0e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "invalid-type",
 			json:           `"string"`,
 			expectedResult: 0,
@@ -457,7 +574,13 @@ func TestDecoderFloat32(t *testing.T) {
 			} else {
 				assert.Nil(t, err, "Err must be nil")
 			}
-			assert.Equal(t, float64(testCase.expectedResult*1000000), math.Round(float64(v*1000000)), fmt.Sprintf("v must be equal to %f", testCase.expectedResult))
+			if !testCase.skipResult {
+				assert.Equal(
+					t,
+					float64(testCase.expectedResult*1000000), math.Round(float64(v*1000000)),
+					fmt.Sprintf("v must be equal to %f", testCase.expectedResult),
+				)
+			}
 		})
 	}
 	t.Run("pool-error", func(t *testing.T) {

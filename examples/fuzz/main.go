@@ -5,9 +5,12 @@ import (
 )
 
 type user struct {
-	id    int
-	name  string
-	email string
+	id      int
+	created uint64
+	age     float64
+	name    string
+	email   string
+	friend  *user
 }
 
 // implement gojay.UnmarshalerJSONObject
@@ -15,10 +18,17 @@ func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	switch key {
 	case "id":
 		return dec.Int(&u.id)
+	case "created":
+		return dec.Uint64(&u.created)
+	case "age":
+		return dec.Float(&u.age)
 	case "name":
 		return dec.String(&u.name)
 	case "email":
 		return dec.String(&u.email)
+	case "friend":
+		uu := &user{}
+		return dec.Object(uu)
 	}
 	return nil
 }

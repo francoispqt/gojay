@@ -138,15 +138,18 @@ func (dec *Decoder) getInt16() (int16, error) {
 			// look for exponent (e,E) as exponent can change the
 			// way number should be parsed to int.
 			// if no exponent found, just unmarshal the number before decimal point
-			startDecimal := j + 1
-			endDecimal := j + 1
 			j++
+			startDecimal := j
+			endDecimal := j - 1
 			for ; j < dec.length || dec.read(); j++ {
 				switch dec.data[j] {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					endDecimal = j
 					continue
 				case 'e', 'E':
+					if startDecimal > endDecimal {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					dec.cursor = j + 1
 					// can try unmarshalling to int as Exponent might change decimal number to non decimal
 					// let's get the float value first
@@ -167,11 +170,15 @@ func (dec *Decoder) getInt16() (int16, error) {
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
-					val := floatVal * float64(pow10uint64[exp+1])
+					val := floatVal * float64(pow10uint64[pExp])
 					return int16(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
 					dec.cursor = j
@@ -215,24 +222,26 @@ func (dec *Decoder) getInt16WithExp(init int16) (int16, error) {
 					uintv := uint16(digits[dec.data[dec.cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
 				case ' ', '\t', '\n', '}', ',', ']':
-					if exp+1 >= uint16(len(pow10uint64)) {
+					exp = exp + 1
+					if exp >= uint16(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
 					if sign == -1 {
-						return init * (1 / int16(pow10uint64[exp+1])), nil
+						return init * (1 / int16(pow10uint64[exp])), nil
 					}
-					return init * int16(pow10uint64[exp+1]), nil
+					return init * int16(pow10uint64[exp]), nil
 				default:
 					return 0, dec.raiseInvalidJSONErr(dec.cursor)
 				}
 			}
-			if exp+1 >= uint16(len(pow10uint64)) {
+			exp = exp + 1
+			if exp >= uint16(len(pow10uint64)) {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			if sign == -1 {
-				return init * (1 / int16(pow10uint64[exp+1])), nil
+				return init * (1 / int16(pow10uint64[exp])), nil
 			}
-			return init * int16(pow10uint64[exp+1]), nil
+			return init * int16(pow10uint64[exp]), nil
 		default:
 			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		}
@@ -317,15 +326,18 @@ func (dec *Decoder) getInt8() (int8, error) {
 			// look for exponent (e,E) as exponent can change the
 			// way number should be parsed to int.
 			// if no exponent found, just unmarshal the number before decimal point
-			startDecimal := j + 1
-			endDecimal := j + 1
 			j++
+			startDecimal := j
+			endDecimal := j - 1
 			for ; j < dec.length || dec.read(); j++ {
 				switch dec.data[j] {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					endDecimal = j
 					continue
 				case 'e', 'E':
+					if startDecimal > endDecimal {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					dec.cursor = j + 1
 					// can try unmarshalling to int as Exponent might change decimal number to non decimal
 					// let's get the float value first
@@ -346,11 +358,15 @@ func (dec *Decoder) getInt8() (int8, error) {
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
-					val := floatVal * float64(pow10uint64[exp+1])
+					val := floatVal * float64(pow10uint64[pExp])
 					return int8(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
 					dec.cursor = j
@@ -495,15 +511,19 @@ func (dec *Decoder) getInt32() (int32, error) {
 			// look for exponent (e,E) as exponent can change the
 			// way number should be parsed to int.
 			// if no exponent found, just unmarshal the number before decimal point
-			startDecimal := j + 1
-			endDecimal := j + 1
 			j++
+			startDecimal := j
+			endDecimal := j - 1
 			for ; j < dec.length || dec.read(); j++ {
 				switch dec.data[j] {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					endDecimal = j
 					continue
 				case 'e', 'E':
+					// if eg 1.E
+					if startDecimal > endDecimal {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					dec.cursor = j + 1
 					// can try unmarshalling to int as Exponent might change decimal number to non decimal
 					// let's get the float value first
@@ -524,11 +544,15 @@ func (dec *Decoder) getInt32() (int32, error) {
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
-					val := floatVal * float64(pow10uint64[exp+1])
+					val := floatVal * float64(pow10uint64[pExp])
 					return int32(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
 					dec.cursor = j
@@ -677,15 +701,19 @@ func (dec *Decoder) getInt64() (int64, error) {
 			// look for exponent (e,E) as exponent can change the
 			// way number should be parsed to int.
 			// if no exponent found, just unmarshal the number before decimal point
-			startDecimal := j + 1
-			endDecimal := j + 1
 			j++
+			startDecimal := j
+			endDecimal := j - 1
 			for ; j < dec.length || dec.read(); j++ {
 				switch dec.data[j] {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					endDecimal = j
 					continue
 				case 'e', 'E':
+					// if eg 1.E
+					if startDecimal > endDecimal {
+						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					}
 					dec.cursor = j + 1
 					// can try unmarshalling to int as Exponent might change decimal number to non decimal
 					// let's get the float value first
@@ -706,11 +734,15 @@ func (dec *Decoder) getInt64() (int64, error) {
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					// we have the floating value, now multiply by the exponent
-					exp := dec.getExponent()
-					if +exp+1 >= int64(len(pow10uint64)) {
+					exp, err := dec.getExponent()
+					if err != nil {
+						return 0, err
+					}
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
-					val := floatVal * float64(pow10uint64[exp+1])
+					val := floatVal * float64(pow10uint64[pExp])
 					return int64(val), nil
 				case ' ', '\t', '\n', ',', ']', '}':
 					dec.cursor = j

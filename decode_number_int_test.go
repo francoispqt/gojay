@@ -209,15 +209,36 @@ func TestDecoderInt(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
-			name:           "error3",
+			name:           "error4",
 			json:           "0.E----",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
 		},
 		{
-			name:           "error3",
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "error5",
 			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error6",
+			json:           "0.e-9",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+
+		{
+			name:           "error7",
+			json:           "-5.e-2",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -237,7 +258,7 @@ func TestDecoderInt(t *testing.T) {
 			err := Unmarshal(json, &v)
 			if testCase.err {
 				assert.NotNil(t, err, "Err must not be nil")
-				if testCase.errType != nil {
+				if testCase.errType != nil && err != nil {
 					assert.IsType(
 						t,
 						testCase.errType,
@@ -511,6 +532,40 @@ func TestDecoderInt64(t *testing.T) {
 			err:            true,
 		},
 		{
+			name:           "error4",
+			json:           "0.E----",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error5",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
+			name:           "error6",
+			json:           "0.e-9",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error7",
+			json:           "-5.e-2",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
 			name:           "invalid-type",
 			json:           `"string"`,
 			expectedResult: 0,
@@ -760,6 +815,12 @@ func TestDecoderInt32(t *testing.T) {
 			expectedResult: -800000,
 		},
 		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "exponent-err-too-big",
 			json:           "0.1e10000000000000000000",
 			expectedResult: 0,
@@ -798,6 +859,34 @@ func TestDecoderInt32(t *testing.T) {
 		{
 			name:           "error3",
 			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error4",
+			json:           "0.E----",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error5",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error6",
+			json:           "0.e-9",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error7",
+			json:           "-5.e-2",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -1057,6 +1146,12 @@ func TestDecoderInt16(t *testing.T) {
 			expectedResult: -100,
 		},
 		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "exponent-err-too-big",
 			json:           "0.1e10000000000000000000",
 			expectedResult: 0,
@@ -1129,6 +1224,41 @@ func TestDecoderInt16(t *testing.T) {
 		{
 			name:           "error3",
 			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error4",
+			json:           "0.E----",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error5",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error6",
+			json:           "0.e-9",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error7",
+			json:           "0.e",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error8",
+			json:           "-5.e-2",
 			expectedResult: 0,
 			err:            true,
 			errType:        InvalidJSONError(""),
@@ -1380,6 +1510,12 @@ func TestDecoderInt8(t *testing.T) {
 			errType:        InvalidJSONError(""),
 		},
 		{
+			name:           "exponent-err-",
+			json:           "0.1e",
+			expectedResult: 0,
+			err:            true,
+		},
+		{
 			name:           "exponent-err-too-big",
 			json:           "0.1e10000000000000000000",
 			expectedResult: 0,
@@ -1438,6 +1574,48 @@ func TestDecoderInt8(t *testing.T) {
 			json:           "-8e+00$aa5",
 			expectedResult: 0,
 			err:            true,
+		},
+		{
+			name:           "error4",
+			json:           "0.E----",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error5",
+			json:           "0E40",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error6",
+			json:           "0.e-9",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error7",
+			json:           "0.e",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error8",
+			json:           "-5.e-2",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "error8",
+			json:           "-5.01e",
+			expectedResult: 0,
+			err:            true,
+			errType:        InvalidJSONError(""),
 		},
 		{
 			name:           "invalid-type",

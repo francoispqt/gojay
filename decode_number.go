@@ -79,7 +79,7 @@ func (dec *Decoder) skipNumber() (int, error) {
 	return end, nil
 }
 
-func (dec *Decoder) getExponent() int64 {
+func (dec *Decoder) getExponent() (int64, error) {
 	start := dec.cursor
 	end := dec.cursor
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
@@ -88,7 +88,8 @@ func (dec *Decoder) getExponent() int64 {
 			end = dec.cursor + 1
 		case '-':
 			dec.cursor++
-			return -dec.getExponent()
+			exp, err := dec.getExponent()
+			return -exp, err
 		case '+':
 			dec.cursor++
 			return dec.getExponent()
@@ -96,15 +97,14 @@ func (dec *Decoder) getExponent() int64 {
 			// if nothing return 0
 			// could raise error
 			if start == end {
-				dec.raiseInvalidJSONErr(dec.cursor)
-				return 0
+				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
-			return dec.atoi64(start, end-1)
+			return dec.atoi64(start, end-1), nil
 		}
 	}
 	if start == end {
-		dec.raiseInvalidJSONErr(dec.cursor)
-		return 0
+
+		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
-	return dec.atoi64(start, end-1)
+	return dec.atoi64(start, end-1), nil
 }
