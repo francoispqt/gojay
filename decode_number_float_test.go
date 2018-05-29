@@ -20,6 +20,11 @@ func TestDecoderFloat64(t *testing.T) {
 		errType        interface{}
 	}{
 		{
+			name:           "basic-float",
+			json:           "1.1",
+			expectedResult: 1.1,
+		},
+		{
 			name:           "basic-exponent-positive-positive-exp",
 			json:           "1e2",
 			expectedResult: 100,
@@ -323,6 +328,11 @@ func TestDecoderFloat32(t *testing.T) {
 		err            bool
 		errType        interface{}
 	}{
+		{
+			name:           "basic-float",
+			json:           "1.1",
+			expectedResult: 1.1,
+		},
 		{
 			name:           "basic-exponent-positive-positive-exp",
 			json:           "1e2",

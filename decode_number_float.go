@@ -109,7 +109,7 @@ func (dec *Decoder) getFloat() (float64, error) {
 				dec.cursor = i
 				break
 			}
-			if end >= dec.length || end <= start {
+			if end >= dec.length || end < start {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// then we add both integers
@@ -258,7 +258,7 @@ func (dec *Decoder) getFloat32() (float32, error) {
 				dec.cursor = i
 				break
 			}
-			if end >= dec.length || end <= start {
+			if end >= dec.length || end < start {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
 			// then we add both integers
