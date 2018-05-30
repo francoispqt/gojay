@@ -13,6 +13,7 @@ type A struct {
 	Uint32 uint32
 	Uint16 uint16
 	Uint8  uint8
+	Bval   *B
 }
 
 //gojay:json

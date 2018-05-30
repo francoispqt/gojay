@@ -1,9 +1,9 @@
-package tests
+package tests 
 
 import "github.com/francoispqt/gojay"
 
-// UnmarshalJSONOject implements gojay's UnmarshalerJSONObject
-func (v *A) UnmarshalJSONOject(dec *gojay.Decoder, k string) error {
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v *A) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	switch k {
 	case "str":
 		return dec.String(&v.Str)
@@ -27,12 +27,17 @@ func (v *A) UnmarshalJSONOject(dec *gojay.Decoder, k string) error {
 		return dec.Uint16(&v.Uint16)
 	case "uint8":
 		return dec.Uint8(&v.Uint8)
+	case "bval":
+		if v.Bval == nil {
+			v.Bval = &B{}
+		}
+		dec.Object(v.Bval)
 	}
 	return nil
 }
 
 // NKeys returns the number of keys to unmarshal
-func (v *A) NKeys() int { return 11 }
+func (v *A) NKeys() int { return 12 }
 
 // MarshalJSONObject implements gojay's MarshalerJSONObject
 func (v *A) MarshalJSONOject(enc *gojay.Encoder) {
@@ -52,8 +57,8 @@ func (v *A) MarshalJSONOject(enc *gojay.Encoder) {
 // IsNil returns wether the structure is nil value or not
 func (v *A) IsNil() bool { return v == nil }
 
-// UnmarshalJSONOject implements gojay's UnmarshalerJSONObject
-func (v *B) UnmarshalJSONOject(dec *gojay.Decoder, k string) error {
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v *B) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	switch k {
 	case "str":
 		return dec.String(&v.Str)
