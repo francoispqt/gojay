@@ -1,9 +1,10 @@
 package gojay
 
 import (
-	"fmt"
 	"io"
+	"fmt"
 	"reflect"
+	"encoding/json"
 )
 
 // MarshalJSONObject returns the JSON encoding of v.
@@ -97,74 +98,90 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 // 		fmt.Println(b) // {"id":123456}
 //	}
 func Marshal(v interface{}) ([]byte, error) {
-	switch vt := v.(type) {
-	case MarshalerJSONObject:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeObject(vt)
-	case MarshalerJSONArray:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeArray(vt)
-	case string:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeString(vt)
-	case bool:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeBool(vt)
-	case int:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(vt)
-	case int64:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt64(vt)
-	case int32:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case int16:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case int8:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case uint64:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case uint32:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case uint16:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case uint8:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeInt(int(vt))
-	case float64:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeFloat(vt)
-	case float32:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeFloat32(vt)
-	case *EmbeddedJSON:
-		enc := BorrowEncoder(nil)
-		defer enc.Release()
-		return enc.encodeEmbeddedJSON(vt)
-	default:
-		return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
-	}
+	return marshal(v, false)
+}
+
+// MarshalAny returns the JSON encoding of v.
+//
+// MarshalAny takes interface v and encodes it according to its type.
+// Basic example with a string:
+// 	b, err := gojay.Marshal("test")
+//	fmt.Println(b) // "test"
+//
+// If v implements Marshaler or Marshaler interface
+// it will call the corresponding methods.
+//
+// If it cannot find any supported type it will be marshalled though default Go "json" package.
+// Warning, this function can be slower, than a default "Marshal"
+//
+//	type TestStruct struct {
+//		id int
+//	}
+//
+// 	func main() {
+//		test := &TestStruct{
+//			id: 123456,
+//		}
+//		b, _ := gojay.Marshal(test)
+// 		fmt.Println(b) // {"id": 123456}
+//	}
+func MarshalAny(v interface{}) ([]byte, error) {
+	return marshal(v, true)
+}
+
+func marshal(v interface{}, any bool) ([]byte, error) {
+	var (
+		enc = BorrowEncoder(nil)
+
+		buf []byte
+		err error
+	)
+
+	buf, err = func() ([]byte, error) {
+		switch vt := v.(type) {
+		case MarshalerJSONObject:
+			return enc.encodeObject(vt)
+		case MarshalerJSONArray:
+			return enc.encodeArray(vt)
+		case string:
+			return enc.encodeString(vt)
+		case bool:
+			return enc.encodeBool(vt)
+		case int:
+			return enc.encodeInt(vt)
+		case int64:
+			return enc.encodeInt64(vt)
+		case int32:
+			return enc.encodeInt(int(vt))
+		case int16:
+			return enc.encodeInt(int(vt))
+		case int8:
+			return enc.encodeInt(int(vt))
+		case uint64:
+			return enc.encodeInt(int(vt))
+		case uint32:
+			return enc.encodeInt(int(vt))
+		case uint16:
+			return enc.encodeInt(int(vt))
+		case uint8:
+			return enc.encodeInt(int(vt))
+		case float64:
+			return enc.encodeFloat(vt)
+		case float32:
+			return enc.encodeFloat32(vt)
+		case *EmbeddedJSON:
+			return enc.encodeEmbeddedJSON(vt)
+		default:
+			if any {
+				return json.Marshal(vt)
+			}
+
+			return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+		}
+	} ()
+
+	enc.Release()
+	return buf, err
 }
 
 // MarshalerJSONObject is the interface to implement for struct to be encoded

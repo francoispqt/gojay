@@ -274,6 +274,22 @@ func TestEncoderObjectMarshalAPI(t *testing.T) {
 			string(r),
 			"Result of marshalling is different as the one expected")
 	})
+	t.Run("marshal-any-object", func(t *testing.T) {
+		test := struct {
+			Foo string
+			Bar int
+		}{
+			"test",
+			100,
+		}
+		r, err := MarshalAny(test)
+		assert.Nil(t, err, "Error should be nil")
+		assert.Equal(
+			t,
+			`{"Foo":"test","Bar":100}`,
+			string(r),
+			"Result of marshalling is different as the one expected")
+	})
 }
 
 type TestObectOmitEmpty struct {
