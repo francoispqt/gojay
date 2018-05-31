@@ -40,7 +40,7 @@ func (v *A) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 func (v *A) NKeys() int { return 12 }
 
 // MarshalJSONObject implements gojay's MarshalerJSONObject
-func (v *A) MarshalJSONOject(enc *gojay.Encoder) {
+func (v *A) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("str", v.Str)
 	enc.BoolKey("bool", v.Bool)
 	enc.IntKey("int", v.Int)
@@ -52,6 +52,7 @@ func (v *A) MarshalJSONOject(enc *gojay.Encoder) {
 	enc.Uint32Key("uint32", v.Uint32)
 	enc.Uint16Key("uint16", v.Uint16)
 	enc.Uint8Key("uint8", v.Uint8)
+	enc.ObjectKey("bval", v.Bval)
 }
 
 // IsNil returns wether the structure is nil value or not
@@ -90,7 +91,7 @@ func (v *B) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 func (v *B) NKeys() int { return 11 }
 
 // MarshalJSONObject implements gojay's MarshalerJSONObject
-func (v *B) MarshalJSONOject(enc *gojay.Encoder) {
+func (v *B) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("str", v.Str)
 	enc.BoolKey("bool", v.Bool)
 	enc.IntKey("int", v.Int)
