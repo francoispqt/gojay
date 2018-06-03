@@ -2,20 +2,19 @@ package main
 
 import (
 	"go/ast"
-	"os"
 )
 
-func (v *vis) genStruct(f *os.File, n string, s *ast.StructType) error {
-	keys, err := v.structGenUnmarshalObj(f, n, s)
+func (g *gen) genStruct(n string, s *ast.StructType) error {
+	keys, err := g.structGenUnmarshalObj(n, s)
 	if err != nil {
 		return err
 	}
-	err = v.structGenNKeys(f, n, keys)
+	err = g.structGenNKeys(n, keys)
 
-	keys, err = v.structGenMarshalObj(f, n, s)
+	keys, err = g.structGenMarshalObj(n, s)
 	if err != nil {
 		return err
 	}
-	err = v.structGenIsNil(f, n)
+	err = g.structGenIsNil(n)
 	return nil
 }

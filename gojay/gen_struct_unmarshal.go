@@ -3,101 +3,14 @@ package main
 import (
 	"errors"
 	"go/ast"
-	"html/template"
-	"log"
-	"os"
-	"reflect"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
-
-var structUnmarshalDefTpl *template.Template
-var structUnmarshalCaseTpl *template.Template
-var structUnmarshalStringTpl *template.Template
-var structUnmarshalIntTpl *template.Template
-var structUnmarshalUintTpl *template.Template
-var structUnmarshalBoolTpl *template.Template
-var structUnmarshalStructTpl *template.Template
-
-var structNKeysTpl *template.Template
-
-var nKeysMethod = `
-// NKeys returns the number of keys to unmarshal
-func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
-`
 
 var structUnmarshalSwitchOpen = []byte("\tswitch k {\n")
 var structUnmarshalClose = []byte("\treturn nil\n}\n")
 
-func init() {
-	t, err := template.New("structUnmarshalDef").
-		Parse("\n// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject" +
-			"\nfunc (v *{{.StructName}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {\n",
-		)
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalDefTpl = t
-
-	t, err = template.New("structUnmarshalCase").
-		Parse("\tcase \"{{.Key}}\":\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalCaseTpl = t
-
-	t, err = template.New("structUnmarshalCaseString").
-		Parse("\t\treturn dec.String(&v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalStringTpl = t
-
-	t, err = template.New("structUnmarshalCaseInt").
-		Parse("\t\treturn dec.Int{{.IntLen}}(&v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalIntTpl = t
-
-	t, err = template.New("structUnmarshalCaseUint").
-		Parse("\t\treturn dec.Uint{{.IntLen}}(&v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalUintTpl = t
-
-	t, err = template.New("structUnmarshalCaseBool").
-		Parse("\t\treturn dec.Bool(&v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalBoolTpl = t
-
-	t, err = template.New("structUnmarshalCaseStruct").
-		Parse(
-			`		if v.{{.Field}} == nil {
-			v.{{.Field}} = &{{.StructName}}{}
-		}
-		dec.Object(v.{{.Field}})
-`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	structUnmarshalStructTpl = t
-
-	t, err = template.New("structUnmarshalNKeys").
-		Parse(nKeysMethod)
-	if err != nil {
-		log.Fatal(err)
-	}
-	structNKeysTpl = t
-
-}
-
-func (v *vis) structGenNKeys(f *os.File, n string, count int) error {
-	err := structNKeysTpl.Execute(f, struct {
+func (g *gen) structGenNKeys(n string, count int) error {
+	err := structUnmarshalTpl["nKeys"].tpl.Execute(g.f, struct {
 		NKeys      int
 		StructName string
 	}{
@@ -107,8 +20,8 @@ func (v *vis) structGenNKeys(f *os.File, n string, count int) error {
 	return err
 }
 
-func (v *vis) structGenUnmarshalObj(f *os.File, n string, s *ast.StructType) (int, error) {
-	err := structUnmarshalDefTpl.Execute(f, struct {
+func (g *gen) structGenUnmarshalObj(n string, s *ast.StructType) (int, error) {
+	err := structUnmarshalTpl["def"].tpl.Execute(g.f, struct {
 		StructName string
 	}{
 		StructName: n,
@@ -119,14 +32,14 @@ func (v *vis) structGenUnmarshalObj(f *os.File, n string, s *ast.StructType) (in
 	keys := 0
 	if len(s.Fields.List) > 0 {
 		// open  switch statement
-		f.Write(structUnmarshalSwitchOpen)
+		g.f.Write(structUnmarshalSwitchOpen)
 
 		// TODO:  check tags
 		for _, field := range s.Fields.List {
 			switch t := field.Type.(type) {
 			case *ast.Ident:
 				var err error
-				keys, err = v.structGenUnmarshalIdent(f, field, t, keys)
+				keys, err = g.structGenUnmarshalIdent(field, t, keys, false)
 				if err != nil {
 					return 0, err
 				}
@@ -134,192 +47,285 @@ func (v *vis) structGenUnmarshalObj(f *os.File, n string, s *ast.StructType) (in
 				switch ptrExp := t.X.(type) {
 				case *ast.Ident:
 					var err error
-					keys, err = v.structGenUnmarshalIdent(f, field, ptrExp, keys)
+					keys, err = g.structGenUnmarshalIdent(field, ptrExp, keys, true)
 					if err != nil {
 						return 0, err
 					}
 				default:
-					spew.Println(reflect.TypeOf(ptrExp))
-					spew.Println(ptrExp)
+					return 0, errors.New("Unknown type1")
 				}
-			default:
-				spew.Println(t)
 			}
 		}
 		// close  switch statement
-		f.Write([]byte("\t}\n"))
+		g.f.Write([]byte("\t}\n"))
 	}
-	_, err = f.Write(structUnmarshalClose)
+	_, err = g.f.Write(structUnmarshalClose)
 	if err != nil {
 		return 0, err
 	}
 	return keys, nil
 }
 
-func (v *vis) structGenUnmarshalIdent(f *os.File, field *ast.Field, i *ast.Ident, keys int) (int, error) {
+func (g *gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, ptr bool) (int, error) {
 	switch i.String() {
 	case "string":
-		var err = v.structUnmarshalString(f, field)
+		var err = g.structUnmarshalString(field, ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "bool":
-		var err = v.structUnmarshalBool(f, field)
+		var err = g.structUnmarshalBool(field, ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int":
-		var err = v.structUnmarshalInt(f, field, "")
+		var err = g.structUnmarshalInt(field, "", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int64":
-		var err = v.structUnmarshalInt(f, field, "64")
+		var err = g.structUnmarshalInt(field, "64", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int32":
-		var err = v.structUnmarshalInt(f, field, "32")
+		var err = g.structUnmarshalInt(field, "32", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int16":
-		var err = v.structUnmarshalInt(f, field, "16")
+		var err = g.structUnmarshalInt(field, "16", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int8":
-		var err = v.structUnmarshalInt(f, field, "8")
+		var err = g.structUnmarshalInt(field, "8", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint64":
-		var err = v.structUnmarshalUint(f, field, "64")
+		var err = g.structUnmarshalUint(field, "64", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint32":
-		var err = v.structUnmarshalUint(f, field, "32")
+		var err = g.structUnmarshalUint(field, "32", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint16":
-		var err = v.structUnmarshalUint(f, field, "16")
+		var err = g.structUnmarshalUint(field, "16", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint8":
-		var err = v.structUnmarshalUint(f, field, "8")
+		var err = g.structUnmarshalUint(field, "8", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	default:
-		switch t := i.Obj.Decl.(type) {
-		case *ast.TypeSpec:
-			var err = v.structUnmarshalStruct(f, field, t)
+		// if ident is already in our spec list
+		if sp, ok := g.vis.specs[i.Name]; ok {
+			err := g.structUnmarshalNonPrim(field, sp, ptr)
 			if err != nil {
 				return 0, err
 			}
 			keys++
-		default:
-			return 0, errors.New("could not determine what to do with type " + i.String())
+		} else if i.Obj != nil {
+			// else check the obj infos
+			switch t := i.Obj.Decl.(type) {
+			case *ast.TypeSpec:
+				err := g.structUnmarshalNonPrim(field, t, ptr)
+				if err != nil {
+					return 0, err
+				}
+				keys++
+			default:
+				return 0, errors.New("could not determine what to do with type " + i.String())
+			}
+		} else {
+			return 0, errors.New("Unknown type")
 		}
 	}
 	return keys, nil
 }
 
-func (v *vis) structUnmarshalString(f *os.File, field *ast.Field) error {
+func (g *gen) structUnmarshalNonPrim(field *ast.Field, sp *ast.TypeSpec, ptr bool) error {
+	switch sp.Type.(type) {
+	case *ast.StructType:
+		return g.structUnmarshalStruct(field, sp, ptr)
+	case *ast.ArrayType:
+		return g.structUnmarshalArr(field, sp, ptr)
+	}
+	return errors.New("Unknown type")
+}
+
+func (g *gen) structUnmarshalString(field *ast.Field, ptr bool) error {
 	key := field.Names[0].String()
-	err := structUnmarshalCaseTpl.Execute(f, struct {
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
 		Key string
 	}{strings.ToLower(key)})
 	if err != nil {
 		return err
 	}
-	err = structUnmarshalStringTpl.Execute(f, struct {
-		Field string
-	}{key})
-	if err != nil {
-		return err
+	if ptr {
+		err = structUnmarshalTpl["string"].tpl.Execute(g.f, struct {
+			Field string
+			Ptr   string
+		}{key, ""})
+		if err != nil {
+			return err
+		}
+	} else {
+		err = structUnmarshalTpl["string"].tpl.Execute(g.f, struct {
+			Field string
+			Ptr   string
+		}{key, "&"})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (v *vis) structUnmarshalBool(f *os.File, field *ast.Field) error {
+func (g *gen) structUnmarshalBool(field *ast.Field, ptr bool) error {
 	key := field.Names[0].String()
-	err := structUnmarshalCaseTpl.Execute(f, struct {
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
 		Key string
 	}{strings.ToLower(key)})
 	if err != nil {
 		return err
 	}
-	err = structUnmarshalBoolTpl.Execute(f, struct {
-		Field string
-	}{key})
-	if err != nil {
-		return err
+	if ptr {
+		err = structUnmarshalTpl["bool"].tpl.Execute(g.f, struct {
+			Field string
+			Ptr   string
+		}{key, ""})
+		if err != nil {
+			return err
+		}
+	} else {
+		err = structUnmarshalTpl["bool"].tpl.Execute(g.f, struct {
+			Field string
+			Ptr   string
+		}{key, "&"})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (v *vis) structUnmarshalInt(f *os.File, field *ast.Field, intLen string) error {
+func (g *gen) structUnmarshalInt(field *ast.Field, intLen string, ptr bool) error {
 	key := field.Names[0].String()
-	err := structUnmarshalCaseTpl.Execute(f, struct {
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
 		Key string
 	}{strings.ToLower(key)})
 	if err != nil {
 		return err
 	}
-	err = structUnmarshalIntTpl.Execute(f, struct {
-		Field  string
-		IntLen string
-	}{key, intLen})
-	if err != nil {
-		return err
+	if ptr {
+		err = structUnmarshalTpl["int"].tpl.Execute(g.f, struct {
+			Field  string
+			IntLen string
+			Ptr    string
+		}{key, intLen, ""})
+		if err != nil {
+			return err
+		}
+	} else {
+		err = structUnmarshalTpl["int"].tpl.Execute(g.f, struct {
+			Field  string
+			IntLen string
+			Ptr    string
+		}{key, intLen, "&"})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (v *vis) structUnmarshalUint(f *os.File, field *ast.Field, intLen string) error {
+func (g *gen) structUnmarshalUint(field *ast.Field, intLen string, ptr bool) error {
 	key := field.Names[0].String()
-	err := structUnmarshalCaseTpl.Execute(f, struct {
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
 		Key string
 	}{strings.ToLower(key)})
 	if err != nil {
 		return err
 	}
-	err = structUnmarshalUintTpl.Execute(f, struct {
-		Field  string
-		IntLen string
-	}{key, intLen})
-	if err != nil {
-		return err
+	if ptr {
+		err = structUnmarshalTpl["uint"].tpl.Execute(g.f, struct {
+			Field  string
+			IntLen string
+			Ptr    string
+		}{key, intLen, ""})
+		if err != nil {
+			return err
+		}
+	} else {
+		err = structUnmarshalTpl["uint"].tpl.Execute(g.f, struct {
+			Field  string
+			IntLen string
+			Ptr    string
+		}{key, intLen, "&"})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (v *vis) structUnmarshalStruct(f *os.File, field *ast.Field, st *ast.TypeSpec) error {
+func (g *gen) structUnmarshalStruct(field *ast.Field, st *ast.TypeSpec, ptr bool) error {
 	key := field.Names[0].String()
-	err := structUnmarshalCaseTpl.Execute(f, struct {
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
 		Key string
 	}{strings.ToLower(key)})
 	if err != nil {
 		return err
 	}
-	err = structUnmarshalStructTpl.Execute(f, struct {
-		Field      string
-		StructName string
+	if ptr {
+		err = structUnmarshalTpl["struct"].tpl.Execute(g.f, struct {
+			Field      string
+			StructName string
+		}{key, st.Name.String()})
+		if err != nil {
+			return err
+		}
+	} else {
+		err = structUnmarshalTpl["struct"].tpl.Execute(g.f, struct {
+			Field      string
+			StructName string
+		}{key, st.Name.String()})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (g *gen) structUnmarshalArr(field *ast.Field, st *ast.TypeSpec, ptr bool) error {
+	key := field.Names[0].String()
+	err := structUnmarshalTpl["case"].tpl.Execute(g.f, struct {
+		Key string
+	}{strings.ToLower(key)})
+	if err != nil {
+		return err
+	}
+	err = structUnmarshalTpl["arr"].tpl.Execute(g.f, struct {
+		Field    string
+		TypeName string
 	}{key, st.Name.String()})
 	if err != nil {
 		return err

@@ -3,84 +3,11 @@ package main
 import (
 	"errors"
 	"go/ast"
-	"html/template"
-	"log"
-	"os"
-	"reflect"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
-var structMarshalDefTpl *template.Template
-var structMarshalStringTpl *template.Template
-var structMarshalIntTpl *template.Template
-var structMarshalUintTpl *template.Template
-var structMarshalBoolTpl *template.Template
-var structMarshalStructTpl *template.Template
-
-var structIsNilTpl *template.Template
-
-var isNilMethod = `
-// IsNil returns wether the structure is nil value or not
-func (v *{{.StructName}}) IsNil() bool { return v == nil }
-`
-
-func init() {
-	t, err := template.New("structUnmarshalDef").
-		Parse("\n// MarshalJSONObject implements gojay's MarshalerJSONObject" +
-			"\nfunc (v *{{.StructName}}) MarshalJSONObject(enc *gojay.Encoder) {\n",
-		)
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalDefTpl = t
-
-	t, err = template.New("structMarshalCaseString").
-		Parse("\tenc.StringKey(\"{{.Key}}\", v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalStringTpl = t
-
-	t, err = template.New("structMarshalCaseInt").
-		Parse("\tenc.Int{{.IntLen}}Key(\"{{.Key}}\", v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalIntTpl = t
-
-	t, err = template.New("structMarshalCaseUint").
-		Parse("\tenc.Uint{{.IntLen}}Key(\"{{.Key}}\", v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalUintTpl = t
-
-	t, err = template.New("structMarshalCaseBool").
-		Parse("\tenc.BoolKey(\"{{.Key}}\", v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalBoolTpl = t
-
-	t, err = template.New("structMarshalCaseStruct").
-		Parse("\tenc.ObjectKey(\"{{.Key}}\", v.{{.Field}})\n")
-	if err != nil {
-		log.Fatal(err)
-	}
-	structMarshalStructTpl = t
-
-	t, err = template.New("structMarhalIsNil").
-		Parse(isNilMethod)
-	if err != nil {
-		log.Fatal(err)
-	}
-	structIsNilTpl = t
-}
-
-func (v *vis) structGenIsNil(f *os.File, n string) error {
-	err := structIsNilTpl.Execute(f, struct {
+func (g *gen) structGenIsNil(n string) error {
+	err := structMarshalTpl["isNil"].tpl.Execute(g.f, struct {
 		StructName string
 	}{
 		StructName: n,
@@ -88,8 +15,8 @@ func (v *vis) structGenIsNil(f *os.File, n string) error {
 	return err
 }
 
-func (v *vis) structGenMarshalObj(f *os.File, n string, s *ast.StructType) (int, error) {
-	err := structMarshalDefTpl.Execute(f, struct {
+func (g *gen) structGenMarshalObj(n string, s *ast.StructType) (int, error) {
+	err := structMarshalTpl["def"].tpl.Execute(g.f, struct {
 		StructName string
 	}{
 		StructName: n,
@@ -104,7 +31,7 @@ func (v *vis) structGenMarshalObj(f *os.File, n string, s *ast.StructType) (int,
 			switch t := field.Type.(type) {
 			case *ast.Ident:
 				var err error
-				keys, err = v.structGenMarshalIdent(f, field, t, keys)
+				keys, err = g.structGenMarshalIdent(field, t, keys, false)
 				if err != nil {
 					return 0, err
 				}
@@ -112,165 +39,225 @@ func (v *vis) structGenMarshalObj(f *os.File, n string, s *ast.StructType) (int,
 				switch ptrExp := t.X.(type) {
 				case *ast.Ident:
 					var err error
-					keys, err = v.structGenMarshalIdent(f, field, ptrExp, keys)
+					keys, err = g.structGenMarshalIdent(field, ptrExp, keys, true)
 					if err != nil {
 						return 0, err
 					}
 				default:
-					spew.Println(reflect.TypeOf(ptrExp))
-					spew.Println(ptrExp)
+					return 0, errors.New("Unknown type")
 				}
-			default:
-				spew.Println(t)
 			}
 		}
 	}
-	_, err = f.Write([]byte("}\n"))
+	_, err = g.f.Write([]byte("}\n"))
 	if err != nil {
 		return 0, err
 	}
 	return keys, nil
 }
 
-func (v *vis) structGenMarshalIdent(f *os.File, field *ast.Field, i *ast.Ident, keys int) (int, error) {
+func (g *gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, ptr bool) (int, error) {
 	switch i.String() {
 	case "string":
-		var err = v.structMarshalString(f, field)
+		var err = g.structMarshalString(field, ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "bool":
-		var err = v.structMarshalBool(f, field)
+		var err = g.structMarshalBool(field, ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int":
-		var err = v.structMarshalInt(f, field, "")
+		var err = g.structMarshalInt(field, "", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int64":
-		var err = v.structMarshalInt(f, field, "64")
+		var err = g.structMarshalInt(field, "64", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int32":
-		var err = v.structMarshalInt(f, field, "32")
+		var err = g.structMarshalInt(field, "32", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int16":
-		var err = v.structMarshalInt(f, field, "16")
+		var err = g.structMarshalInt(field, "16", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "int8":
-		var err = v.structMarshalInt(f, field, "8")
+		var err = g.structMarshalInt(field, "8", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint64":
-		var err = v.structMarshalUint(f, field, "64")
+		var err = g.structMarshalUint(field, "64", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint32":
-		var err = v.structMarshalUint(f, field, "32")
+		var err = g.structMarshalUint(field, "32", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint16":
-		var err = v.structMarshalUint(f, field, "16")
+		var err = g.structMarshalUint(field, "16", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	case "uint8":
-		var err = v.structMarshalUint(f, field, "8")
+		var err = g.structMarshalUint(field, "8", ptr)
 		if err != nil {
 			return 0, err
 		}
 		keys++
 	default:
-		switch t := i.Obj.Decl.(type) {
-		case *ast.TypeSpec:
-			var err = v.structMarshalStruct(f, field, t)
+		// if ident is already in our spec list
+		if sp, ok := g.vis.specs[i.Name]; ok {
+			err := g.structMarshalNonPrim(field, sp, ptr)
 			if err != nil {
 				return 0, err
 			}
 			keys++
-		default:
-			return 0, errors.New("could not determine what to do with type " + i.String())
+		} else if i.Obj != nil {
+			switch t := i.Obj.Decl.(type) {
+			case *ast.TypeSpec:
+				var err = g.structMarshalNonPrim(field, t, ptr)
+				if err != nil {
+					return 0, err
+				}
+				keys++
+			default:
+				return 0, errors.New("could not determine what to do with type " + i.String())
+			}
+		} else {
+			return 0, errors.New("Unknown type")
 		}
 	}
 	return keys, nil
 }
 
-func (v *vis) structMarshalString(f *os.File, field *ast.Field) error {
+func (g *gen) structMarshalNonPrim(field *ast.Field, sp *ast.TypeSpec, ptr bool) error {
+	switch sp.Type.(type) {
+	case *ast.StructType:
+		return g.structMarshalStruct(field, sp, ptr)
+	case *ast.ArrayType:
+		return g.structMarshalArr(field, sp, ptr)
+	}
+	return nil
+}
+
+func (g *gen) structMarshalString(field *ast.Field, ptr bool) error {
 	key := field.Names[0].String()
-	err := structMarshalStringTpl.Execute(f, struct {
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	err := structMarshalTpl["string"].tpl.Execute(g.f, struct {
 		Field string
 		Key   string
-	}{key, strings.ToLower(key)})
+		Ptr   string
+	}{key, strings.ToLower(key), ptrStr})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *vis) structMarshalBool(f *os.File, field *ast.Field) error {
+func (g *gen) structMarshalBool(field *ast.Field, ptr bool) error {
 	key := field.Names[0].String()
-	err := structMarshalBoolTpl.Execute(f, struct {
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	err := structMarshalTpl["bool"].tpl.Execute(g.f, struct {
 		Field string
 		Key   string
-	}{key, strings.ToLower(key)})
+		Ptr   string
+	}{key, strings.ToLower(key), ptrStr})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *vis) structMarshalInt(f *os.File, field *ast.Field, intLen string) error {
+func (g *gen) structMarshalInt(field *ast.Field, intLen string, ptr bool) error {
 	key := field.Names[0].String()
-	err := structMarshalIntTpl.Execute(f, struct {
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	err := structMarshalTpl["int"].tpl.Execute(g.f, struct {
 		Field  string
 		IntLen string
 		Key    string
-	}{key, intLen, strings.ToLower(key)})
+		Ptr    string
+	}{key, intLen, strings.ToLower(key), ptrStr})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *vis) structMarshalUint(f *os.File, field *ast.Field, intLen string) error {
+func (g *gen) structMarshalUint(field *ast.Field, intLen string, ptr bool) error {
 	key := field.Names[0].String()
-	err := structMarshalUintTpl.Execute(f, struct {
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	err := structMarshalTpl["uint"].tpl.Execute(g.f, struct {
 		Field  string
 		IntLen string
 		Key    string
-	}{key, intLen, strings.ToLower(key)})
+		Ptr    string
+	}{key, intLen, strings.ToLower(key), ptrStr})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *vis) structMarshalStruct(f *os.File, field *ast.Field, st *ast.TypeSpec) error {
+func (g *gen) structMarshalStruct(field *ast.Field, st *ast.TypeSpec, ptr bool) error {
 	key := field.Names[0].String()
-	var err = structMarshalStructTpl.Execute(f, struct {
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	var err = structMarshalTpl["struct"].tpl.Execute(g.f, struct {
 		Key   string
 		Field string
-	}{strings.ToLower(key), key})
+		Ptr   string
+	}{strings.ToLower(key), key, ptrStr})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *gen) structMarshalArr(field *ast.Field, st *ast.TypeSpec, ptr bool) error {
+	key := field.Names[0].String()
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	var err = structMarshalTpl["arr"].tpl.Execute(g.f, struct {
+		Key   string
+		Field string
+		Ptr   string
+	}{strings.ToLower(key), key, ptrStr})
 	if err != nil {
 		return err
 	}

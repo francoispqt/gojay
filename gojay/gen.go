@@ -2,17 +2,28 @@ package main
 
 import (
 	"go/ast"
-	"html/template"
 	"log"
 	"os"
-
-	"github.com/davecgh/go-spew/spew"
+	"text/template"
 )
 
 const genFileSuffix = "_gojay.go"
 
 var pkgTpl *template.Template
 var gojayImport = []byte("import \"github.com/francoispqt/gojay\"\n")
+
+type gen struct {
+	f        *os.File
+	genTypes map[string]*ast.TypeSpec
+	vis      *vis
+}
+
+type genTpl struct {
+	strTpl string
+	tpl    *template.Template
+}
+
+type templateList map[string]*genTpl
 
 func init() {
 	t, err := template.New("pkgDef").
@@ -23,48 +34,21 @@ func init() {
 	pkgTpl = t
 }
 
-func (v *vis) gen() error {
-	// open the file
-	f, err := os.OpenFile(v.genFileName(), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0777)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	// write package
-	err = v.writePkg(f)
-	if err != nil {
-		return err
-	}
-	// write import of gojay
-	err = v.writeGojayImport(f)
-	if err != nil {
-		return err
-	}
-	// range over specs
-	// generate interfaces implementations based on type
-	for _, s := range v.specs {
-		switch t := s.Type.(type) {
-		case *ast.StructType:
-			err = v.genStruct(f, s.Name.String(), t)
-			if err != nil {
-				return err
-			}
-		case *ast.ArrayType:
-			spew.Println(t, "arr")
+func parseTemplates(tpls templateList, pfx string) {
+	for k, t := range tpls {
+		tpl, err := template.New(pfx + k).Parse(t.strTpl)
+		if err != nil {
+			log.Fatal(err)
 		}
+		t.tpl = tpl
 	}
-	return nil
 }
 
-func (v *vis) genFileName() string {
-	return v.file[:len(v.file)-3] + genFileSuffix
-}
-
-func (v *vis) writePkg(f *os.File) error {
-	err := pkgTpl.Execute(f, struct {
+func (g *gen) writePkg(pkg string) error {
+	err := pkgTpl.Execute(g.f, struct {
 		PkgName string
 	}{
-		PkgName: v.pkg,
+		PkgName: pkg,
 	})
 	if err != nil {
 		return err
@@ -72,10 +56,42 @@ func (v *vis) writePkg(f *os.File) error {
 	return nil
 }
 
-func (v *vis) writeGojayImport(f *os.File) error {
-	_, err := f.Write(gojayImport)
+func (g *gen) writeGojayImport() error {
+	_, err := g.f.Write(gojayImport)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (g *gen) gen(pkg string) error {
+	// write package
+	err := g.writePkg(pkg)
+	if err != nil {
+		return err
+	}
+	// write import of gojay
+	err = g.writeGojayImport()
+	if err != nil {
+		return err
+	}
+	// range over specs
+	// generate interfaces implementations based on type
+	for _, s := range g.genTypes {
+		switch t := s.Type.(type) {
+		case *ast.StructType:
+			err = g.genStruct(s.Name.String(), t)
+			if err != nil {
+				return err
+			}
+		case *ast.ArrayType:
+			err = g.genArray(s.Name.String(), t)
+			if err != nil {
+				return err
+			}
+		case *ast.MapType:
+			// TODO: generate for map type
+		}
 	}
 	return nil
 }

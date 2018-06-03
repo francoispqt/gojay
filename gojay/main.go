@@ -50,18 +50,25 @@ func getFiles() ([]string, error) {
 }
 
 func main() {
-	files, err := getFiles()
+	p, err := getPath()
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, f := range files {
-		fset := token.NewFileSet()
-		node, err := parser.ParseFile(fset, f, nil, parser.ParseComments)
-		if err != nil {
-			log.Fatal(err)
+	// for _, f := range files {
+	fset := token.NewFileSet()
+	pkgs, err := parser.ParseDir(fset, p, nil, parser.ParseComments)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for pkgName, pkg := range pkgs {
+		v := NewVisitor(pkgName)
+		for fileName, f := range pkg.Files {
+			v.file = fileName[:len(fileName)-3] + genFileSuffix
+			ast.Walk(v, f)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
-		v := &vis{pkg: node.Name.String(), specs: make([]*ast.TypeSpec, 0), file: f}
-		ast.Walk(v, node)
 		err = v.gen()
 		if err != nil {
 			log.Fatal(err)
