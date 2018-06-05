@@ -441,10 +441,10 @@ type user struct {
     email string
 }
 // implement MarshalerJSONObject
-func (u *user) MarshalJSONObject(dec *gojay.Decoder, key string) {
-    dec.IntKey("id", u.id)
-    dec.StringKey("name", u.name)
-    dec.StringKey("email", u.email)
+func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
+    enc.IntKey("id", u.id)
+    enc.StringKey("name", u.name)
+    enc.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
     return u == nil
