@@ -10,11 +10,9 @@ func (g *gen) genStruct(n string, s *ast.StructType) error {
 		return err
 	}
 	err = g.structGenNKeys(n, keys)
-
 	keys, err = g.structGenMarshalObj(n, s)
 	if err != nil {
 		return err
 	}
-	err = g.structGenIsNil(n)
-	return nil
+	return g.structGenIsNil(n)
 }
