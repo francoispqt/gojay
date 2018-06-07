@@ -47,6 +47,8 @@ var pow10uint64 = [20]uint64{
 	1000000000000000000,
 }
 
+var skipNumberEndCursorIncrement [256]int
+
 func init() {
 	digits = make([]int8, 256)
 	for i := 0; i < len(digits); i++ {
@@ -55,27 +57,32 @@ func init() {
 	for i := int8('0'); i <= int8('9'); i++ {
 		digits[i] = i - int8('0')
 	}
+
+	for i := 0; i < 256; i++ {
+		switch i {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.':
+			skipNumberEndCursorIncrement[i] = 1
+		}
+	}
 }
 
 func (dec *Decoder) skipNumber() (int, error) {
 	end := dec.cursor + 1
 	// look for following numbers
 	for j := dec.cursor + 1; j < dec.length || dec.read(); j++ {
+		end += skipNumberEndCursorIncrement[dec.data[j]]
+
 		switch dec.data[j] {
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			end = j + 1
-			continue
-		case '.':
-			end = j + 1
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ' ', '\n', '\t', '\r':
 			continue
 		case ',', '}', ']':
 			return end, nil
-		case ' ', '\n', '\t', '\r':
-			continue
+		default:
+			// invalid json we expect numbers, dot (single one), comma, or spaces
+			return end, dec.raiseInvalidJSONErr(dec.cursor)
 		}
-		// invalid json we expect numbers, dot (single one), comma, or spaces
-		return end, dec.raiseInvalidJSONErr(dec.cursor)
 	}
+
 	return end, nil
 }
 
