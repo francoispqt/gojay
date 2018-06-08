@@ -174,15 +174,18 @@ type UnmarshalerJSONArray interface {
 
 // A Decoder reads and decodes JSON values from an input stream.
 type Decoder struct {
-	r        io.Reader
-	data     []byte
-	err      error
-	isPooled byte
-	called   byte
-	child    byte
-	cursor   int
-	length   int
-	keysDone int
+	r          io.Reader
+	data       []byte
+	err        error
+	isPooled   byte
+	called     byte
+	child      byte
+	cursor     int
+	length     int
+	keysDone   int
+	validation byte
+	path       string
+	Schema     *Schema
 }
 
 // Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by v.

@@ -4,6 +4,47 @@ package gojay
 // It can be used to delay JSON decoding or precompute a JSON encoding.
 type EmbeddedJSON []byte
 
+// Introspection on EmbeddedJSON
+
+// IsNull checks wether the JSON is null
+func (ej *EmbeddedJSON) IsNull() (isNull bool) {
+	if ej == nil {
+		return true
+	}
+	b := *ej
+	lenB := len(b)
+	if lenB < 6 { // "null"
+		return false
+	}
+	for cursor := 0; cursor < len(b); cursor++ {
+		switch b[cursor] {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case 'n':
+			if lenB < cursor+3 {
+				return false
+			}
+			cursor++
+			if b[cursor] != 'u' {
+				return false
+			}
+			cursor++
+			if b[cursor] != 'l' {
+				return false
+			}
+			cursor++
+			if b[cursor] != 'l' {
+				return false
+			}
+			cursor++
+			isNull = true
+		default:
+			return false
+		}
+	}
+	return isNull
+}
+
 func (dec *Decoder) decodeEmbeddedJSON(ej *EmbeddedJSON) error {
 	var err error
 	if ej == nil {

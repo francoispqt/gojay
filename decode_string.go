@@ -27,7 +27,17 @@ func (dec *Decoder) decodeString(v *string) error {
 			}
 			// we do minus one to remove the last quote
 			d := dec.data[start : end-1]
-			*v = *(*string)(unsafe.Pointer(&d))
+			if dec.validation == 0x1 {
+				tmpVal := *(*string)(unsafe.Pointer(&d))
+				if err := dec.Schema.ValidatePathString(dec.path, tmpVal); err != nil {
+					dec.err = err
+					// TODO:
+					return dec.err
+				}
+				*v = tmpVal
+			} else {
+				*v = *(*string)(unsafe.Pointer(&d))
+			}
 			dec.cursor = end
 			return nil
 		// is nil

@@ -25,7 +25,17 @@ func (dec *Decoder) decodeInt(v *int) error {
 			if err != nil {
 				return err
 			}
-			*v = int(val)
+			if dec.validation == 0x1 {
+				tmpVal := int(val)
+				if err := dec.Schema.ValidatePath(dec.path, tmpVal); err != nil {
+					dec.err = err
+					// TODO:
+					return dec.err
+				}
+				*v = int(val)
+			} else {
+				*v = int(val)
+			}
 			return nil
 		case '-':
 			dec.cursor = dec.cursor + 1
@@ -33,7 +43,17 @@ func (dec *Decoder) decodeInt(v *int) error {
 			if err != nil {
 				return err
 			}
-			*v = -int(val)
+			if dec.validation == 0x1 {
+				tmpVal := int(val)
+				if err := dec.Schema.ValidatePath(dec.path, tmpVal); err != nil {
+					dec.err = err
+					// TODO:
+					return dec.err
+				}
+				*v = -int(val)
+			} else {
+				*v = -int(val)
+			}
 			return nil
 		case 'n':
 			dec.cursor++

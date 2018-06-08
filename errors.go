@@ -81,3 +81,11 @@ type InvalidUsagePooledEncoderError string
 func (err InvalidUsagePooledEncoderError) Error() string {
 	return string(err)
 }
+
+// InvaalidMarshalError is a type representing an error returned when
+// Envcoding did not find the proper way to encode
+type SchemaValidationError string
+
+func (err SchemaValidationError) Error() string {
+	return string(err)
+}
