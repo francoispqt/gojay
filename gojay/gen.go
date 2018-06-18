@@ -107,6 +107,10 @@ func (g *Gen) Gen() error {
 		// is map
 		case *ast.MapType:
 			// TODO: generate for map type
+			err = g.genMap(s.Name.String(), t)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
