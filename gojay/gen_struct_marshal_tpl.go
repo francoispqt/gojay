@@ -20,6 +20,9 @@ func (v *{{.StructName}}) IsNil() bool { return v == nil }
 	"uint": &genTpl{
 		strTpl: "\tenc.Uint{{.IntLen}}Key(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
+	"float": &genTpl{
+		strTpl: "\tenc.Float{{.IntLen}}Key(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+	},
 	"bool": &genTpl{
 		strTpl: "\tenc.BoolKey(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},

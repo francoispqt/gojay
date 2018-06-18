@@ -2,7 +2,7 @@ package tests
 
 //gojay:json
 type A struct {
-	Str    string
+	Str    string `gojay:"string"`
 	Bool   bool
 	Int    int
 	Int64  int64

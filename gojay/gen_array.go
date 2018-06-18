@@ -4,7 +4,7 @@ import (
 	"go/ast"
 )
 
-func (g *gen) genArray(n string, s *ast.ArrayType) error {
+func (g *Gen) genArray(n string, s *ast.ArrayType) error {
 	err := g.arrGenUnmarshal(n, s)
 	if err != nil {
 		return err

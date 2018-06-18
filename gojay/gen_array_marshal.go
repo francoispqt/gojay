@@ -7,8 +7,8 @@ import (
 
 func init() {}
 
-func (g *gen) arrGenIsNil(n string) error {
-	err := arrMarshalTpl["isNil"].tpl.Execute(g.f, struct {
+func (g *Gen) arrGenIsNil(n string) error {
+	err := arrMarshalTpl["isNil"].tpl.Execute(g.b, struct {
 		TypeName string
 	}{
 		TypeName: n,
@@ -16,8 +16,8 @@ func (g *gen) arrGenIsNil(n string) error {
 	return err
 }
 
-func (g *gen) arrGenMarshal(n string, s *ast.ArrayType) error {
-	err := arrMarshalTpl["def"].tpl.Execute(g.f, struct {
+func (g *Gen) arrGenMarshal(n string, s *ast.ArrayType) error {
+	err := arrMarshalTpl["def"].tpl.Execute(g.b, struct {
 		TypeName string
 	}{
 		TypeName: n,
@@ -43,14 +43,14 @@ func (g *gen) arrGenMarshal(n string, s *ast.ArrayType) error {
 			return errors.New("Unknown type")
 		}
 	}
-	_, err = g.f.Write([]byte("}\n"))
+	_, err = g.b.Write([]byte("}\n"))
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (g *gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
+func (g *Gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	switch i.String() {
 	case "string":
 		return g.arrMarshalString(ptr)
@@ -76,7 +76,7 @@ func (g *gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
 		return g.arrMarshalUint("8", ptr)
 	default:
 		// if ident is already in our spec list
-		if sp, ok := g.vis.specs[i.Name]; ok {
+		if sp, ok := g.genTypes[i.Name]; ok {
 			return g.arrMarshalNonPrim(sp, ptr)
 		} else if i.Obj != nil {
 			// else check the obj infos
@@ -91,7 +91,7 @@ func (g *gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	}
 }
 
-func (g *gen) arrMarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrMarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
 		return g.arrMarshalStruct(sp, ptr)
@@ -101,16 +101,16 @@ func (g *gen) arrMarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalString(ptr bool) error {
+func (g *Gen) arrMarshalString(ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["stringPtr"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["stringPtr"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["string"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["string"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
@@ -120,16 +120,16 @@ func (g *gen) arrMarshalString(ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalBool(ptr bool) error {
+func (g *Gen) arrMarshalBool(ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["bool"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["bool"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
@@ -139,9 +139,9 @@ func (g *gen) arrMarshalBool(ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalInt(intLen string, ptr bool) error {
+func (g *Gen) arrMarshalInt(intLen string, ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["int"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
@@ -149,7 +149,7 @@ func (g *gen) arrMarshalInt(intLen string, ptr bool) error {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["int"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, "&"})
@@ -160,9 +160,9 @@ func (g *gen) arrMarshalInt(intLen string, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalUint(intLen string, ptr bool) error {
+func (g *Gen) arrMarshalUint(intLen string, ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["uint"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
@@ -170,7 +170,7 @@ func (g *gen) arrMarshalUint(intLen string, ptr bool) error {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["uint"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, "&"})
@@ -181,16 +181,16 @@ func (g *gen) arrMarshalUint(intLen string, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalStruct(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrMarshalStruct(st *ast.TypeSpec, ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["structPtr"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["structPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["struct"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["struct"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
@@ -200,16 +200,16 @@ func (g *gen) arrMarshalStruct(st *ast.TypeSpec, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrMarshalArr(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrMarshalArr(st *ast.TypeSpec, ptr bool) error {
 	if ptr {
-		err := arrMarshalTpl["arrPtr"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["arrPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrMarshalTpl["arr"].tpl.Execute(g.f, struct {
+		err := arrMarshalTpl["arr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {

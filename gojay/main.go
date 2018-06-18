@@ -1,10 +1,9 @@
+//+build !test
+
 package main
 
 import (
-	"errors"
-	"go/ast"
-	"go/parser"
-	"go/token"
+	"flag"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,7 +11,8 @@ import (
 	"strings"
 )
 
-const gojayAnnotation = "//gojay:json"
+var dst = flag.String("o", "", "destination file to output generated implementations")
+var src = flag.String("s", "", "source dir or file")
 
 func hasAnnotation(fP string) bool {
 	b, err := ioutil.ReadFile(fP)
@@ -22,56 +22,54 @@ func hasAnnotation(fP string) bool {
 	return strings.Contains(string(b), gojayAnnotation)
 }
 
+// getPath returns either the path given as argument or current working directory
 func getPath() (string, error) {
-	p := os.Args[1]
-	return filepath.Abs(p)
-}
-
-func getFiles() ([]string, error) {
-	if len(os.Args) < 2 {
-		return nil, errors.New("Gojay generator takes one argument, 0 given")
-	}
-	p, err := getPath()
-	if err != nil {
-		return nil, err
-	}
-	files, err := ioutil.ReadDir(p)
-	if err != nil {
-		return nil, err
-	}
-	r := make([]string, 0)
-	for _, f := range files {
-		fP := filepath.Join(p, f.Name())
-		if !f.IsDir() && strings.HasSuffix(f.Name(), ".go") && hasAnnotation(fP) {
-			r = append(r, fP)
+	var err error
+	var p string
+	if *src != "" {
+		p, err = filepath.Abs(*src)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		p, err = os.Getwd()
+		if err != nil {
+			return "", err
 		}
 	}
-	return r, nil
+	return p, nil
 }
 
 func main() {
+	flag.Parse()
+	// get path
 	p, err := getPath()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// for _, f := range files {
-	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, p, nil, parser.ParseComments)
+	// parse source files
+	g := NewGen(p)
+	err = g.parse()
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
-	for pkgName, pkg := range pkgs {
-		v := NewVisitor(pkgName)
-		for fileName, f := range pkg.Files {
-			v.file = fileName[:len(fileName)-3] + genFileSuffix
-			ast.Walk(v, f)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		err = v.gen()
+	// generate output
+	err = g.Gen()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	// if has dst file, write to file
+	if *dst != "" {
+		f, err := os.OpenFile(*dst, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 		if err != nil {
 			log.Fatal(err)
+			return
 		}
+		f.WriteString(g.b.String())
+		return
 	}
+	// else just print to stdout
+	os.Stdout.WriteString(g.b.String())
 }

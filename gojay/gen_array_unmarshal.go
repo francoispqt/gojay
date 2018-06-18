@@ -5,8 +5,8 @@ import (
 	"go/ast"
 )
 
-func (g *gen) arrGenUnmarshal(n string, s *ast.ArrayType) error {
-	err := arrUnmarshalTpl["def"].tpl.Execute(g.f, struct {
+func (g *Gen) arrGenUnmarshal(n string, s *ast.ArrayType) error {
+	err := arrUnmarshalTpl["def"].tpl.Execute(g.b, struct {
 		TypeName string
 	}{
 		TypeName: n,
@@ -32,14 +32,14 @@ func (g *gen) arrGenUnmarshal(n string, s *ast.ArrayType) error {
 			return errors.New("Unknown type")
 		}
 	}
-	_, err = g.f.Write(structUnmarshalClose)
+	_, err = g.b.Write(structUnmarshalClose)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (g *gen) arrGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
+func (g *Gen) arrGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
 	switch i.String() {
 	case "string":
 		return g.arrUnmarshalString(ptr)
@@ -65,7 +65,7 @@ func (g *gen) arrGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
 		return g.arrUnmarshalUint("8", ptr)
 	default:
 		// if ident is already in our spec list
-		if sp, ok := g.vis.specs[i.Name]; ok {
+		if sp, ok := g.genTypes[i.Name]; ok {
 			return g.arrUnmarshalNonPrim(sp, ptr)
 		} else if i.Obj != nil {
 			// else check the obj infos
@@ -80,7 +80,7 @@ func (g *gen) arrGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
 	}
 }
 
-func (g *gen) arrUnmarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrUnmarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
 		return g.arrUnmarshalStruct(sp, ptr)
@@ -90,16 +90,16 @@ func (g *gen) arrUnmarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalString(ptr bool) error {
+func (g *Gen) arrUnmarshalString(ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["stringPtr"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["stringPtr"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["string"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["string"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
@@ -109,16 +109,16 @@ func (g *gen) arrUnmarshalString(ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalBool(ptr bool) error {
+func (g *Gen) arrUnmarshalBool(ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["bool"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["bool"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
@@ -128,9 +128,9 @@ func (g *gen) arrUnmarshalBool(ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalInt(intLen string, ptr bool) error {
+func (g *Gen) arrUnmarshalInt(intLen string, ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["int"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
@@ -138,7 +138,7 @@ func (g *gen) arrUnmarshalInt(intLen string, ptr bool) error {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["int"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, "&"})
@@ -149,9 +149,9 @@ func (g *gen) arrUnmarshalInt(intLen string, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalUint(intLen string, ptr bool) error {
+func (g *Gen) arrUnmarshalUint(intLen string, ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["uint"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
@@ -159,7 +159,7 @@ func (g *gen) arrUnmarshalUint(intLen string, ptr bool) error {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["uint"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, "&"})
@@ -170,16 +170,16 @@ func (g *gen) arrUnmarshalUint(intLen string, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalStruct(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrUnmarshalStruct(st *ast.TypeSpec, ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["structPtr"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["structPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["struct"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["struct"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
@@ -189,16 +189,16 @@ func (g *gen) arrUnmarshalStruct(st *ast.TypeSpec, ptr bool) error {
 	return nil
 }
 
-func (g *gen) arrUnmarshalArr(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrUnmarshalArr(st *ast.TypeSpec, ptr bool) error {
 	if ptr {
-		err := arrUnmarshalTpl["arrPtr"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["arrPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
 			return err
 		}
 	} else {
-		err := arrUnmarshalTpl["arr"].tpl.Execute(g.f, struct {
+		err := arrUnmarshalTpl["arr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {

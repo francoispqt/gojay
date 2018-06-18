@@ -23,14 +23,24 @@ func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
 	"uint": &genTpl{
 		strTpl: "\t\treturn dec.Uint{{.IntLen}}({{.Ptr}}v.{{.Field}})\n",
 	},
+	"float": &genTpl{
+		strTpl: "\t\treturn dec.Float{{.IntLen}}({{.Ptr}}v.{{.Field}})\n",
+	},
 	"bool": &genTpl{
 		strTpl: "\t\treturn dec.Bool({{.Ptr}}v.{{.Field}})\n",
 	},
 	"struct": &genTpl{
 		strTpl: `		if v.{{.Field}} == nil {
+			v.{{.Field}} = {{.StructName}}{}
+		}
+		return dec.Object(v.{{.Field}})
+`,
+	},
+	"structPtr": &genTpl{
+		strTpl: `		if v.{{.Field}} == nil {
 			v.{{.Field}} = &{{.StructName}}{}
 		}
-		dec.Object(v.{{.Field}})
+		return dec.Object(v.{{.Field}})
 `,
 	},
 	"arr": &genTpl{
@@ -38,7 +48,7 @@ func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
 			arr := make({{.TypeName}}, 0)
 			v.{{.Field}} = &arr
 		}
-		dec.Array(v.{{.Field}})
+		return dec.Array(v.{{.Field}})
 `,
 	},
 }
