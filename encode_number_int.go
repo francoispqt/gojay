@@ -191,3 +191,135 @@ func (enc *Encoder) Int64KeyOmitEmpty(key string, v int64) {
 	enc.writeBytes(objKey)
 	enc.buf = strconv.AppendInt(enc.buf, v, 10)
 }
+
+// AddInt32 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddInt32(v int32) {
+	enc.Int64(int64(v))
+}
+
+// AddInt32OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) AddInt32OmitEmpty(v int32) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// Int32 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) Int32(v int32) {
+	enc.Int64(int64(v))
+}
+
+// Int32OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) Int32OmitEmpty(v int32) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// AddInt32Key adds an int32 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddInt32Key(key string, v int32) {
+	enc.Int64Key(key, int64(v))
+}
+
+// AddInt32KeyOmitEmpty adds an int32 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) AddInt32KeyOmitEmpty(key string, v int32) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}
+
+// Int32Key adds an int32 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) Int32Key(key string, v int32) {
+	enc.Int64Key(key, int64(v))
+}
+
+// Int32KeyOmitEmpty adds an int32 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) Int32KeyOmitEmpty(key string, v int32) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}
+
+// AddInt16 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddInt16(v int16) {
+	enc.Int64(int64(v))
+}
+
+// AddInt16OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) AddInt16OmitEmpty(v int16) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// Int16 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) Int16(v int16) {
+	enc.Int64(int64(v))
+}
+
+// Int16OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) Int16OmitEmpty(v int16) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// AddInt16Key adds an int16 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddInt16Key(key string, v int16) {
+	enc.Int64Key(key, int64(v))
+}
+
+// AddInt16KeyOmitEmpty adds an int16 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) AddInt16KeyOmitEmpty(key string, v int16) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}
+
+// Int16Key adds an int16 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) Int16Key(key string, v int16) {
+	enc.Int64Key(key, int64(v))
+}
+
+// Int16KeyOmitEmpty adds an int16 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) Int16KeyOmitEmpty(key string, v int16) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}
+
+// AddInt8 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddInt8(v int8) {
+	enc.Int64(int64(v))
+}
+
+// AddInt8OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) AddInt8OmitEmpty(v int8) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// Int8 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) Int8(v int8) {
+	enc.Int64(int64(v))
+}
+
+// Int8OmitEmpty adds an int to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) Int8OmitEmpty(v int8) {
+	enc.Int64OmitEmpty(int64(v))
+}
+
+// AddInt8Key adds an int8 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddInt8Key(key string, v int8) {
+	enc.Int64Key(key, int64(v))
+}
+
+// AddInt8KeyOmitEmpty adds an int8 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) AddInt8KeyOmitEmpty(key string, v int8) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}
+
+// Int8Key adds an int8 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) Int8Key(key string, v int8) {
+	enc.Int64Key(key, int64(v))
+}
+
+// Int8KeyOmitEmpty adds an int8 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key.
+func (enc *Encoder) Int8KeyOmitEmpty(key string, v int8) {
+	enc.Int64KeyOmitEmpty(key, int64(v))
+}

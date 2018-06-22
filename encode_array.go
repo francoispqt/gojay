@@ -128,3 +128,22 @@ func (enc *Encoder) ArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
 	v.MarshalJSONArray(enc)
 	enc.writeByte(']')
 }
+
+// EncodeArrayFunc is a custom func type implementing MarshaleArray.
+// Use it to cast a func(*Encoder) to Marshal an object.
+//
+//	enc := gojay.NewEncoder(io.Writer)
+//	enc.EncodeArray(gojay.EncodeArrayFunc(func(enc *gojay.Encoder) {
+//		enc.AddStringKey("hello", "world")
+//	}))
+type EncodeArrayFunc func(*Encoder)
+
+// MarshalJSONArray implements MarshalerJSONArray.
+func (f EncodeArrayFunc) MarshalJSONArray(enc *Encoder) {
+	f(enc)
+}
+
+// IsNil implements MarshalerJSONArray.
+func (f EncodeArrayFunc) IsNil() bool {
+	return f == nil
+}
