@@ -23,6 +23,17 @@ func hasAnnotation(fP string) bool {
 	return strings.Contains(string(b), gojayAnnotation)
 }
 
+func resolvePath(p string) (string, error) {
+	if _, err := os.Stat(p); err != nil {
+		if os.IsNotExist(err) {
+			return filepath.Abs(os.Getenv("GOPATH") + "/src/" + *src)
+		} else {
+			return "", err
+		}
+	}
+	return p, nil
+}
+
 // getPath returns either the path given as argument or current working directory
 func getPath() (string, error) {
 	var err error
@@ -32,18 +43,13 @@ func getPath() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if _, err := os.Stat(p); err != nil {
-			if os.IsNotExist(err) {
-				return filepath.Abs(os.Getenv("GOPATH") + "/src/" + *src)
-			} else {
-				return "", err
-			}
-		}
+		return resolvePath(p)
 	} else if len(os.Args) > 1 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
-		p, err = filepath.Abs(os.Getenv("GOPATH") + "/src/" + os.Args[1])
+		p, err = filepath.Abs(os.Args[1])
 		if err != nil {
 			return "", err
 		}
+		return resolvePath(p)
 	} else {
 		p, err = os.Getwd()
 		if err != nil {
