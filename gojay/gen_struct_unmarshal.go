@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"go/ast"
+	"log"
 )
 
 var structUnmarshalSwitchOpen = []byte("\tswitch k {\n")
@@ -75,76 +76,40 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 
 	switch i.String() {
 	case "string":
-		var err = g.structUnmarshalString(field, keyV, ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalString(field, keyV, ptr)
 		keys++
 	case "bool":
-		var err = g.structUnmarshalBool(field, keyV, ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalBool(field, keyV, ptr)
 		keys++
 	case "int":
-		var err = g.structUnmarshalInt(field, keyV, "", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalInt(field, keyV, "", ptr)
 		keys++
 	case "int64":
-		var err = g.structUnmarshalInt(field, keyV, "64", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalInt(field, keyV, "64", ptr)
 		keys++
 	case "int32":
-		var err = g.structUnmarshalInt(field, keyV, "32", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalInt(field, keyV, "32", ptr)
 		keys++
 	case "int16":
-		var err = g.structUnmarshalInt(field, keyV, "16", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalInt(field, keyV, "16", ptr)
 		keys++
 	case "int8":
-		var err = g.structUnmarshalInt(field, keyV, "8", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalInt(field, keyV, "8", ptr)
 		keys++
 	case "uint64":
-		var err = g.structUnmarshalUint(field, keyV, "64", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalUint(field, keyV, "64", ptr)
 		keys++
 	case "uint32":
-		var err = g.structUnmarshalUint(field, keyV, "32", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalUint(field, keyV, "32", ptr)
 		keys++
 	case "uint16":
-		var err = g.structUnmarshalUint(field, keyV, "16", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalUint(field, keyV, "16", ptr)
 		keys++
 	case "uint8":
-		var err = g.structUnmarshalUint(field, keyV, "8", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalUint(field, keyV, "8", ptr)
 		keys++
 	case "float64":
-		var err = g.structUnmarshalFloat(field, keyV, "", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structUnmarshalFloat(field, keyV, "", ptr)
 		keys++
 	default:
 		// if ident is already in our spec list
@@ -176,20 +141,22 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 func (g *Gen) structUnmarshalNonPrim(field *ast.Field, keyV string, sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
-		return g.structUnmarshalStruct(field, keyV, sp, ptr)
+		g.structUnmarshalStruct(field, keyV, sp, ptr)
+		return nil
 	case *ast.ArrayType:
-		return g.structUnmarshalArr(field, keyV, sp, ptr)
+		g.structUnmarshalArr(field, keyV, sp, ptr)
+		return nil
 	}
 	return errors.New("Unknown type")
 }
 
-func (g *Gen) structUnmarshalString(field *ast.Field, keyV string, ptr bool) error {
+func (g *Gen) structUnmarshalString(field *ast.Field, keyV string, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["string"].tpl.Execute(g.b, struct {
@@ -197,7 +164,7 @@ func (g *Gen) structUnmarshalString(field *ast.Field, keyV string, ptr bool) err
 			Ptr   string
 		}{key, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["string"].tpl.Execute(g.b, struct {
@@ -205,19 +172,18 @@ func (g *Gen) structUnmarshalString(field *ast.Field, keyV string, ptr bool) err
 			Ptr   string
 		}{key, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalBool(field *ast.Field, keyV string, ptr bool) error {
+func (g *Gen) structUnmarshalBool(field *ast.Field, keyV string, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
@@ -225,7 +191,7 @@ func (g *Gen) structUnmarshalBool(field *ast.Field, keyV string, ptr bool) error
 			Ptr   string
 		}{key, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
@@ -233,19 +199,18 @@ func (g *Gen) structUnmarshalBool(field *ast.Field, keyV string, ptr bool) error
 			Ptr   string
 		}{key, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalInt(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structUnmarshalInt(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["int"].tpl.Execute(g.b, struct {
@@ -254,7 +219,7 @@ func (g *Gen) structUnmarshalInt(field *ast.Field, keyV string, intLen string, p
 			Ptr    string
 		}{key, intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["int"].tpl.Execute(g.b, struct {
@@ -263,19 +228,18 @@ func (g *Gen) structUnmarshalInt(field *ast.Field, keyV string, intLen string, p
 			Ptr    string
 		}{key, intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalUint(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structUnmarshalUint(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
@@ -284,7 +248,7 @@ func (g *Gen) structUnmarshalUint(field *ast.Field, keyV string, intLen string, 
 			Ptr    string
 		}{key, intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
@@ -293,19 +257,18 @@ func (g *Gen) structUnmarshalUint(field *ast.Field, keyV string, intLen string, 
 			Ptr    string
 		}{key, intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalFloat(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structUnmarshalFloat(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["float"].tpl.Execute(g.b, struct {
@@ -314,7 +277,7 @@ func (g *Gen) structUnmarshalFloat(field *ast.Field, keyV string, intLen string,
 			Ptr    string
 		}{key, intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["float"].tpl.Execute(g.b, struct {
@@ -323,19 +286,18 @@ func (g *Gen) structUnmarshalFloat(field *ast.Field, keyV string, intLen string,
 			Ptr    string
 		}{key, intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalStruct(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) structUnmarshalStruct(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if ptr {
 		err = structUnmarshalTpl["structPtr"].tpl.Execute(g.b, struct {
@@ -343,7 +305,7 @@ func (g *Gen) structUnmarshalStruct(field *ast.Field, keyV string, st *ast.TypeS
 			StructName string
 		}{key, st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err = structUnmarshalTpl["struct"].tpl.Execute(g.b, struct {
@@ -351,26 +313,34 @@ func (g *Gen) structUnmarshalStruct(field *ast.Field, keyV string, st *ast.TypeS
 			StructName string
 		}{key, st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) structUnmarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) structUnmarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) {
 	key := field.Names[0].String()
 	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
 		Key string
 	}{keyV})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	err = structUnmarshalTpl["arr"].tpl.Execute(g.b, struct {
-		Field    string
-		TypeName string
-	}{key, st.Name.String()})
-	if err != nil {
-		return err
+	if ptr {
+		err = structUnmarshalTpl["arrPtr"].tpl.Execute(g.b, struct {
+			Field    string
+			TypeName string
+		}{key, st.Name.String()})
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err = structUnmarshalTpl["arr"].tpl.Execute(g.b, struct {
+			Field    string
+			TypeName string
+		}{key, st.Name.String()})
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	return nil
 }

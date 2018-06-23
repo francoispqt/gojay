@@ -13,6 +13,7 @@ import (
 
 var dst = flag.String("o", "", "destination file to output generated implementations")
 var src = flag.String("s", "", "source dir or file")
+var types = flag.String("t", "", "types to generate")
 
 func hasAnnotation(fP string) bool {
 	b, err := ioutil.ReadFile(fP)
@@ -26,8 +27,13 @@ func hasAnnotation(fP string) bool {
 func getPath() (string, error) {
 	var err error
 	var p string
-	if *src != "" {
+	if *src != "" { // if src is present parse from src
 		p, err = filepath.Abs(*src)
+		if err != nil {
+			return "", err
+		}
+	} else if len(os.Args) > 1 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
+		p, err = filepath.Abs(os.Getenv("GOPATH") + "/src/" + os.Args[1])
 		if err != nil {
 			return "", err
 		}
@@ -40,15 +46,32 @@ func getPath() (string, error) {
 	return p, nil
 }
 
-func main() {
+func getTypes() (t []string) {
+	if *types != "" { // if src is present parse from src
+		return strings.Split(*types, ",")
+	} else if *src == "" && *dst == "" && len(os.Args) > 2 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
+		return strings.Split(os.Args[2], ",")
+	}
+	return t
+}
+
+func parseArgs() (p string, t []string, err error) {
 	flag.Parse()
-	// get path
-	p, err := getPath()
+	p, err = getPath()
+	if err != nil {
+		return p, t, err
+	}
+	t = getTypes()
+	return p, t, err
+}
+
+func main() {
+	p, t, err := parseArgs()
 	if err != nil {
 		log.Fatal(err)
 	}
 	// parse source files
-	g := NewGen(p)
+	g := NewGen(p, t)
 	err = g.parse()
 	if err != nil {
 		log.Fatal(err)

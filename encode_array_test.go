@@ -331,3 +331,8 @@ func TestEncoderArrErrors(t *testing.T) {
 		assert.True(t, false, "should not be called as it should have panicked")
 	})
 }
+
+func TestEncoderArrayFunc(t *testing.T) {
+	var f EncodeArrayFunc
+	assert.True(t, f.IsNil())
+}

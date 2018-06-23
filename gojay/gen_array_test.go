@@ -360,7 +360,11 @@ func (v *SliceStrSlice) IsNil() bool {
 			if err != nil {
 				t.Fatal(err)
 			}
-			assert.Equal(t, testCase.expectedResult, g.b.String())
+			assert.Equal(
+				t,
+				string(genHeader)+testCase.expectedResult,
+				g.b.String(),
+			)
 		})
 	}
 }

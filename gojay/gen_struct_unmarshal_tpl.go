@@ -51,6 +51,14 @@ func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
 		return dec.Array(&v.{{.Field}})
 `,
 	},
+	"arrPtr": &genTpl{
+		strTpl: `		if v.{{.Field}} == nil {
+			arr := make({{.TypeName}}, 0)
+			v.{{.Field}} = &arr
+		}
+		return dec.Array(v.{{.Field}})
+`,
+	},
 }
 
 func init() {

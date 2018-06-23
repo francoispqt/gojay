@@ -8,4 +8,8 @@ test:
 
 .PHONY: cover
 cover: 
-	go test -tags test -coverprofile=profile.out
+	go test -tags test -coverprofile=coverage.out
+
+.PHONY: coverhtml
+coverhtml: 
+	go tool cover -html=coverage.out

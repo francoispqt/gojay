@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"go/ast"
+	"log"
 )
 
 func (g *Gen) mapGenIsNil(n string) error {
@@ -52,81 +53,37 @@ func (g *Gen) mapGenMarshalObj(n string, s *ast.MapType) error {
 func (g *Gen) mapGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	switch i.String() {
 	case "string":
-		var err = g.mapMarshalString(ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalString(ptr)
 	case "bool":
-		var err = g.mapMarshalBool(ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalBool(ptr)
 	case "int":
-		var err = g.mapMarshalInt("", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalInt("", ptr)
 	case "int64":
-		var err = g.mapMarshalInt("64", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalInt("64", ptr)
 	case "int32":
-		var err = g.mapMarshalInt("32", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalInt("32", ptr)
 	case "int16":
-		var err = g.mapMarshalInt("16", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalInt("16", ptr)
 	case "int8":
-		var err = g.mapMarshalInt("8", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalInt("8", ptr)
 	case "uint64":
-		var err = g.mapMarshalUint("64", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalUint("64", ptr)
 	case "uint32":
-		var err = g.mapMarshalUint("32", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalUint("32", ptr)
 	case "uint16":
-		var err = g.mapMarshalUint("16", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalUint("16", ptr)
 	case "uint8":
-		var err = g.mapMarshalUint("8", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalUint("8", ptr)
 	case "float64":
-		var err = g.mapMarshalFloat("", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapMarshalFloat("", ptr)
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
-			err := g.mapMarshalNonPrim(sp, ptr)
-			if err != nil {
-				return err
-			}
-
+			g.mapMarshalNonPrim(sp, ptr)
 		} else if i.Obj != nil {
 			switch t := i.Obj.Decl.(type) {
 			case *ast.TypeSpec:
-				var err = g.mapMarshalNonPrim(t, ptr)
-				if err != nil {
-					return err
-				}
-
+				g.mapMarshalNonPrim(t, ptr)
 			default:
 				return errors.New("could not determine what to do with type " + i.String())
 			}
@@ -137,17 +94,16 @@ func (g *Gen) mapGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	return nil
 }
 
-func (g *Gen) mapMarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
+func (g *Gen) mapMarshalNonPrim(sp *ast.TypeSpec, ptr bool) {
 	switch sp.Type.(type) {
 	case *ast.StructType:
-		return g.mapMarshalStruct(sp, ptr)
+		g.mapMarshalStruct(sp, ptr)
 	case *ast.ArrayType:
-		return g.mapMarshalArr(sp, ptr)
+		g.mapMarshalArr(sp, ptr)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalString(ptr bool) error {
+func (g *Gen) mapMarshalString(ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -156,12 +112,11 @@ func (g *Gen) mapMarshalString(ptr bool) error {
 		Ptr string
 	}{ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalBool(ptr bool) error {
+func (g *Gen) mapMarshalBool(ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -170,12 +125,11 @@ func (g *Gen) mapMarshalBool(ptr bool) error {
 		Ptr string
 	}{ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalInt(intLen string, ptr bool) error {
+func (g *Gen) mapMarshalInt(intLen string, ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -185,12 +139,11 @@ func (g *Gen) mapMarshalInt(intLen string, ptr bool) error {
 		Ptr    string
 	}{intLen, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalUint(intLen string, ptr bool) error {
+func (g *Gen) mapMarshalUint(intLen string, ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -200,12 +153,11 @@ func (g *Gen) mapMarshalUint(intLen string, ptr bool) error {
 		Ptr    string
 	}{intLen, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalFloat(intLen string, ptr bool) error {
+func (g *Gen) mapMarshalFloat(intLen string, ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -215,12 +167,11 @@ func (g *Gen) mapMarshalFloat(intLen string, ptr bool) error {
 		Ptr    string
 	}{intLen, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalStruct(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) mapMarshalStruct(st *ast.TypeSpec, ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -229,12 +180,11 @@ func (g *Gen) mapMarshalStruct(st *ast.TypeSpec, ptr bool) error {
 		Ptr string
 	}{ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) mapMarshalArr(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) mapMarshalArr(st *ast.TypeSpec, ptr bool) {
 	ptrStr := ""
 	if ptr {
 		ptrStr = "*"
@@ -243,7 +193,6 @@ func (g *Gen) mapMarshalArr(st *ast.TypeSpec, ptr bool) error {
 		Ptr string
 	}{ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }

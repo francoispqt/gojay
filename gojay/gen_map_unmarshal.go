@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"go/ast"
+	"log"
 )
 
 func (g *Gen) mapGenNKeys(n string, count int) error {
@@ -54,65 +55,29 @@ func (g *Gen) mapGenUnmarshalObj(n string, s *ast.MapType) error {
 func (g *Gen) mapGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
 	switch i.String() {
 	case "string":
-		var err = g.mapUnmarshalString(ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalString(ptr)
 	case "bool":
-		var err = g.mapUnmarshalBool(ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalBool(ptr)
 	case "int":
-		var err = g.mapUnmarshalInt("", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalInt("", ptr)
 	case "int64":
-		var err = g.mapUnmarshalInt("64", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalInt("64", ptr)
 	case "int32":
-		var err = g.mapUnmarshalInt("32", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalInt("32", ptr)
 	case "int16":
-		var err = g.mapUnmarshalInt("16", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalInt("16", ptr)
 	case "int8":
-		var err = g.mapUnmarshalInt("8", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalInt("8", ptr)
 	case "uint64":
-		var err = g.mapUnmarshalUint("64", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalUint("64", ptr)
 	case "uint32":
-		var err = g.mapUnmarshalUint("32", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalUint("32", ptr)
 	case "uint16":
-		var err = g.mapUnmarshalUint("16", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalUint("16", ptr)
 	case "uint8":
-		var err = g.mapUnmarshalUint("8", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalUint("8", ptr)
 	case "float64":
-		var err = g.mapUnmarshalFloat("", ptr)
-		if err != nil {
-			return err
-		}
+		g.mapUnmarshalFloat("", ptr)
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
@@ -141,59 +106,59 @@ func (g *Gen) mapGenUnmarshalIdent(i *ast.Ident, ptr bool) error {
 func (g *Gen) mapUnmarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
-		return g.mapUnmarshalStruct(sp, ptr)
+		g.mapUnmarshalStruct(sp, ptr)
+		return nil
 	case *ast.ArrayType:
-		return g.mapUnmarshalArr(sp, ptr)
+		g.mapUnmarshalArr(sp, ptr)
+		return nil
 	}
 	return errors.New("Unknown type")
 }
 
-func (g *Gen) mapUnmarshalString(ptr bool) error {
+func (g *Gen) mapUnmarshalString(ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["string"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["string"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalBool(ptr bool) error {
+func (g *Gen) mapUnmarshalBool(ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalInt(intLen string, ptr bool) error {
+func (g *Gen) mapUnmarshalInt(intLen string, ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["int"].tpl.Execute(g.b, struct {
@@ -201,20 +166,19 @@ func (g *Gen) mapUnmarshalInt(intLen string, ptr bool) error {
 			Ptr    string
 		}{intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalUint(intLen string, ptr bool) error {
+func (g *Gen) mapUnmarshalUint(intLen string, ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["uint"].tpl.Execute(g.b, struct {
@@ -222,20 +186,19 @@ func (g *Gen) mapUnmarshalUint(intLen string, ptr bool) error {
 			Ptr    string
 		}{intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalFloat(intLen string, ptr bool) error {
+func (g *Gen) mapUnmarshalFloat(intLen string, ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["float"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["float"].tpl.Execute(g.b, struct {
@@ -243,37 +206,34 @@ func (g *Gen) mapUnmarshalFloat(intLen string, ptr bool) error {
 			Ptr    string
 		}{intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalStruct(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) mapUnmarshalStruct(st *ast.TypeSpec, ptr bool) {
 	if ptr {
 		err := mapUnmarshalTpl["structPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := mapUnmarshalTpl["struct"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) mapUnmarshalArr(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) mapUnmarshalArr(st *ast.TypeSpec, ptr bool) {
 	err := mapUnmarshalTpl["arr"].tpl.Execute(g.b, struct {
 		TypeName string
 	}{st.Name.String()})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }

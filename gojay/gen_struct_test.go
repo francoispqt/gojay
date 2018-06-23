@@ -23,6 +23,9 @@ type Struct struct{
 	Int16 int16
 	Int32 int32
 	Int64 int64
+	Uint8 uint8
+	Uint16 uint16
+	Uint32 uint32
 	Uint64 uint64
 	Float float64
 	Str string
@@ -46,6 +49,12 @@ func (v *Struct) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 		return dec.Int32(&v.Int32)
 	case "int64":
 		return dec.Int64(&v.Int64)
+	case "uint8":
+		return dec.Uint8(&v.Uint8)
+	case "uint16":
+		return dec.Uint16(&v.Uint16)
+	case "uint32":
+		return dec.Uint32(&v.Uint32)
 	case "uint64":
 		return dec.Uint64(&v.Uint64)
 	case "float":
@@ -59,7 +68,7 @@ func (v *Struct) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 }
 
 // NKeys returns the number of keys to unmarshal
-func (v *Struct) NKeys() int { return 9 }
+func (v *Struct) NKeys() int { return 12 }
 
 // MarshalJSONObject implements gojay's MarshalerJSONObject
 func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
@@ -68,6 +77,9 @@ func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Int16Key("int16", v.Int16)
 	enc.Int32Key("int32", v.Int32)
 	enc.Int64Key("int64", v.Int64)
+	enc.Uint8Key("uint8", v.Uint8)
+	enc.Uint16Key("uint16", v.Uint16)
+	enc.Uint32Key("uint32", v.Uint32)
 	enc.Uint64Key("uint64", v.Uint64)
 	enc.FloatKey("float", v.Float)
 	enc.StringKey("str", v.Str)
@@ -367,7 +379,11 @@ func (v *Struct) IsNil() bool { return v == nil }
 			if err != nil {
 				t.Fatal(err)
 			}
-			assert.Equal(t, testCase.expectedResult, g.b.String())
+			assert.Equal(
+				t,
+				string(genHeader)+testCase.expectedResult,
+				g.b.String(),
+			)
 		})
 	}
 }

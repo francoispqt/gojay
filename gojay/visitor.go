@@ -29,12 +29,12 @@ func (v *vis) Visit(n ast.Node) (w ast.Visitor) {
 		v.commentFound = false
 		return v
 	case *ast.GenDecl:
-		if n.Doc != nil {
+		if len(v.g.types) == 0 && n.Doc != nil {
 			v.commentFound = docContains(n.Doc, gojayAnnotation)
 		}
 		return v
 	case *ast.TypeSpec:
-		if v.commentFound {
+		if v.commentFound || v.g.isGenType(n.Name.Name) {
 			v.g.genTypes[n.Name.Name] = n
 		}
 		v.commentFound = false
@@ -46,7 +46,7 @@ func (v *vis) Visit(n ast.Node) (w ast.Visitor) {
 	return v
 }
 
-func NewVisitor(g *Gen, pkgName string) *vis {
+func newVisitor(g *Gen, pkgName string) *vis {
 	return &vis{
 		g:   g,
 		pkg: pkgName,

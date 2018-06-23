@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"go/ast"
+	"log"
 )
 
 func (g *Gen) structGenIsNil(n string) error {
@@ -64,76 +65,40 @@ func (g *Gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, pt
 
 	switch i.String() {
 	case "string":
-		var err = g.structMarshalString(field, keyV, ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalString(field, keyV, ptr)
 		keys++
 	case "bool":
-		var err = g.structMarshalBool(field, keyV, ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalBool(field, keyV, ptr)
 		keys++
 	case "int":
-		var err = g.structMarshalInt(field, keyV, "", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalInt(field, keyV, "", ptr)
 		keys++
 	case "int64":
-		var err = g.structMarshalInt(field, keyV, "64", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalInt(field, keyV, "64", ptr)
 		keys++
 	case "int32":
-		var err = g.structMarshalInt(field, keyV, "32", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalInt(field, keyV, "32", ptr)
 		keys++
 	case "int16":
-		var err = g.structMarshalInt(field, keyV, "16", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalInt(field, keyV, "16", ptr)
 		keys++
 	case "int8":
-		var err = g.structMarshalInt(field, keyV, "8", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalInt(field, keyV, "8", ptr)
 		keys++
 	case "uint64":
-		var err = g.structMarshalUint(field, keyV, "64", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalUint(field, keyV, "64", ptr)
 		keys++
 	case "uint32":
-		var err = g.structMarshalUint(field, keyV, "32", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalUint(field, keyV, "32", ptr)
 		keys++
 	case "uint16":
-		var err = g.structMarshalUint(field, keyV, "16", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalUint(field, keyV, "16", ptr)
 		keys++
 	case "uint8":
-		var err = g.structMarshalUint(field, keyV, "8", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalUint(field, keyV, "8", ptr)
 		keys++
 	case "float64":
-		var err = g.structMarshalFloat(field, keyV, "", ptr)
-		if err != nil {
-			return 0, err
-		}
+		g.structMarshalFloat(field, keyV, "", ptr)
 		keys++
 	default:
 		// if ident is already in our spec list
@@ -164,14 +129,16 @@ func (g *Gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, pt
 func (g *Gen) structMarshalNonPrim(field *ast.Field, keyV string, sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
-		return g.structMarshalStruct(field, keyV, sp, ptr)
+		g.structMarshalStruct(field, keyV, sp, ptr)
+		return nil
 	case *ast.ArrayType:
-		return g.structMarshalArr(field, keyV, sp, ptr)
+		g.structMarshalArr(field, keyV, sp, ptr)
+		return nil
 	}
 	return nil
 }
 
-func (g *Gen) structMarshalString(field *ast.Field, keyV string, ptr bool) error {
+func (g *Gen) structMarshalString(field *ast.Field, keyV string, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -183,12 +150,11 @@ func (g *Gen) structMarshalString(field *ast.Field, keyV string, ptr bool) error
 		Ptr   string
 	}{key, keyV, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalBool(field *ast.Field, keyV string, ptr bool) error {
+func (g *Gen) structMarshalBool(field *ast.Field, keyV string, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -200,12 +166,11 @@ func (g *Gen) structMarshalBool(field *ast.Field, keyV string, ptr bool) error {
 		Ptr   string
 	}{key, keyV, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalInt(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structMarshalInt(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -218,12 +183,11 @@ func (g *Gen) structMarshalInt(field *ast.Field, keyV string, intLen string, ptr
 		Ptr    string
 	}{key, intLen, keyV, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalUint(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structMarshalUint(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -236,12 +200,11 @@ func (g *Gen) structMarshalUint(field *ast.Field, keyV string, intLen string, pt
 		Ptr    string
 	}{key, intLen, keyV, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalFloat(field *ast.Field, keyV string, intLen string, ptr bool) error {
+func (g *Gen) structMarshalFloat(field *ast.Field, keyV string, intLen string, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -254,12 +217,11 @@ func (g *Gen) structMarshalFloat(field *ast.Field, keyV string, intLen string, p
 		Ptr    string
 	}{key, intLen, keyV, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalStruct(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) structMarshalStruct(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -271,12 +233,11 @@ func (g *Gen) structMarshalStruct(field *ast.Field, keyV string, st *ast.TypeSpe
 		Ptr   string
 	}{keyV, key, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }
 
-func (g *Gen) structMarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) structMarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) {
 	key := field.Names[0].String()
 	ptrStr := ""
 	if ptr {
@@ -288,7 +249,6 @@ func (g *Gen) structMarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec, 
 		Ptr   string
 	}{keyV, key, ptrStr})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return nil
 }

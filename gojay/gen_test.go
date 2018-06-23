@@ -8,13 +8,13 @@ import (
 )
 
 func MakeGenFromReader(input io.Reader) (*Gen, error) {
-	g := NewGen("")
+	g := NewGen("", []string{})
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", input, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
-	v := NewVisitor(g, g.pkg)
+	v := newVisitor(g, g.pkg)
 	ast.Walk(v, f)
 	if err != nil {
 		return nil, err

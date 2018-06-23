@@ -31,7 +31,7 @@ func (g *Gen) parseDir() error {
 	}
 	// range across packages
 	for pkgName, pkg := range pkgs {
-		v := NewVisitor(g, pkgName)
+		v := newVisitor(g, pkgName)
 		g.pkg = pkgName
 		// range on files in package
 		for _, f := range pkg.Files {
@@ -53,7 +53,7 @@ func (g *Gen) parseFile() error {
 		return err
 	}
 	g.pkg = f.Name.Name
-	v := NewVisitor(g, g.pkg)
+	v := newVisitor(g, g.pkg)
 	ast.Walk(v, f)
 	if err != nil {
 		return err
