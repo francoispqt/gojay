@@ -32,6 +32,13 @@ func getPath() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		if _, err := os.Stat(p); err != nil {
+			if os.IsNotExist(err) {
+				return filepath.Abs(os.Getenv("GOPATH") + "/src/" + *src)
+			} else {
+				return "", err
+			}
+		}
 	} else if len(os.Args) > 1 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
 		p, err = filepath.Abs(os.Getenv("GOPATH") + "/src/" + os.Args[1])
 		if err != nil {
