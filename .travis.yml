@@ -6,6 +6,7 @@ go:
 
 script:
   - go get github.com/stretchr/testify
+  - go test ./gojay -race
   - go test -race -coverprofile=coverage.txt -covermode=atomic
 
 after_success:

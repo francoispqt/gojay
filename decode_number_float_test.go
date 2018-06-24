@@ -630,3 +630,58 @@ func TestDecoderFloat32(t *testing.T) {
 		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 	})
 }
+
+func TestDecoderFloat64Field(t *testing.T) {
+	var testCasesBasic = []struct {
+		name  string
+		json  string
+		value float64
+	}{
+		{
+			name:  "basic",
+			json:  "[1]",
+			value: float64(1),
+		},
+		{
+			name:  "big",
+			json:  "[0]",
+			value: float64(0),
+		},
+	}
+	for _, testCase := range testCasesBasic {
+		t.Run(testCase.name, func(t *testing.T) {
+			var dec = NewDecoder(strings.NewReader(testCase.json))
+			var v float64
+			dec.DecodeArray(DecodeArrayFunc(func(dec *Decoder) error {
+				return dec.AddFloat64(&v)
+			}))
+			assert.Equal(t, testCase.value, v)
+		})
+	}
+	var testCasesBasicAlt = []struct {
+		name  string
+		json  string
+		value float64
+	}{
+		{
+			name:  "basic",
+			json:  "[1]",
+			value: float64(1),
+		},
+		{
+			name:  "big",
+			json:  "[0]",
+			value: float64(0),
+		},
+	}
+	for _, testCase := range testCasesBasicAlt {
+		t.Run(testCase.name, func(t *testing.T) {
+			var dec = NewDecoder(strings.NewReader(testCase.json))
+			var v float64
+			dec.DecodeArray(DecodeArrayFunc(func(dec *Decoder) error {
+				return dec.Float(&v)
+			}))
+			assert.Equal(t, testCase.value, v)
+		})
+	}
+}

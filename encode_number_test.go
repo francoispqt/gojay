@@ -4,9 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"math"
 	"fmt"
+	"math"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncoderNumberEncodeAPI(t *testing.T) {
@@ -356,7 +357,7 @@ func TestAddNumberFunc(t *testing.T) {
 	})
 }
 
-func TestEncoderUint64(t *testing.T) {
+func TestEncodeUint64(t *testing.T) {
 	builder := &strings.Builder{}
 	enc := BorrowEncoder(builder)
 	err := enc.Encode(uint64(145509))
