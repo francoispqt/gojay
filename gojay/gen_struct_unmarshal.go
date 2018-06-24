@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"go/ast"
 	"log"
 )
@@ -57,7 +57,7 @@ func (g *Gen) structGenUnmarshalObj(n string, s *ast.StructType) (int, error) {
 						return 0, err
 					}
 				default:
-					return 0, errors.New("Unknown type")
+					return 0, fmt.Errorf("Unknown type %s", n)
 				}
 			}
 		}
@@ -109,7 +109,10 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 		g.structUnmarshalUint(field, keyV, "8", ptr)
 		keys++
 	case "float64":
-		g.structUnmarshalFloat(field, keyV, "", ptr)
+		g.structUnmarshalFloat(field, keyV, "64", ptr)
+		keys++
+	case "float32":
+		g.structUnmarshalFloat(field, keyV, "32", ptr)
 		keys++
 	default:
 		// if ident is already in our spec list
@@ -129,10 +132,12 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 				}
 				keys++
 			default:
-				return 0, errors.New("could not determine what to do with type " + i.String())
+				g.structUnmarshalAny(field, keyV, sp, ptr)
+				keys++
 			}
 		} else {
-			return 0, errors.New("Unknown type")
+			g.structUnmarshalAny(field, keyV, sp, ptr)
+			keys++
 		}
 	}
 	return keys, nil
@@ -146,8 +151,10 @@ func (g *Gen) structUnmarshalNonPrim(field *ast.Field, keyV string, sp *ast.Type
 	case *ast.ArrayType:
 		g.structUnmarshalArr(field, keyV, sp, ptr)
 		return nil
+	default:
+		g.structUnmarshalAny(field, keyV, sp, ptr)
+		return nil
 	}
-	return errors.New("Unknown type")
 }
 
 func (g *Gen) structUnmarshalString(field *ast.Field, keyV string, ptr bool) {
@@ -339,6 +346,31 @@ func (g *Gen) structUnmarshalArr(field *ast.Field, keyV string, st *ast.TypeSpec
 			Field    string
 			TypeName string
 		}{key, st.Name.String()})
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+func (g *Gen) structUnmarshalAny(field *ast.Field, keyV string, st *ast.TypeSpec, ptr bool) {
+	key := field.Names[0].String()
+	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
+		Key string
+	}{keyV})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if ptr {
+		err = structUnmarshalTpl["anyPtr"].tpl.Execute(g.b, struct {
+			Field string
+		}{key})
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err = structUnmarshalTpl["any"].tpl.Execute(g.b, struct {
+			Field string
+		}{key})
 		if err != nil {
 			log.Fatal(err)
 		}

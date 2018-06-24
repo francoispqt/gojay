@@ -27,9 +27,11 @@ type Struct struct{
 	Uint16 uint16
 	Uint32 uint32
 	Uint64 uint64
-	Float float64
+	Float64 float64
+	Float32 float32
 	Str string
 	Bool bool
+	Unknown UnknownType
 }
 			`),
 			expectedResult: `package  
@@ -57,18 +59,22 @@ func (v *Struct) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 		return dec.Uint32(&v.Uint32)
 	case "uint64":
 		return dec.Uint64(&v.Uint64)
-	case "float":
-		return dec.Float(&v.Float)
+	case "float64":
+		return dec.Float64(&v.Float64)
+	case "float32":
+		return dec.Float32(&v.Float32)
 	case "str":
 		return dec.String(&v.Str)
 	case "bool":
 		return dec.Bool(&v.Bool)
+	case "unknown":
+		return dec.Any(&v.Unknown)
 	}
 	return nil
 }
 
 // NKeys returns the number of keys to unmarshal
-func (v *Struct) NKeys() int { return 12 }
+func (v *Struct) NKeys() int { return 14 }
 
 // MarshalJSONObject implements gojay's MarshalerJSONObject
 func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
@@ -81,9 +87,11 @@ func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Uint16Key("uint16", v.Uint16)
 	enc.Uint32Key("uint32", v.Uint32)
 	enc.Uint64Key("uint64", v.Uint64)
-	enc.FloatKey("float", v.Float)
+	enc.Float64Key("float64", v.Float64)
+	enc.Float32Key("float32", v.Float32)
 	enc.StringKey("str", v.Str)
 	enc.BoolKey("bool", v.Bool)
+	enc.AnyKey("unknown", v.Unknown)
 }
 
 // IsNil returns wether the structure is nil value or not
@@ -362,6 +370,42 @@ func (v *Struct) NKeys() int { return 1 }
 // MarshalJSONObject implements gojay's MarshalerJSONObject
 func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.ObjectKey("someStruct", v.Struct)
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v *Struct) IsNil() bool { return v == nil }
+`,
+		},
+		"complexStructStructPtrTagOmitEmpty": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type Struct struct{
+	Struct *Struct ` + "`gojay:\"someStruct,omitempty\"`" + `
+}
+			`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v *Struct) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	switch k {
+	case "someStruct":
+		if v.Struct == nil {
+			v.Struct = &Struct{}
+		}
+		return dec.Object(v.Struct)
+	}
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v *Struct) NKeys() int { return 1 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v *Struct) MarshalJSONObject(enc *gojay.Encoder) {
+	enc.ObjectKeyOmitEmpty("someStruct", v.Struct)
 }
 
 // IsNil returns wether the structure is nil value or not

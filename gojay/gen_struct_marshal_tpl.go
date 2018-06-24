@@ -12,25 +12,28 @@ func (v *{{.StructName}}) IsNil() bool { return v == nil }
 `,
 	},
 	"string": &genTpl{
-		strTpl: "\tenc.StringKey(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+		strTpl: "\tenc.StringKey{{.OmitEmpty}}(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
 	"int": &genTpl{
-		strTpl: "\tenc.Int{{.IntLen}}Key(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+		strTpl: "\tenc.Int{{.IntLen}}Key{{.OmitEmpty}}(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
 	"uint": &genTpl{
-		strTpl: "\tenc.Uint{{.IntLen}}Key(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+		strTpl: "\tenc.Uint{{.IntLen}}Key{{.OmitEmpty}}(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
 	"float": &genTpl{
-		strTpl: "\tenc.Float{{.IntLen}}Key(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+		strTpl: "\tenc.Float{{.IntLen}}Key{{.OmitEmpty}}(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
 	"bool": &genTpl{
-		strTpl: "\tenc.BoolKey(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
+		strTpl: "\tenc.BoolKey{{.OmitEmpty}}(\"{{.Key}}\", {{.Ptr}}v.{{.Field}})\n",
 	},
 	"struct": &genTpl{
-		strTpl: "\tenc.ObjectKey(\"{{.Key}}\", v.{{.Field}})\n",
+		strTpl: "\tenc.ObjectKey{{.OmitEmpty}}(\"{{.Key}}\", v.{{.Field}})\n",
 	},
 	"arr": &genTpl{
-		strTpl: "\tenc.ArrayKey(\"{{.Key}}\", v.{{.Field}})\n",
+		strTpl: "\tenc.ArrayKey{{.OmitEmpty}}(\"{{.Key}}\", v.{{.Field}})\n",
+	},
+	"any": &genTpl{
+		strTpl: "\tenc.AnyKey(\"{{.Key}}\", v.{{.Field}})\n",
 	},
 }
 

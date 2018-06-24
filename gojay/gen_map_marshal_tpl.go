@@ -13,31 +13,31 @@ func (v {{.StructName}}) IsNil() bool { return v == nil || len(v) == 0 }
 	},
 	"string": &genTpl{
 		strTpl: `	for k, s := range v {
-		enc.StringKey(k, s)
+		enc.StringKey(k, {{.Ptr}}s)
 	}
 `,
 	},
 	"int": &genTpl{
 		strTpl: `	for k, s := range v {
-		enc.Int{{.IntLen}}Key(k, s)
+		enc.Int{{.IntLen}}Key(k, {{.Ptr}}s)
 	}
 `,
 	},
 	"uint": &genTpl{
 		strTpl: `	for k, s := range v {
-		enc.Uint{{.IntLen}}Key(k, s)
+		enc.Uint{{.IntLen}}Key(k, {{.Ptr}}s)
 	}
 `,
 	},
 	"float": &genTpl{
 		strTpl: `	for k, s := range v {
-		enc.Float{{.IntLen}}Key(k, s)
+		enc.Float{{.IntLen}}Key(k, {{.Ptr}}s)
 	}
 `,
 	},
 	"bool": &genTpl{
 		strTpl: `	for k, s := range v {
-		enc.BoolKey(k, s)
+		enc.BoolKey(k, {{.Ptr}}s)
 	}
 `,
 	},

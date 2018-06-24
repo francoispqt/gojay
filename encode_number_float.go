@@ -41,17 +41,61 @@ func (enc *Encoder) encodeFloat32(n float32) ([]byte, error) {
 
 // AddFloat adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) AddFloat(v float64) {
-	enc.Float(v)
+	enc.Float64(v)
 }
 
 // AddFloatOmitEmpty adds a float64 to be encoded and skips it if its value is 0,
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) AddFloatOmitEmpty(v float64) {
-	enc.FloatOmitEmpty(v)
+	enc.Float64OmitEmpty(v)
 }
 
 // Float adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Float(v float64) {
+	enc.Float64(v)
+}
+
+// FloatOmitEmpty adds a float64 to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) FloatOmitEmpty(v float64) {
+	enc.Float64OmitEmpty(v)
+}
+
+// AddFloatKey adds a float64 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddFloatKey(key string, v float64) {
+	enc.Float64Key(key, v)
+}
+
+// AddFloatKeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddFloatKeyOmitEmpty(key string, v float64) {
+	enc.Float64KeyOmitEmpty(key, v)
+}
+
+// FloatKey adds a float64 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) FloatKey(key string, v float64) {
+	enc.Float64Key(key, v)
+}
+
+// FloatKeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) FloatKeyOmitEmpty(key string, v float64) {
+	enc.Float64KeyOmitEmpty(key, v)
+}
+
+// AddFloat64 adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddFloat64(v float64) {
+	enc.Float(v)
+}
+
+// AddFloat64OmitEmpty adds a float64 to be encoded and skips it if its value is 0,
+// must be used inside a slice or array encoding (does not encode a key).
+func (enc *Encoder) AddFloat64OmitEmpty(v float64) {
+	enc.FloatOmitEmpty(v)
+}
+
+// Float64 adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) Float64(v float64) {
 	enc.grow(10)
 	r := enc.getPreviousRune()
 	if r != '[' {
@@ -60,9 +104,9 @@ func (enc *Encoder) Float(v float64) {
 	enc.buf = strconv.AppendFloat(enc.buf, v, 'f', -1, 64)
 }
 
-// FloatOmitEmpty adds a float64 to be encoded and skips it if its value is 0,
+// Float64OmitEmpty adds a float64 to be encoded and skips it if its value is 0,
 // must be used inside a slice or array encoding (does not encode a key).
-func (enc *Encoder) FloatOmitEmpty(v float64) {
+func (enc *Encoder) Float64OmitEmpty(v float64) {
 	if v == 0 {
 		return
 	}
@@ -74,19 +118,19 @@ func (enc *Encoder) FloatOmitEmpty(v float64) {
 	enc.buf = strconv.AppendFloat(enc.buf, v, 'f', -1, 64)
 }
 
-// AddFloatKey adds a float64 to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) AddFloatKey(key string, v float64) {
+// AddFloat64Key adds a float64 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) AddFloat64Key(key string, v float64) {
 	enc.FloatKey(key, v)
 }
 
-// AddFloatKeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
+// AddFloat64KeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key
-func (enc *Encoder) AddFloatKeyOmitEmpty(key string, v float64) {
+func (enc *Encoder) AddFloat64KeyOmitEmpty(key string, v float64) {
 	enc.FloatKeyOmitEmpty(key, v)
 }
 
-// FloatKey adds a float64 to be encoded, must be used inside an object as it will encode a key
-func (enc *Encoder) FloatKey(key string, value float64) {
+// Float64Key adds a float64 to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) Float64Key(key string, value float64) {
 	r := enc.getPreviousRune()
 	if r != '{' {
 		enc.writeByte(',')
@@ -98,9 +142,9 @@ func (enc *Encoder) FloatKey(key string, value float64) {
 	enc.buf = strconv.AppendFloat(enc.buf, value, 'f', -1, 64)
 }
 
-// FloatKeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
+// Float64KeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key
-func (enc *Encoder) FloatKeyOmitEmpty(key string, v float64) {
+func (enc *Encoder) Float64KeyOmitEmpty(key string, v float64) {
 	if v == 0 {
 		return
 	}

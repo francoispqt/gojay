@@ -169,10 +169,15 @@ func (s *StreamEncoder) AddInt(value int) {
 	s.Encoder.writeByte(s.delimiter)
 }
 
-// AddFloat adds a float64 to be encoded.
-func (s *StreamEncoder) AddFloat(value float64) {
+// AddFloat64 adds a float64 to be encoded.
+func (s *StreamEncoder) AddFloat64(value float64) {
 	s.buf = strconv.AppendFloat(s.buf, value, 'f', -1, 64)
 	s.Encoder.writeByte(s.delimiter)
+}
+
+// AddFloat adds a float64 to be encoded.
+func (s *StreamEncoder) AddFloat(value float64) {
+	s.AddFloat64(value)
 }
 
 // Non exposed

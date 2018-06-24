@@ -277,6 +277,72 @@ func (v *IntSlice) IsNil() bool {
 }
 `,
 		},
+		"basicFloatSlice": {
+			input: strings.NewReader(`package test
+	
+//gojay:json
+type IntSlice []float64
+								`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONArray implements gojay's UnmarshalerJSONArray
+func (v *IntSlice) UnmarshalJSONArray(dec *gojay.Decoder) error {
+	var i float64
+	if err := dec.Float64(&i); err != nil {
+		return err
+	}
+	*v = append(*v, i)
+	return nil
+}
+
+// MarshalJSONArray implements gojay's MarshalerJSONArray
+func (v *IntSlice) MarshalJSONArray(enc *gojay.Encoder) {
+	for _, s := range *v {
+		enc.Float64(s)
+	}
+}
+
+// IsNil implements gojay's MarshalerJSONArray
+func (v *IntSlice) IsNil() bool {
+	return *v == nil || len(*v) == 0
+}
+`,
+		},
+		"basicFloat32Slice": {
+			input: strings.NewReader(`package test
+	
+//gojay:json
+type IntSlice []float32
+								`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONArray implements gojay's UnmarshalerJSONArray
+func (v *IntSlice) UnmarshalJSONArray(dec *gojay.Decoder) error {
+	var i float32
+	if err := dec.Float32(&i); err != nil {
+		return err
+	}
+	*v = append(*v, i)
+	return nil
+}
+
+// MarshalJSONArray implements gojay's MarshalerJSONArray
+func (v *IntSlice) MarshalJSONArray(enc *gojay.Encoder) {
+	for _, s := range *v {
+		enc.Float32(s)
+	}
+}
+
+// IsNil implements gojay's MarshalerJSONArray
+func (v *IntSlice) IsNil() bool {
+	return *v == nil || len(*v) == 0
+}
+`,
+		},
 		"basicStructSlice": {
 			input: strings.NewReader(`package test
 	

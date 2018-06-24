@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"log"
 )
@@ -40,7 +41,7 @@ func (g *Gen) mapGenMarshalObj(n string, s *ast.MapType) error {
 				return err
 			}
 		default:
-			return errors.New("Unknown type")
+			return fmt.Errorf("Unknown type %s", n)
 		}
 	}
 	_, err = g.b.Write([]byte("}\n"))
@@ -75,7 +76,9 @@ func (g *Gen) mapGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	case "uint8":
 		g.mapMarshalUint("8", ptr)
 	case "float64":
-		g.mapMarshalFloat("", ptr)
+		g.mapMarshalFloat("64", ptr)
+	case "float32":
+		g.mapMarshalFloat("32", ptr)
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
@@ -88,7 +91,7 @@ func (g *Gen) mapGenMarshalIdent(i *ast.Ident, ptr bool) error {
 				return errors.New("could not determine what to do with type " + i.String())
 			}
 		} else {
-			return errors.New("Unknown type")
+			return fmt.Errorf("Unknown type %s", i.Name)
 		}
 	}
 	return nil

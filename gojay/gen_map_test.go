@@ -48,6 +48,40 @@ func (v StrMap) MarshalJSONObject(enc *gojay.Encoder) {
 func (v StrMap) IsNil() bool { return v == nil || len(v) == 0 }
 `,
 		},
+		"basicMapStringStringPtr": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type StrMap map[string]*string
+`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v StrMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	var str string
+	if err := dec.String(&str); err != nil {
+		return err
+	}
+	v[k] = &str
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v StrMap) NKeys() int { return 0 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v StrMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, s := range v {
+		enc.StringKey(k, *s)
+	}
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v StrMap) IsNil() bool { return v == nil || len(v) == 0 }
+`,
+		},
 		"basicMapStringInt": {
 			input: strings.NewReader(`package test
 
@@ -82,6 +116,40 @@ func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
 func (v IntMap) IsNil() bool { return v == nil || len(v) == 0 }
 `,
 		},
+		"basicMapStringIntPtr": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type IntMap map[string]*int
+`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v IntMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	var i int
+	if err := dec.Int(&i); err != nil {
+		return err
+	}
+	v[k] = &i
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v IntMap) NKeys() int { return 0 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, s := range v {
+		enc.IntKey(k, *s)
+	}
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v IntMap) IsNil() bool { return v == nil || len(v) == 0 }
+`,
+		},
 		"basicMapStringInt64": {
 			input: strings.NewReader(`package test
 
@@ -109,6 +177,40 @@ func (v IntMap) NKeys() int { return 0 }
 func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
 	for k, s := range v {
 		enc.Int64Key(k, s)
+	}
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v IntMap) IsNil() bool { return v == nil || len(v) == 0 }
+`,
+		},
+		"basicMapStringInt64Ptr": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type IntMap map[string]*int64
+`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v IntMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	var i int64
+	if err := dec.Int64(&i); err != nil {
+		return err
+	}
+	v[k] = &i
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v IntMap) NKeys() int { return 0 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, s := range v {
+		enc.Int64Key(k, *s)
 	}
 }
 
@@ -252,6 +354,40 @@ func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
 func (v IntMap) IsNil() bool { return v == nil || len(v) == 0 }
 `,
 		},
+		"basicMapStringUint64Ptr": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type IntMap map[string]*uint64
+`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v IntMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	var i uint64
+	if err := dec.Uint64(&i); err != nil {
+		return err
+	}
+	v[k] = &i
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v IntMap) NKeys() int { return 0 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v IntMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, s := range v {
+		enc.Uint64Key(k, *s)
+	}
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v IntMap) IsNil() bool { return v == nil || len(v) == 0 }
+`,
+		},
 		"basicMapStringUint32": {
 			input: strings.NewReader(`package test
 
@@ -381,6 +517,40 @@ func (v BoolMap) NKeys() int { return 0 }
 func (v BoolMap) MarshalJSONObject(enc *gojay.Encoder) {
 	for k, s := range v {
 		enc.BoolKey(k, s)
+	}
+}
+
+// IsNil returns wether the structure is nil value or not
+func (v BoolMap) IsNil() bool { return v == nil || len(v) == 0 }
+`,
+		},
+		"basicMapStringBoolPtr": {
+			input: strings.NewReader(`package test
+
+//gojay:json
+type BoolMap map[string]*bool
+`),
+			expectedResult: `package  
+
+import "github.com/francoispqt/gojay"
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (v BoolMap) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+	var b bool
+	if err := dec.Bool(&b); err != nil {
+		return err
+	}
+	v[k] = &b
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (v BoolMap) NKeys() int { return 0 }
+
+// MarshalJSONObject implements gojay's MarshalerJSONObject
+func (v BoolMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, s := range v {
+		enc.BoolKey(k, *s)
 	}
 }
 

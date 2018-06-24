@@ -59,6 +59,12 @@ func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
 		return dec.Array(v.{{.Field}})
 `,
 	},
+	"any": &genTpl{
+		strTpl: "\t\treturn dec.Any(&v.{{.Field}})\n",
+	},
+	"anyPtr": &genTpl{
+		strTpl: "\t\treturn dec.Any(v.{{.Field}})\n",
+	},
 }
 
 func init() {

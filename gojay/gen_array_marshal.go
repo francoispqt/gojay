@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
+	"log"
 )
 
 func init() {}
@@ -40,7 +42,7 @@ func (g *Gen) arrGenMarshal(n string, s *ast.ArrayType) error {
 				return err
 			}
 		default:
-			return errors.New("Unknown type")
+			return fmt.Errorf("Unknown type %s", n)
 		}
 	}
 	_, err = g.b.Write([]byte("}\n"))
@@ -53,27 +55,31 @@ func (g *Gen) arrGenMarshal(n string, s *ast.ArrayType) error {
 func (g *Gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
 	switch i.String() {
 	case "string":
-		return g.arrMarshalString(ptr)
+		g.arrMarshalString(ptr)
 	case "bool":
-		return g.arrMarshalBool(ptr)
+		g.arrMarshalBool(ptr)
 	case "int":
-		return g.arrMarshalInt("", ptr)
+		g.arrMarshalInt("", ptr)
 	case "int64":
-		return g.arrMarshalInt("64", ptr)
+		g.arrMarshalInt("64", ptr)
 	case "int32":
-		return g.arrMarshalInt("32", ptr)
+		g.arrMarshalInt("32", ptr)
 	case "int16":
-		return g.arrMarshalInt("16", ptr)
+		g.arrMarshalInt("16", ptr)
 	case "int8":
-		return g.arrMarshalInt("8", ptr)
+		g.arrMarshalInt("8", ptr)
 	case "uint64":
-		return g.arrMarshalUint("64", ptr)
+		g.arrMarshalUint("64", ptr)
 	case "uint32":
-		return g.arrMarshalUint("32", ptr)
+		g.arrMarshalUint("32", ptr)
 	case "uint16":
-		return g.arrMarshalUint("16", ptr)
+		g.arrMarshalUint("16", ptr)
 	case "uint8":
-		return g.arrMarshalUint("8", ptr)
+		g.arrMarshalUint("8", ptr)
+	case "float64":
+		g.arrMarshalFloat("64", ptr)
+	case "float32":
+		g.arrMarshalFloat("32", ptr)
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
@@ -87,66 +93,65 @@ func (g *Gen) arrGenMarshalIdent(i *ast.Ident, ptr bool) error {
 				return errors.New("could not determine what to do with type " + i.String())
 			}
 		}
-		return errors.New("Unknown type")
+		return fmt.Errorf("Unknown type %s", i.Name)
 	}
+	return nil
 }
 
 func (g *Gen) arrMarshalNonPrim(sp *ast.TypeSpec, ptr bool) error {
 	switch sp.Type.(type) {
 	case *ast.StructType:
-		return g.arrMarshalStruct(sp, ptr)
+		g.arrMarshalStruct(sp, ptr)
 	case *ast.ArrayType:
-		return g.arrMarshalArr(sp, ptr)
+		g.arrMarshalArr(sp, ptr)
 	}
 	return nil
 }
 
-func (g *Gen) arrMarshalString(ptr bool) error {
+func (g *Gen) arrMarshalString(ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["stringPtr"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["string"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) arrMarshalBool(ptr bool) error {
+func (g *Gen) arrMarshalBool(ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["bool"].tpl.Execute(g.b, struct {
 			Ptr string
 		}{"&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) arrMarshalInt(intLen string, ptr bool) error {
+func (g *Gen) arrMarshalInt(intLen string, ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["int"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["int"].tpl.Execute(g.b, struct {
@@ -154,20 +159,39 @@ func (g *Gen) arrMarshalInt(intLen string, ptr bool) error {
 			Ptr    string
 		}{intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) arrMarshalUint(intLen string, ptr bool) error {
+func (g *Gen) arrMarshalFloat(intLen string, ptr bool) {
+	if ptr {
+		err := arrMarshalTpl["float"].tpl.Execute(g.b, struct {
+			IntLen string
+			Ptr    string
+		}{intLen, ""})
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err := arrMarshalTpl["float"].tpl.Execute(g.b, struct {
+			IntLen string
+			Ptr    string
+		}{intLen, "&"})
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+func (g *Gen) arrMarshalUint(intLen string, ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["uint"].tpl.Execute(g.b, struct {
 			IntLen string
 			Ptr    string
 		}{intLen, ""})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["uint"].tpl.Execute(g.b, struct {
@@ -175,46 +199,43 @@ func (g *Gen) arrMarshalUint(intLen string, ptr bool) error {
 			Ptr    string
 		}{intLen, "&"})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) arrMarshalStruct(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrMarshalStruct(st *ast.TypeSpec, ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["structPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["struct"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }
 
-func (g *Gen) arrMarshalArr(st *ast.TypeSpec, ptr bool) error {
+func (g *Gen) arrMarshalArr(st *ast.TypeSpec, ptr bool) {
 	if ptr {
 		err := arrMarshalTpl["arrPtr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	} else {
 		err := arrMarshalTpl["arr"].tpl.Execute(g.b, struct {
 			StructName string
 		}{st.Name.String()})
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
-	return nil
 }

@@ -566,3 +566,8 @@ func TestDecodeArrayNullError(t *testing.T) {
 	assert.NotNil(t, err, "err should not be nil")
 	assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 }
+
+func TestDecoderArrayFunc(t *testing.T) {
+	var f DecodeArrayFunc
+	assert.True(t, f.IsNil())
+}

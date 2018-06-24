@@ -106,3 +106,23 @@ func (dec *Decoder) skipArray() (int, error) {
 	}
 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
+
+// DecodeArrayFunc is a custom func type implementing UnarshaleArray.
+// Use it to cast a func(*Decoder) to Unmarshal an object.
+//
+//	str := ""
+//	dec := gojay.NewDecoder(io.Reader)
+//	dec.DecodeArray(gojay.DecodeArrayFunc(func(dec *gojay.Decoder, k string) error {
+//		return dec.AddString(&str)
+//	}))
+type DecodeArrayFunc func(*Decoder) error
+
+// UnmarshalJSONArray implements UnarshalerArray.
+func (f DecodeArrayFunc) UnmarshalJSONArray(dec *Decoder) error {
+	return f(dec)
+}
+
+// IsNil implements UnarshalerArray.
+func (f DecodeArrayFunc) IsNil() bool {
+	return f == nil
+}

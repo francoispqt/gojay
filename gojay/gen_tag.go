@@ -11,6 +11,7 @@ const gojayTag = "gojay"
 const hideTag = "-"
 const unmarshalHideTag = "-u"
 const marshalHideTag = "-m"
+const omitEmptyTag = "omitempty"
 
 func getGojayTagValue(tags *ast.BasicLit) (*structtag.Tag, error) {
 	t, err := structtag.Parse(tags.Value[1 : len(tags.Value)-1])
@@ -40,6 +41,15 @@ func hasTagMarshalHide(tags *ast.BasicLit) bool {
 		return false
 	}
 	return (v.Name == marshalHideTag || v.Name == hideTag) || v.HasOption(marshalHideTag)
+}
+
+func hasTagOmitEmpty(tags *ast.BasicLit) bool {
+	v, err := getGojayTagValue(tags)
+	if err != nil {
+		log.Print(err)
+		return false
+	}
+	return v.Name == omitEmptyTag || v.HasOption(omitEmptyTag)
 }
 
 func tagKeyName(tags *ast.BasicLit) string {

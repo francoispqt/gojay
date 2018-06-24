@@ -27,6 +27,12 @@ var arrUnmarshalTpl = templateList{
 			"\t\treturn err\n\t}\n" +
 			"\t*v = append(*v, i)\n",
 	},
+	"float": &genTpl{
+		strTpl: "\tvar i float{{.IntLen}}" +
+			"\n\tif err := dec.Float{{.IntLen}}(&i); err != nil {\n" +
+			"\t\treturn err\n\t}\n" +
+			"\t*v = append(*v, i)\n",
+	},
 	"bool": &genTpl{
 		strTpl: "\tvar b bool" +
 			"\n\tif err := dec.Bool(&b); err != nil {\n" +

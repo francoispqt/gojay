@@ -294,7 +294,13 @@ func (dec *Decoder) AddUint64(v *uint64) error {
 // AddFloat decodes the next key to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddFloat(v *float64) error {
-	return dec.Float(v)
+	return dec.Float64(v)
+}
+
+// AddFloat64 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat64(v *float64) error {
+	return dec.Float64(v)
 }
 
 // AddFloat32 decodes the next key to a *float64.
@@ -428,6 +434,12 @@ func (dec *Decoder) Uint64(v *uint64) error {
 // Float decodes the next key to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float(v *float64) error {
+	return dec.Float64(v)
+}
+
+// Float64 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float64(v *float64) error {
 	err := dec.decodeFloat64(v)
 	if err != nil {
 		return err

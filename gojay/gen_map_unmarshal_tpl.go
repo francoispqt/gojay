@@ -16,7 +16,7 @@ func (v {{.StructName}}) NKeys() int { return {{.NKeys}} }
 	if err := dec.String(&str); err != nil {
 		return err
 	}
-	v[k] = str
+	v[k] = {{.Ptr}}str
 `,
 	},
 	"int": &genTpl{
@@ -24,7 +24,7 @@ func (v {{.StructName}}) NKeys() int { return {{.NKeys}} }
 	if err := dec.Int{{.IntLen}}(&i); err != nil {
 		return err
 	}
-	v[k] = i
+	v[k] = {{.Ptr}}i
 `,
 	},
 	"uint": &genTpl{
@@ -32,7 +32,7 @@ func (v {{.StructName}}) NKeys() int { return {{.NKeys}} }
 	if err := dec.Uint{{.IntLen}}(&i); err != nil {
 		return err
 	}
-	v[k] = i
+	v[k] = {{.Ptr}}i
 `,
 	},
 	"float": &genTpl{
@@ -40,7 +40,7 @@ func (v {{.StructName}}) NKeys() int { return {{.NKeys}} }
 	if err := dec.Float{{.IntLen}}(&i); err != nil {
 		return err
 	}
-	v[k] = i
+	v[k] = {{.Ptr}}i
 `,
 	},
 	"bool": &genTpl{
@@ -48,7 +48,7 @@ func (v {{.StructName}}) NKeys() int { return {{.NKeys}} }
 	if err := dec.Bool(&b); err != nil {
 		return err
 	}
-	v[k] = b
+	v[k] = {{.Ptr}}b
 `,
 	},
 	"struct": &genTpl{

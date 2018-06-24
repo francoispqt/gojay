@@ -31,6 +31,11 @@ var arrMarshalTpl = templateList{
 			"\t\tenc.Uint{{.IntLen}}(s)\n" +
 			"\t}\n",
 	},
+	"float": &genTpl{
+		strTpl: "\tfor _, s := range *v {\n" +
+			"\t\tenc.Float{{.IntLen}}(s)\n" +
+			"\t}\n",
+	},
 	"struct": &genTpl{
 		strTpl: "\tfor _, s := range *v {\n" +
 			"\t\tenc.Object(s)\n" +
