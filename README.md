@@ -14,6 +14,8 @@ It has a simple API and doesn't use reflection. It relies on small interfaces to
 
 Gojay also comes with powerful stream decoding features and an even faster [Unsafe](#unsafe-api) API.
 
+There is also a [code generation tool](https://github.com/francoispqt/gojay/tree/master/gojay)
+
 # Why another JSON parser?
 
 I looked at other fast decoder/encoder and realised it was mostly hardly readable static code generation or a lot of reflection, poor streaming features, and not so fast in the end. 
@@ -31,7 +33,7 @@ go get github.com/francoispqt/gojay
 * [Encoder](#encoding)
 * [Decoder](#decoding)
 * [Stream API](#stream-api)
-
+* [Code Generation](https://github.com/francoispqt/gojay/tree/master/gojay)
 
 ## Decoding
 
