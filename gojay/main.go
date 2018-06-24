@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,15 @@ import (
 )
 
 var dst = flag.String("o", "", "destination file to output generated implementations")
-var src = flag.String("s", "", "source dir or file")
+var src = flag.String("s", "", "source dir or file (absolute or relative path)")
+var pkg = flag.String("p", "", "go package")
 var types = flag.String("t", "", "types to generate")
+
+var ErrNoPathProvided = errors.New("You must provide a path or a package name")
+
+type stringWriter interface {
+	WriteString(string) (int, error)
+}
 
 func hasAnnotation(fP string) bool {
 	b, err := ioutil.ReadFile(fP)
@@ -24,62 +32,69 @@ func hasAnnotation(fP string) bool {
 }
 
 func resolvePath(p string) (string, error) {
-	if _, err := os.Stat(p); err != nil {
-		if os.IsNotExist(err) {
-			return filepath.Abs(os.Getenv("GOPATH") + "/src/" + *src)
-		} else {
-			return "", err
-		}
+	if fullPath, err := filepath.Abs(p); err != nil {
+		return "", err
+	} else if _, err := os.Stat(fullPath); err != nil {
+		return "", err
+	} else {
+		return fullPath, nil
 	}
-	return p, nil
 }
 
 // getPath returns either the path given as argument or current working directory
 func getPath() (string, error) {
-	var err error
-	var p string
-	if *src != "" { // if src is present parse from src
-		p, err = filepath.Abs(*src)
-		if err != nil {
-			return "", err
-		}
-		return resolvePath(p)
+	// if pkg is set, resolve pkg path
+	if *pkg != "" {
+		return resolvePath(os.Getenv("GOPATH") + "/src/" + *pkg)
+	} else if *src != "" { // if src is present parse from src
+		return resolvePath(*src)
 	} else if len(os.Args) > 1 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
-		p, err = filepath.Abs(os.Args[1])
-		if err != nil {
-			return "", err
-		}
-		return resolvePath(p)
-	} else {
-		p, err = os.Getwd()
-		if err != nil {
-			return "", err
-		}
+		return resolvePath(os.Getenv("GOPATH") + "/src/" + os.Args[1])
 	}
-	return p, nil
+	return "", ErrNoPathProvided
 }
 
+// getTypes returns the types to be parsed
 func getTypes() (t []string) {
 	if *types != "" { // if src is present parse from src
 		return strings.Split(*types, ",")
-	} else if *src == "" && *dst == "" && len(os.Args) > 2 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
+	} else if *src == "." && *dst == "" && len(os.Args) > 2 { // else if there is a command line arg, use it as path to a package $GOPATH/src/os.Args[1]
 		return strings.Split(os.Args[2], ",")
 	}
 	return t
 }
 
-func parseArgs() (p string, t []string, err error) {
+// getOutput returns the output
+func getOutput() (stringWriter, error) {
+	if *dst != "" {
+		p, err := filepath.Abs(*dst)
+		if err != nil {
+			return nil, err
+		}
+		return os.OpenFile(p, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	} else if len(os.Args) > 3 && *src == "" && *types == "" {
+		p, err := filepath.Abs(os.Args[3])
+		if err != nil {
+			return nil, err
+		}
+		return os.OpenFile(p, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	}
+	return os.Stdout, nil
+}
+
+func parseArgs() (p string, t []string, o stringWriter, err error) {
 	flag.Parse()
 	p, err = getPath()
 	if err != nil {
-		return p, t, err
+		return p, t, o, err
 	}
 	t = getTypes()
-	return p, t, err
+	o, err = getOutput()
+	return p, t, o, err
 }
 
 func main() {
-	p, t, err := parseArgs()
+	p, t, o, err := parseArgs()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,16 +111,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	// if has dst file, write to file
-	if *dst != "" {
-		f, err := os.OpenFile(*dst, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		f.WriteString(g.b.String())
-		return
-	}
-	// else just print to stdout
-	os.Stdout.WriteString(g.b.String())
+	// write content to output
+	o.WriteString(g.b.String())
 }

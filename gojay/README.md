@@ -10,29 +10,37 @@ go install github.com/francoispqt/gojay/gojay
 
 ## Generate code 
 
-- for specific types in a go package, to stdout:
+### Basic command
+
+The basic command is strait forward and easy to use:
 ```sh
-gojay -s github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice
+gojay github.com/some/package TypeA,TypeB,TypeC output.go 
 ```
-or simply
+If you just want to the output to stdout, omit the third parameter. 
+
+### Using flags
+
+- p package to parse, relative path to $GOPATH/src
+- s file/dir to path, can be a relative or absolute path
+- t types to generate (comma separated)
+- o output file (relative or absolute path)
+
+Examples: 
+- Specific types in a go package, to stdout:
 ```sh
-gojay github.com/francoispqt/gojay/gojay/tests A,B,StrSlice
+gojay -p github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice 
 ```
 
-- for specific types in a go package, write to a file:
+- Specific types in a go package, write to a file:
 ```sh
-gojay -s github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice -o output.go
+gojay -p github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice -o output.go
 ```
 
-- for all types annotated by a //gojay:json (don't specify any type) in a package: 
+- Specific types in a go file, to stdout: 
 ```sh
-gojay -s github.com/francoispqt/gojay/gojay/tests -o output.go
+gojay -s somegofile.go -t SomeType
 ```
 
-- for types annotated in a specific file
-```sh
-gojay -s path/to/gofile.go -o output.go
-```
 
 ## Gojay tags
 
