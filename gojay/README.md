@@ -12,7 +12,7 @@ go install github.com/francoispqt/gojay/gojay
 
 ### Basic command
 
-The basic command is strait forward and easy to use:
+The basic command is straightforward and easy to use:
 ```sh
 gojay github.com/some/package TypeA,TypeB,TypeC output.go 
 ```
