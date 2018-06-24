@@ -8,6 +8,9 @@
 ![stability-stable](https://img.shields.io/badge/stability-stable-green.svg)
 
 # GoJay
+
+<img src="https://github.com/francoispqt/gojay/raw/feature/generator/gojay.png" width="200px">
+
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
 
 It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices. 
