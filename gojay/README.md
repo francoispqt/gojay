@@ -49,11 +49,13 @@ You can add tags to your structs to control:
 - skip a struct field only for unmarshaling
 - skip a struct field only for marshaling
 - skip a struct field
+- the use of omit empty methods for marshaling
 
 ### Example: 
 ```go
 type A struct {
     Str             string  `gojay:"string"`
+    StrOmitEmpty    string  `gojay:"string,omitempty"`
     SkipUnmarshal   string  `gojay:"skipUnmarshal,-u"`
     SkipMarshal     string  `gojay:"skipMarshal,-m"`
     Skip            string  `gojay:"-"`
