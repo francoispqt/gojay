@@ -14,7 +14,7 @@ It has a simple API and doesn't use reflection. It relies on small interfaces to
 
 Gojay also comes with powerful stream decoding features and an even faster [Unsafe](#unsafe-api) API.
 
-There is also a [code generation tool](https://github.com/francoispqt/gojay/tree/master/gojay)
+There is also a [code generation tool](https://github.com/francoispqt/gojay/tree/master/gojay) to make usage easier and faster. 
 
 # Why another JSON parser?
 
