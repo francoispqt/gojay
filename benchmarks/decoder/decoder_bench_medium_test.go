@@ -9,6 +9,7 @@ import (
 	"github.com/francoispqt/gojay/benchmarks"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
+	msgpack "github.com/vmihailenco/msgpack"
 )
 
 func BenchmarkJsonIterDecodeObjMedium(b *testing.B) {
@@ -50,6 +51,15 @@ func BenchmarkEasyJsonDecodeObjMedium(b *testing.B) {
 		easyjson.Unmarshal(benchmarks.MediumFixture, &result)
 	}
 }
+
+func BenchmarkMsgPackDecodeObjMedium(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		result := benchmarks.MediumPayload{}
+		msgpack.Unmarshal(benchmarks.MediumFixture, &result)
+	}
+}
+
 func BenchmarkGoJayDecodeObjMedium(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {

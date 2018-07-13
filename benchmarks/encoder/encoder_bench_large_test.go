@@ -9,6 +9,7 @@ import (
 	"github.com/francoispqt/gojay/benchmarks"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
+	"github.com/vmihailenco/msgpack"
 )
 
 func BenchmarkEncodingJsonEncodeLargeStruct(b *testing.B) {
@@ -33,6 +34,15 @@ func BenchmarkEasyJsonEncodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		if _, err := easyjson.Marshal(benchmarks.NewLargePayload()); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkMsgPackEncodeObjLarge(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		if _, err := msgpack.Marshal(benchmarks.NewLargePayload()); err != nil {
 			b.Fatal(err)
 		}
 	}
