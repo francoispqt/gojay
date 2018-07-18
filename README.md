@@ -33,6 +33,12 @@ This is how GoJay aims to be a very fast, JIT stream parser with 0 reflection, l
 go get github.com/francoispqt/gojay
 ```
 
+## Install gojay cmd tools
+
+```bash
+go install github.com/francoispqt/gojay/gojay
+```
+
 * [Encoder](#encoding)
 * [Decoder](#decoding)
 * [Stream API](#stream-api)
