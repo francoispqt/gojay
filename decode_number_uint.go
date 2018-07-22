@@ -39,6 +39,7 @@ func (dec *Decoder) decodeUint8(v *uint8) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -108,6 +109,7 @@ func (dec *Decoder) decodeUint16(v *uint16) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -177,6 +179,7 @@ func (dec *Decoder) decodeUint32(v *uint32) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -245,6 +248,7 @@ func (dec *Decoder) decodeUint64(v *uint64) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
