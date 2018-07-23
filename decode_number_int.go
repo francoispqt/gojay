@@ -471,6 +471,7 @@ func (dec *Decoder) decodeInt32(v *int32) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -658,6 +659,7 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 			if err != nil {
 				return err
 			}
+			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
