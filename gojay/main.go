@@ -82,19 +82,18 @@ func getOutput() (stringWriter, error) {
 	return os.Stdout, nil
 }
 
-func parseArgs() (p string, t []string, o stringWriter, err error) {
+func parseArgs() (p string, t []string, err error) {
 	flag.Parse()
 	p, err = getPath()
 	if err != nil {
-		return p, t, o, err
+		return p, t, err
 	}
 	t = getTypes()
-	o, err = getOutput()
-	return p, t, o, err
+	return p, t, err
 }
 
 func main() {
-	p, t, o, err := parseArgs()
+	p, t, err := parseArgs()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,6 +106,12 @@ func main() {
 	}
 	// generate output
 	err = g.Gen()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	var o stringWriter
+	o, err = getOutput()
 	if err != nil {
 		log.Fatal(err)
 		return
