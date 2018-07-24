@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"time"
 )
 
 // UnmarshalJSONArray parses the JSON-encoded data and stores the result in the value pointed to by v.
@@ -475,6 +476,21 @@ func (dec *Decoder) Bool(v *bool) error {
 // If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
 func (dec *Decoder) String(v *string) error {
 	err := dec.decodeString(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// AddTime decodes the next key to a *time.Time with the given format
+func (dec *Decoder) AddTime(v *time.Time, format string) error {
+	return dec.Time(v, format)
+}
+
+// Time decodes the next key to a *time.Time with the given format
+func (dec *Decoder) Time(v *time.Time, format string) error {
+	err := dec.decodeTime(v, format)
 	if err != nil {
 		return err
 	}
