@@ -195,6 +195,11 @@ func TestDecoderFloat64(t *testing.T) {
 			expectedResult: -788.76,
 		},
 		{
+			name:           "basic-float3",
+			json:           "-0.1234",
+			expectedResult: -0.1234,
+		},
+		{
 			name:           "basic-exp-too-big",
 			json:           "1e10000000000 ",
 			expectedResult: 0,
@@ -537,6 +542,11 @@ func TestDecoderFloat32(t *testing.T) {
 			name:           "basic-float2",
 			json:           "-7.8876e002",
 			expectedResult: -788.76,
+		},
+		{
+			name:           "basic-float3",
+			json:           "-0.1234",
+			expectedResult: -0.1234,
 		},
 		{
 			name:           "error",
