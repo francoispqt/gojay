@@ -112,12 +112,12 @@ func TestSliceStrings(t *testing.T) {
 		},
 		{
 			name:           "basic-test",
-			json:           `["hello world", "hey" , "foo","bar \\n escape"]`,
+			json:           `["hello world", "hey" , "foo","bar \n escape"]`,
 			expectedResult: testSliceStrings{"hello world", "hey", "foo", "bar \n escape"},
 		},
 		{
 			name:           "basic-test",
-			json:           `["hello world", "hey" , null,"bar \\n escape"]`,
+			json:           `["hello world", "hey" , null,"bar \n escape"]`,
 			expectedResult: testSliceStrings{"hello world", "hey", "", "bar \n escape"},
 		},
 		{
