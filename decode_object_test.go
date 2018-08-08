@@ -1370,7 +1370,7 @@ func TestSkipObject(t *testing.T) {
 		},
 		{
 			name: "basic-escaped",
-			json: `"key":"value\\\\\\" hello"}`,
+			json: `"key":"value\\\\\\\" hello"}`,
 		},
 		{
 			name: "basic-err",
