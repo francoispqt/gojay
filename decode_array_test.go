@@ -510,10 +510,12 @@ func TestUnmarshalJSONArrays(t *testing.T) {
 
 func TestSkipArray(t *testing.T) {
 	testCases := []struct {
+		name         string
 		json         string
 		expectations func(*testing.T, int, error)
 	}{
 		{
+			name: "basic",
 			json: `"testbasic"]`,
 			expectations: func(t *testing.T, i int, err error) {
 				assert.Equal(t, len(`"testbasic"]`), i)
@@ -521,6 +523,7 @@ func TestSkipArray(t *testing.T) {
 			},
 		},
 		{
+			name: "complex escape string",
 			json: `"test \\\\\" escape"]`,
 			expectations: func(t *testing.T, i int, err error) {
 				assert.Equal(t, len(`"test \\\\\" escape"]`), i)
@@ -528,6 +531,7 @@ func TestSkipArray(t *testing.T) {
 			},
 		},
 		{
+			name: "complex escape slash",
 			json: `"test \\\\\\"]`,
 			expectations: func(t *testing.T, i int, err error) {
 				assert.Equal(t, len(`"test \\\\\\"]`), i)
@@ -544,9 +548,11 @@ func TestSkipArray(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		dec := NewDecoder(strings.NewReader(test.json))
-		i, err := dec.skipArray()
-		test.expectations(t, i, err)
+		t.Run(test.name, func(t *testing.T) {
+			dec := NewDecoder(strings.NewReader(test.json))
+			i, err := dec.skipArray()
+			test.expectations(t, i, err)
+		})
 	}
 }
 

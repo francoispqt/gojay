@@ -79,26 +79,34 @@ func (dec *Decoder) skipArray() (int, error) {
 			arraysOpen++
 		case '"':
 			j++
+			var isInEscapeSeq bool
+			var isFirstQuote = true
 			for ; j < dec.length || dec.read(); j++ {
 				if dec.data[j] != '"' {
 					continue
 				}
-				if dec.data[j-1] != '\\' {
+				if dec.data[j-1] != '\\' || (!isInEscapeSeq && !isFirstQuote) {
 					break
+				} else {
+					isInEscapeSeq = false
+				}
+				if isFirstQuote {
+					isFirstQuote = false
 				}
 				// loop backward and count how many anti slash found
 				// to see if string is effectively escaped
-				ct := 1
-				for i := j - 2; i > 0; i-- {
+				ct := 0
+				for i := j - 1; i > 0; i-- {
 					if dec.data[i] != '\\' {
 						break
 					}
 					ct++
 				}
-				// is even number of slashes, quote is not escaped
+				// is pair number of slashes, quote is not escaped
 				if ct&1 == 0 {
 					break
 				}
+				isInEscapeSeq = true
 			}
 		default:
 			continue
