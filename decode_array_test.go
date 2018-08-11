@@ -534,6 +534,13 @@ func TestSkipArray(t *testing.T) {
 				assert.Nil(t, err)
 			},
 		},
+		{
+			json: `"test \n"]`,
+			expectations: func(t *testing.T, i int, err error) {
+				assert.Equal(t, len(`"test \n"]`), i)
+				assert.Nil(t, err)
+			},
+		},
 	}
 
 	for _, test := range testCases {

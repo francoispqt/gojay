@@ -1382,6 +1382,11 @@ func TestSkipObject(t *testing.T) {
 			json: `{"key":"value"`,
 			err:  true,
 		},
+		{
+			name: "basic-err2",
+			json: `"key":"value\n"}`,
+			err:  false,
+		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
