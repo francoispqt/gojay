@@ -102,6 +102,24 @@ func TestDecoderString(t *testing.T) {
 			err:            true,
 		},
 		{
+			name:           "escape-control-char-solidus",
+			json:           `"\/"`,
+			expectedResult: "/",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char-solidus",
+			json:           `"/"`,
+			expectedResult: "/",
+			err:            false,
+		},
+		{
+			name:           "escape-control-char-solidus-escape-char",
+			json:           `"\\/"`,
+			expectedResult: `\/`,
+			err:            false,
+		},
+		{
 			name:           "escape-control-char",
 			json:           `"\\r"`,
 			expectedResult: `\r`,

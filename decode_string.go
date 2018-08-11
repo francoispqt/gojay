@@ -55,7 +55,6 @@ func (dec *Decoder) parseEscapedString() error {
 	if dec.cursor >= dec.length && !dec.read() {
 		return dec.raiseInvalidJSONErr(dec.cursor)
 	}
-
 	switch dec.data[dec.cursor] {
 	case '"':
 		dec.data[dec.cursor] = '"'
@@ -80,7 +79,6 @@ func (dec *Decoder) parseEscapedString() error {
 		if err != nil {
 			return err
 		}
-
 		diff := dec.cursor - start
 		dec.data = append(append(dec.data[:start-1], str...), dec.data[dec.cursor:]...)
 		dec.length = len(dec.data)
@@ -90,7 +88,6 @@ func (dec *Decoder) parseEscapedString() error {
 	default:
 		return dec.raiseInvalidJSONErr(dec.cursor)
 	}
-
 	// Truncate the previous backslash character, and the
 	dec.data = append(dec.data[:dec.cursor-1], dec.data[dec.cursor:]...)
 	dec.length--
