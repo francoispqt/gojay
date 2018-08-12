@@ -877,14 +877,14 @@ func TestDecodeObjectComplex(t *testing.T) {
 			json: `{
 				"testSubObject": {
 					"testStr": "some string",
-					"testInt":124465, 
-					"testUint16":120, 
-					"testUint8":15, 
-					"testInt16":-135, 
+					"testInt":124465,
+					"testUint16":120,
+					"testUint8":15,
+					"testInt16":-135,
 					"testInt8":-23
 				},
 				"testSubSliceInts": [1,2,3,4,5],
-				"testStr": "some \\n string"
+				"testStr": "some \n string"
 			}`,
 			expectedResult: testObjectComplex{
 				testSubObject: &testObject{
@@ -902,7 +902,7 @@ func TestDecodeObjectComplex(t *testing.T) {
 		},
 		{
 			name: "complex-json-err",
-			json: `{"testSubObject":{"testStr":"some string,"testInt":124465,"testUint16":120, "testUint8":15,"testInt16":-135,"testInt8":-23},"testSubSliceInts":[1,2],"testStr":"some \\n string"}`,
+			json: `{"testSubObject":{"testStr":"some string,"testInt":124465,"testUint16":120, "testUint8":15,"testInt16":-135,"testInt8":-23},"testSubSliceInts":[1,2],"testStr":"some \n string"}`,
 			expectedResult: testObjectComplex{
 				testSubObject: &testObject{},
 			},
@@ -1012,9 +1012,9 @@ func TestDecodeObjectNull(t *testing.T) {
 
 var jsonComplex = []byte(`{
 	"test": "{\"test\":\"1\",\"test1\":2}",
-	"test2\\n": "\\\\\\\\\\n",
+	"test2\n": "\\\\\\\\\n",
 	"testArrSkip": ["testString with escaped \\\" quotes"],
-	"testSkipString": "skip \\ string with \\n escaped char \" ",
+	"testSkipString": "skip \\ string with \n escaped char \" ",
 	"testSkipObject": {
 		"testSkipSubObj": {
 			"test": "test"
@@ -1028,7 +1028,7 @@ var jsonComplex = []byte(`{
 	"testSkipBoolNull": null,
 	"testSub": {
 		"test": "{\"test\":\"1\",\"test1\":2}",
-		"test2\\n": "[1,2,3]",
+		"test2\n": "[1,2,3]",
 		"test3": 1,
 		"testObjSkip": {
 			"test": "test string with escaped \" quotes"
@@ -1381,6 +1381,11 @@ func TestSkipObject(t *testing.T) {
 			name: "basic-err2",
 			json: `{"key":"value"`,
 			err:  true,
+		},
+		{
+			name: "basic-err2",
+			json: `"key":"value\n"}`,
+			err:  false,
 		},
 	}
 	for _, testCase := range testCases {

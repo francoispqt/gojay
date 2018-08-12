@@ -112,12 +112,12 @@ func TestSliceStrings(t *testing.T) {
 		},
 		{
 			name:           "basic-test",
-			json:           `["hello world", "hey" , "foo","bar \\n escape"]`,
+			json:           `["hello world", "hey" , "foo","bar \n escape"]`,
 			expectedResult: testSliceStrings{"hello world", "hey", "foo", "bar \n escape"},
 		},
 		{
 			name:           "basic-test",
-			json:           `["hello world", "hey" , null,"bar \\n escape"]`,
+			json:           `["hello world", "hey" , null,"bar \n escape"]`,
 			expectedResult: testSliceStrings{"hello world", "hey", "", "bar \n escape"},
 		},
 		{
@@ -531,6 +531,13 @@ func TestSkipArray(t *testing.T) {
 			json: `"test \\\\\\"]`,
 			expectations: func(t *testing.T, i int, err error) {
 				assert.Equal(t, len(`"test \\\\\\"]`), i)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			json: `"test \n"]`,
+			expectations: func(t *testing.T, i int, err error) {
+				assert.Equal(t, len(`"test \n"]`), i)
 				assert.Nil(t, err)
 			},
 		},
