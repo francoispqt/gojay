@@ -79,7 +79,7 @@ func (dec *Decoder) skipArray() (int, error) {
 			arraysOpen++
 		case '"':
 			j++
-			for ; j < dec.length; j++ {
+			for ; j < dec.length || dec.read(); j++ {
 				if dec.data[j] != '"' {
 					continue
 				}
