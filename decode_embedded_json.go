@@ -62,7 +62,7 @@ func (dec *Decoder) decodeEmbeddedJSON(ej *EmbeddedJSON) error {
 		break
 	}
 	if err == nil {
-		if dec.cursor-1 > beginOfEmbeddedJSON {
+		if dec.cursor-1 >= beginOfEmbeddedJSON {
 			*ej = append(*ej, dec.data[beginOfEmbeddedJSON:dec.cursor]...)
 		}
 		dec.called |= 1
