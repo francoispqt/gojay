@@ -2,7 +2,7 @@ package gojay
 
 import "strconv"
 
-// EncodeUint32 encodes an int64 to JSON
+// EncodeUint64 encodes an int64 to JSON
 func (enc *Encoder) EncodeUint64(n uint64) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))

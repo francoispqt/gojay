@@ -421,7 +421,7 @@ func TestDecoderChannelOfObjectsBasic(t *testing.T) {
 	assert.Nil(t, err, "Err must be nil")
 	ct := 0
 	l := len(testChan)
-	for _ = range testChan {
+	for range testChan {
 		ct++
 		if ct == l {
 			break

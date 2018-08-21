@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// EncodeTime encodes a *time.Time to JSON with the given format
 func (enc *Encoder) EncodeTime(t *time.Time, format string) error {
 	if enc.isPooled == 1 {
 		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
