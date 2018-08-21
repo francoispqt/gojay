@@ -88,7 +88,7 @@ func (dec *Decoder) parseEscapedString() error {
 	default:
 		return dec.raiseInvalidJSONErr(dec.cursor)
 	}
-	// Truncate the previous backslash character, and the
+
 	dec.data = append(dec.data[:dec.cursor-1], dec.data[dec.cursor:]...)
 	dec.length--
 
@@ -138,7 +138,7 @@ func (dec *Decoder) skipEscapedString() error {
 					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				return nil
-			case 'n', 'r', 't':
+			case 'n', 'r', 't', '/', 'f', 'b':
 				return nil
 			default:
 				// nSlash must be even

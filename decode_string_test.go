@@ -24,6 +24,12 @@ func TestDecoderString(t *testing.T) {
 			err:            false,
 		},
 		{
+			name:           "string-solidus",
+			json:           `"\/"`,
+			expectedResult: "/",
+			err:            false,
+		},
+		{
 			name:           "basic-string",
 			json:           ``,
 			expectedResult: "",
@@ -402,6 +408,12 @@ func TestSkipString(t *testing.T) {
 			expectedResult: ``,
 			err:            true,
 			errType:        InvalidJSONError(""),
+		},
+		{
+			name:           "string-solidus",
+			json:           `Asia\/Bangkok","enable":true}"`,
+			expectedResult: "",
+			err:            false,
 		},
 	}
 

@@ -1369,6 +1369,10 @@ func TestSkipObject(t *testing.T) {
 			json: `"key":"value"}`,
 		},
 		{
+			name: "basic-escape-solidus",
+			json: `"key":"value\/solidus"}`,
+		},
+		{
 			name: "basic-escaped",
 			json: `"key":"value\\\\\\\" hello"}`,
 		},
