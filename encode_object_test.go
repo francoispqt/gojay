@@ -419,3 +419,63 @@ func TestEncoderObjectEncodeAPIError(t *testing.T) {
 		assert.True(t, false, "should not be called as it should have panicked")
 	})
 }
+
+func TestEncoderObjectKeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":{"test":"","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":{"test":"","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddObjectKeyNullEmpty("foo", (*TestEncoding)(nil))
+			enc.ObjectKeyNullEmpty("bar", &TestEncoding{})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderObjectNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,{"test":"","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,{"test":"","test2":"","testInt":0,"testBool":false,"testArr":[],"testF64":0,"testF32":0,"sub":{}}`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddObjectNullEmpty((*TestEncoding)(nil))
+			enc.ObjectNullEmpty(&TestEncoding{})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}

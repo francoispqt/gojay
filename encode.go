@@ -1,11 +1,13 @@
 package gojay
 
 import (
-	"io"
-	"fmt"
-	"reflect"
 	"encoding/json"
+	"fmt"
+	"io"
+	"reflect"
 )
+
+var nullBytes = []byte("null")
 
 // MarshalJSONObject returns the JSON encoding of v.
 //
@@ -178,7 +180,7 @@ func marshal(v interface{}, any bool) ([]byte, error) {
 
 			return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
 		}
-	} ()
+	}()
 
 	enc.Release()
 	return buf, err

@@ -29,6 +29,14 @@ func (enc *Encoder) AddSQLNullStringOmitEmpty(v *sql.NullString) {
 	}
 }
 
+// AddSQLNullStringNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddSQLNullStringNullEmpty(v *sql.NullString) {
+	if v != nil && v.Valid {
+		enc.StringNullEmpty(v.String)
+	}
+}
+
 // AddSQLNullStringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddSQLNullStringKey(key string, v *sql.NullString) {
 	enc.StringKey(key, v.String)
@@ -54,6 +62,13 @@ func (enc *Encoder) SQLNullStringOmitEmpty(v *sql.NullString) {
 	}
 }
 
+// SQLNullStringNullEmpty adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullStringNullEmpty(v *sql.NullString) {
+	if v != nil && v.Valid {
+		enc.StringNullEmpty(v.String)
+	}
+}
+
 // SQLNullStringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) SQLNullStringKey(key string, v *sql.NullString) {
 	enc.StringKey(key, v.String)
@@ -64,6 +79,14 @@ func (enc *Encoder) SQLNullStringKey(key string, v *sql.NullString) {
 func (enc *Encoder) SQLNullStringKeyOmitEmpty(key string, v *sql.NullString) {
 	if v != nil && v.Valid && v.String != "" {
 		enc.StringKeyOmitEmpty(key, v.String)
+	}
+}
+
+// SQLNullStringKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullStringKeyNullEmpty(key string, v *sql.NullString) {
+	if v != nil && v.Valid {
+		enc.StringKeyNullEmpty(key, v.String)
 	}
 }
 
@@ -96,6 +119,14 @@ func (enc *Encoder) AddSQLNullInt64OmitEmpty(v *sql.NullInt64) {
 	}
 }
 
+// AddSQLNullInt64NullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddSQLNullInt64NullEmpty(v *sql.NullInt64) {
+	if v != nil && v.Valid {
+		enc.Int64NullEmpty(v.Int64)
+	}
+}
+
 // AddSQLNullInt64Key adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddSQLNullInt64Key(key string, v *sql.NullInt64) {
 	enc.Int64Key(key, v.Int64)
@@ -106,6 +137,14 @@ func (enc *Encoder) AddSQLNullInt64Key(key string, v *sql.NullInt64) {
 func (enc *Encoder) AddSQLNullInt64KeyOmitEmpty(key string, v *sql.NullInt64) {
 	if v != nil && v.Valid && v.Int64 != 0 {
 		enc.Int64KeyOmitEmpty(key, v.Int64)
+	}
+}
+
+// AddSQLNullInt64KeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddSQLNullInt64KeyNullEmpty(key string, v *sql.NullInt64) {
+	if v != nil && v.Valid {
+		enc.Int64KeyNullEmpty(key, v.Int64)
 	}
 }
 
@@ -121,6 +160,13 @@ func (enc *Encoder) SQLNullInt64OmitEmpty(v *sql.NullInt64) {
 	}
 }
 
+// SQLNullInt64NullEmpty adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullInt64NullEmpty(v *sql.NullInt64) {
+	if v != nil && v.Valid {
+		enc.Int64NullEmpty(v.Int64)
+	}
+}
+
 // SQLNullInt64Key adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) SQLNullInt64Key(key string, v *sql.NullInt64) {
 	enc.Int64Key(key, v.Int64)
@@ -131,6 +177,14 @@ func (enc *Encoder) SQLNullInt64Key(key string, v *sql.NullInt64) {
 func (enc *Encoder) SQLNullInt64KeyOmitEmpty(key string, v *sql.NullInt64) {
 	if v != nil && v.Valid && v.Int64 != 0 {
 		enc.Int64KeyOmitEmpty(key, v.Int64)
+	}
+}
+
+// SQLNullInt64KeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullInt64KeyNullEmpty(key string, v *sql.NullInt64) {
+	if v != nil && v.Valid {
+		enc.Int64KeyNullEmpty(key, v.Int64)
 	}
 }
 
@@ -163,6 +217,14 @@ func (enc *Encoder) AddSQLNullFloat64OmitEmpty(v *sql.NullFloat64) {
 	}
 }
 
+// AddSQLNullFloat64NullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddSQLNullFloat64NullEmpty(v *sql.NullFloat64) {
+	if v != nil && v.Valid {
+		enc.Float64NullEmpty(v.Float64)
+	}
+}
+
 // AddSQLNullFloat64Key adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddSQLNullFloat64Key(key string, v *sql.NullFloat64) {
 	enc.Float64Key(key, v.Float64)
@@ -173,6 +235,14 @@ func (enc *Encoder) AddSQLNullFloat64Key(key string, v *sql.NullFloat64) {
 func (enc *Encoder) AddSQLNullFloat64KeyOmitEmpty(key string, v *sql.NullFloat64) {
 	if v != nil && v.Valid && v.Float64 != 0 {
 		enc.Float64KeyOmitEmpty(key, v.Float64)
+	}
+}
+
+// AddSQLNullFloat64KeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddSQLNullFloat64KeyNullEmpty(key string, v *sql.NullFloat64) {
+	if v != nil && v.Valid {
+		enc.Float64KeyNullEmpty(key, v.Float64)
 	}
 }
 
@@ -188,6 +258,13 @@ func (enc *Encoder) SQLNullFloat64OmitEmpty(v *sql.NullFloat64) {
 	}
 }
 
+// SQLNullFloat64NullEmpty adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullFloat64NullEmpty(v *sql.NullFloat64) {
+	if v != nil && v.Valid {
+		enc.Float64NullEmpty(v.Float64)
+	}
+}
+
 // SQLNullFloat64Key adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) SQLNullFloat64Key(key string, v *sql.NullFloat64) {
 	enc.Float64Key(key, v.Float64)
@@ -198,6 +275,14 @@ func (enc *Encoder) SQLNullFloat64Key(key string, v *sql.NullFloat64) {
 func (enc *Encoder) SQLNullFloat64KeyOmitEmpty(key string, v *sql.NullFloat64) {
 	if v != nil && v.Valid && v.Float64 != 0 {
 		enc.Float64KeyOmitEmpty(key, v.Float64)
+	}
+}
+
+// SQLNullFloat64KeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullFloat64KeyNullEmpty(key string, v *sql.NullFloat64) {
+	if v != nil && v.Valid {
+		enc.Float64KeyNullEmpty(key, v.Float64)
 	}
 }
 
@@ -243,6 +328,14 @@ func (enc *Encoder) AddSQLNullBoolKeyOmitEmpty(key string, v *sql.NullBool) {
 	}
 }
 
+// AddSQLNullBoolKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddSQLNullBoolKeyNullEmpty(key string, v *sql.NullBool) {
+	if v != nil && v.Valid {
+		enc.BoolKeyNullEmpty(key, v.Bool)
+	}
+}
+
 // SQLNullBool adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) SQLNullBool(v *sql.NullBool) {
 	enc.Bool(v.Bool)
@@ -252,6 +345,13 @@ func (enc *Encoder) SQLNullBool(v *sql.NullBool) {
 func (enc *Encoder) SQLNullBoolOmitEmpty(v *sql.NullBool) {
 	if v != nil && v.Valid && v.Bool != false {
 		enc.Bool(v.Bool)
+	}
+}
+
+// SQLNullBoolNullEmpty adds a string to be encoded, must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullBoolNullEmpty(v *sql.NullBool) {
+	if v != nil && v.Valid {
+		enc.BoolNullEmpty(v.Bool)
 	}
 }
 
@@ -265,5 +365,13 @@ func (enc *Encoder) SQLNullBoolKey(key string, v *sql.NullBool) {
 func (enc *Encoder) SQLNullBoolKeyOmitEmpty(key string, v *sql.NullBool) {
 	if v != nil && v.Valid && v.Bool != false {
 		enc.BoolKeyOmitEmpty(key, v.Bool)
+	}
+}
+
+// SQLNullBoolKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) SQLNullBoolKeyNullEmpty(key string, v *sql.NullBool) {
+	if v != nil && v.Valid {
+		enc.BoolKeyNullEmpty(key, v.Bool)
 	}
 }
