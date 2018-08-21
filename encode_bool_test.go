@@ -62,3 +62,63 @@ func TestEncoderBoolErrors(t *testing.T) {
 		assert.NotNil(t, err, "err should not be nil")
 	})
 }
+
+func TestEncoderBoolNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: "[null,true",
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,true`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.BoolNullEmpty(false)
+			enc.AddBoolNullEmpty(true)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderBoolNullKeyEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":true`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":true`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.BoolKeyNullEmpty("foo", false)
+			enc.AddBoolKeyNullEmpty("bar", true)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}

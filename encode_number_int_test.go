@@ -536,3 +536,303 @@ func TestEncoderInt8(t *testing.T) {
 		})
 	}
 }
+
+func TestEncoderIntNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.IntNullEmpty(0)
+			enc.AddIntNullEmpty(1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderIntKeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.IntKeyNullEmpty("foo", 0)
+			enc.AddIntKeyNullEmpty("bar", 1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt64NullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.Int64NullEmpty(0)
+			enc.AddInt64NullEmpty(1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt64KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.Int64KeyNullEmpty("foo", 0)
+			enc.AddInt64KeyNullEmpty("bar", 1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt32NullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.Int32NullEmpty(0)
+			enc.AddInt32NullEmpty(1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt32KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.Int32KeyNullEmpty("foo", 0)
+			enc.Int32KeyNullEmpty("bar", int32(1))
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt16NullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.Int16NullEmpty(0)
+			enc.Int16NullEmpty(1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt16KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddInt16KeyNullEmpty("foo", 0)
+			enc.Int16KeyNullEmpty("bar", int16(1))
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt8NullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddInt8NullEmpty(0)
+			enc.Int8NullEmpty(1)
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderInt8KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddInt8KeyNullEmpty("foo", 0)
+			enc.Int8KeyNullEmpty("bar", int8(1))
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}

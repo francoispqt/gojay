@@ -41,6 +41,12 @@ func (enc *Encoder) AddStringOmitEmpty(v string) {
 	enc.StringOmitEmpty(v)
 }
 
+// AddStringNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) AddStringNullEmpty(v string) {
+	enc.StringNullEmpty(v)
+}
+
 // AddStringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) AddStringKey(key, v string) {
 	enc.StringKey(key, v)
@@ -50,6 +56,12 @@ func (enc *Encoder) AddStringKey(key, v string) {
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) AddStringKeyOmitEmpty(key, v string) {
 	enc.StringKeyOmitEmpty(key, v)
+}
+
+// AddStringKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) AddStringKeyNullEmpty(key, v string) {
+	enc.StringKeyNullEmpty(key, v)
 }
 
 // String adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
@@ -72,6 +84,28 @@ func (enc *Encoder) StringOmitEmpty(v string) {
 		return
 	}
 	r := enc.getPreviousRune()
+	if r != '[' {
+		enc.writeTwoBytes(',', '"')
+	} else {
+		enc.writeByte('"')
+	}
+	enc.writeStringEscape(v)
+	enc.writeByte('"')
+}
+
+// StringNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside a slice or array encoding (does not encode a key)
+func (enc *Encoder) StringNullEmpty(v string) {
+	r := enc.getPreviousRune()
+	if v == "" {
+		if r != '[' {
+			enc.writeByte(',')
+			enc.writeBytes(nullBytes)
+		} else {
+			enc.writeBytes(nullBytes)
+		}
+		return
+	}
 	if r != '[' {
 		enc.writeTwoBytes(',', '"')
 	} else {
@@ -111,6 +145,27 @@ func (enc *Encoder) StringKeyOmitEmpty(key, v string) {
 	}
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyStr)
+	enc.writeStringEscape(v)
+	enc.writeByte('"')
+}
+
+// StringKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
+// Must be used inside an object as it will encode a key
+func (enc *Encoder) StringKeyNullEmpty(key, v string) {
+	enc.grow(len(key) + len(v) + 5)
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeTwoBytes(',', '"')
+	} else {
+		enc.writeByte('"')
+	}
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKey)
+	if v == "" {
+		enc.writeBytes(nullBytes)
+		return
+	}
+	enc.writeByte('"')
 	enc.writeStringEscape(v)
 	enc.writeByte('"')
 }

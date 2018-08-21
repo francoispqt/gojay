@@ -1119,3 +1119,243 @@ func TestAddSQLNullBool(t *testing.T) {
 		},
 	)
 }
+
+func TestEncoderSQLNullStringEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,"bar"`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,"bar"`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullStringNullEmpty(&sql.NullString{"", true})
+			enc.SQLNullStringNullEmpty(&sql.NullString{"bar", true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullStringKeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":"bar"`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":"bar"`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.SQLNullStringKeyNullEmpty("foo", &sql.NullString{"", true})
+			enc.SQLNullStringKeyNullEmpty("bar", &sql.NullString{"bar", true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullBoolEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,true`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,true`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.SQLNullBoolNullEmpty(&sql.NullBool{false, true})
+			enc.SQLNullBoolNullEmpty(&sql.NullBool{true, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullBoolKeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":true`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":true`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullBoolKeyNullEmpty("foo", &sql.NullBool{false, true})
+			enc.SQLNullBoolKeyNullEmpty("bar", &sql.NullBool{true, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullInt64Empty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullInt64NullEmpty(&sql.NullInt64{0, true})
+			enc.SQLNullInt64NullEmpty(&sql.NullInt64{1, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullInt64KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullInt64KeyNullEmpty("foo", &sql.NullInt64{0, true})
+			enc.SQLNullInt64KeyNullEmpty("bar", &sql.NullInt64{1, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullFloat64Empty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullFloat64NullEmpty(&sql.NullFloat64{0, true})
+			enc.SQLNullFloat64NullEmpty(&sql.NullFloat64{1, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderSQLNullFloat64KeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":1`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":1`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddSQLNullFloat64KeyNullEmpty("foo", &sql.NullFloat64{0, true})
+			enc.SQLNullFloat64KeyNullEmpty("bar", &sql.NullFloat64{1, true})
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}

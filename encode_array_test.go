@@ -336,3 +336,57 @@ func TestEncoderArrayFunc(t *testing.T) {
 	var f EncodeArrayFunc
 	assert.True(t, f.IsNil())
 }
+
+func TestEncodeArrayNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name, baseJSON, expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,["foo"]`,
+		},
+		{
+			name:         "basic 1st elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,["foo"]`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddArrayNullEmpty(&TestEncodingArrStrings{})
+			enc.ArrayNullEmpty(&TestEncodingArrStrings{"foo"})
+		})
+	}
+}
+
+func TestEncodeArrayKeyNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name, baseJSON, expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":["foo"]`,
+		},
+		{
+			name:         "basic 1st elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":["foo"]`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.AddArrayKeyNullEmpty("foo", &TestEncodingArrStrings{})
+			enc.ArrayKeyNullEmpty("bar", &TestEncodingArrStrings{"foo"})
+		})
+	}
+}

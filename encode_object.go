@@ -46,6 +46,13 @@ func (enc *Encoder) AddObjectOmitEmpty(v MarshalerJSONObject) {
 	enc.ObjectOmitEmpty(v)
 }
 
+// AddObjectNullEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectNullEmpty(v MarshalerJSONObject) {
+	enc.ObjectNullEmpty(v)
+}
+
 // AddObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerJSONObject
 func (enc *Encoder) AddObjectKey(key string, v MarshalerJSONObject) {
@@ -57,6 +64,13 @@ func (enc *Encoder) AddObjectKey(key string, v MarshalerJSONObject) {
 // value must implement MarshalerJSONObject
 func (enc *Encoder) AddObjectKeyOmitEmpty(key string, v MarshalerJSONObject) {
 	enc.ObjectKeyOmitEmpty(key, v)
+}
+
+// AddObjectKeyNullEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) AddObjectKeyNullEmpty(key string, v MarshalerJSONObject) {
+	enc.ObjectKeyNullEmpty(key, v)
 }
 
 // Object adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
@@ -93,6 +107,24 @@ func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 	r := enc.getPreviousRune()
 	if r != '[' {
 		enc.writeByte(',')
+	}
+	enc.writeByte('{')
+	v.MarshalJSONObject(enc)
+	enc.writeByte('}')
+}
+
+// ObjectNullEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) ObjectNullEmpty(v MarshalerJSONObject) {
+	enc.grow(2)
+	r := enc.getPreviousRune()
+	if r != '[' {
+		enc.writeByte(',')
+	}
+	if v.IsNil() {
+		enc.writeBytes(nullBytes)
+		return
 	}
 	enc.writeByte('{')
 	v.MarshalJSONObject(enc)
@@ -141,6 +173,27 @@ func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
+	value.MarshalJSONObject(enc)
+	enc.writeByte('}')
+}
+
+// ObjectKeyNullEmpty adds an object to be encoded or skips it if IsNil returns true.
+// Must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject
+func (enc *Encoder) ObjectKeyNullEmpty(key string, value MarshalerJSONObject) {
+	enc.grow(5 + len(key))
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKey)
+	if value.IsNil() {
+		enc.writeBytes(nullBytes)
+		return
+	}
+	enc.writeByte('{')
 	value.MarshalJSONObject(enc)
 	enc.writeByte('}')
 }

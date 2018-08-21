@@ -162,3 +162,92 @@ func TestEncoderStringMarshalAPI(t *testing.T) {
 			"Result of marshalling is different as the one expected")
 	})
 }
+
+func TestEncoderStringNullEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `[null,"true"`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,"true"`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `["test"`,
+			expectedJSON: `["test",null,"true"`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.StringNullEmpty("")
+			enc.AddStringNullEmpty("true")
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderStringNullEmpty2(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "[",
+			expectedJSON: `["test"`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.StringNullEmpty("test")
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
+
+func TestEncoderStringNullKeyEmpty(t *testing.T) {
+	var testCases = []struct {
+		name         string
+		baseJSON     string
+		expectedJSON string
+	}{
+		{
+			name:         "basic 1st elem",
+			baseJSON:     "{",
+			expectedJSON: `{"foo":null,"bar":"true"`,
+		},
+		{
+			name:         "basic 2nd elem",
+			baseJSON:     `{"test":"test"`,
+			expectedJSON: `{"test":"test","foo":null,"bar":"true"`,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run("true", func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			enc.writeString(testCase.baseJSON)
+			enc.StringKeyNullEmpty("foo", "")
+			enc.AddStringKeyNullEmpty("bar", "true")
+			enc.Write()
+			assert.Equal(t, testCase.expectedJSON, b.String())
+		})
+	}
+}
