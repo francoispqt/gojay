@@ -16,6 +16,7 @@ type testObject struct {
 	testBool      bool
 	testSubObject *testObject
 	testSubArray  testSliceInts
+	testInterface interface{}
 }
 
 // make sure it implements interfaces
@@ -70,12 +71,14 @@ func (t *testObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 		return dec.AddFloat32(&t.testFloat32)
 	case "testBool":
 		return dec.AddBool(&t.testBool)
+	case "testInterface":
+		return dec.AddInterface(&t.testInterface)
 	}
 	return nil
 }
 
 func (t *testObject) NKeys() int {
-	return 13
+	return 14
 }
 
 type testObject0Keys struct {
@@ -94,6 +97,7 @@ type testObject0Keys struct {
 	testBool      bool
 	testSubObject *testObject0Keys
 	testSubArray  testSliceInts
+	testInterface interface{}
 }
 
 // make sure it implements interfaces
@@ -118,6 +122,7 @@ func (t *testObject0Keys) MarshalJSONObject(enc *Encoder) {
 	enc.AddFloatKey("testFloat64", t.testFloat64)
 	enc.AddFloat32Key("testFloat32", t.testFloat32)
 	enc.AddBoolKey("testBool", t.testBool)
+	enc.AddInterfaceKey("testInterface", t.testInterface)
 }
 
 func (t *testObject0Keys) UnmarshalJSONObject(dec *Decoder, k string) error {
@@ -148,6 +153,8 @@ func (t *testObject0Keys) UnmarshalJSONObject(dec *Decoder, k string) error {
 		return dec.AddFloat32(&t.testFloat32)
 	case "testBool":
 		return dec.AddBool(&t.testBool)
+	case "testInterface":
+		return dec.AddInterface(&t.testInterface)
 	}
 	return nil
 }
