@@ -150,6 +150,12 @@ func Unmarshal(data []byte, v interface{}) error {
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
 		_, err = dec.decodeArray(vt)
+	case *interface{}:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = make([]byte, len(data))
+		copy(dec.data, data)
+		err = dec.decodeInterface(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
