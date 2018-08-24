@@ -24,6 +24,11 @@ func (dec *Decoder) decodeInterface(i *interface{}) error {
 		return err
 	}
 
+	// if start & end are equal the object is a null, don't unmarshal
+	if start == end {
+		return nil
+	}
+
 	object := dec.data[start:end]
 	if err = json.Unmarshal(object, i); err != nil {
 		return err
@@ -48,6 +53,9 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 			if err != nil {
 				return
 			}
+			// Set start & end to the same cursor to indicate the object
+			// is a null and should not be unmarshal
+			start = dec.cursor
 			end = dec.cursor
 			dec.cursor++
 			return

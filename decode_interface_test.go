@@ -344,6 +344,18 @@ func TestDecodeAsTestObject(t *testing.T) {
 			skipCheckResult: true,
 		},
 		{
+			name: "mull-interface",
+			json: `{
+        "testInterface": null,
+        "testStr": "adios"
+      }`,
+			expectedResult: testObject{
+				testInterface: interface{}(nil),
+				testStr:       "adios",
+			},
+			err: false,
+		},
+		{
 			name: "basic-interface",
 			json: `{
         "testInterface": {
@@ -416,6 +428,7 @@ func TestUnmarshalInterface(t *testing.T) {
 	json := []byte(`{
     "testInterface": {
       "number": 1988,
+      "null": null,
       "string": "prost",
       "array": ["h","o","l","a"],
       "object": {
@@ -438,6 +451,7 @@ func TestUnmarshalInterface(t *testing.T) {
 		},
 		"number": float64(1988),
 		"string": "prost",
+		"null":   interface{}(nil),
 		"array":  []interface{}{"h", "o", "l", "a"},
 		"object": map[string]interface{}{
 			"k": "v",
@@ -505,4 +519,13 @@ func TestDecodeInterfacePoolError(t *testing.T) {
 	}()
 	_ = dec.DecodeInterface(&result)
 	assert.True(t, false, "should not be called as decoder should have panicked")
+}
+
+func TestDecodeNull(t *testing.T) {
+	var i interface{}
+	dec := BorrowDecoder(strings.NewReader("null"))
+	defer dec.Release()
+	err := dec.DecodeInterface(&i)
+	assert.Nil(t, err, "err should be nil")
+	assert.Equal(t, interface{}(nil), i, "value at given index should be the same as expected results")
 }
