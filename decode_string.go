@@ -20,7 +20,7 @@ func (dec *Decoder) decodeString(v *string) error {
 			// is string
 			continue
 		case '"':
-			dec.cursor = dec.cursor + 1
+			dec.cursor++
 			start, end, err := dec.getString()
 			if err != nil {
 				return err
@@ -28,6 +28,47 @@ func (dec *Decoder) decodeString(v *string) error {
 			// we do minus one to remove the last quote
 			d := dec.data[start : end-1]
 			*v = *(*string)(unsafe.Pointer(&d))
+			dec.cursor = end
+			return nil
+		// is nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+func (dec *Decoder) decodeStringNull(v **string) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch dec.data[dec.cursor] {
+		case ' ', '\n', '\t', '\r', ',':
+			// is string
+			continue
+		case '"':
+			dec.cursor++
+			start, end, err := dec.getString()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(string)
+			}
+			// we do minus one to remove the last quote
+			d := dec.data[start : end-1]
+			**v = *(*string)(unsafe.Pointer(&d))
 			dec.cursor = end
 			return nil
 		// is nil

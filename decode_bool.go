@@ -9,6 +9,15 @@ func (dec *Decoder) DecodeBool(v *bool) error {
 	}
 	return dec.decodeBool(v)
 }
+
+// DecodeBoolNull is like DecodeBool but it takes a **bool
+// if the JSON is `true` or `false` and the pointer is nil, gojay assigns a new pointer to a bool
+func (dec *Decoder) DecodeBoolNull(v **bool) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeBoolNull(v)
+}
 func (dec *Decoder) decodeBool(v *bool) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
@@ -39,6 +48,54 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = false
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return nil
+}
+func (dec *Decoder) decodeBoolNull(v **bool) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch dec.data[dec.cursor] {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case 't':
+			dec.cursor++
+			err := dec.assertTrue()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(bool)
+			}
+			**v = true
+			dec.cursor++
+			return nil
+		case 'f':
+			dec.cursor++
+			err := dec.assertFalse()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(bool)
+			}
+			**v = false
+			dec.cursor++
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
 			dec.cursor++
 			return nil
 		default:

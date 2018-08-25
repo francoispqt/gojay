@@ -61,6 +61,59 @@ func (dec *Decoder) decodeInt(v *int) error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
+func (dec *Decoder) decodeIntNull(v **int) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getInt64()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int)
+			}
+			**v = int(val)
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getInt64Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int)
+			}
+			**v = -int(val)
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = InvalidUnmarshalError(
+				fmt.Sprintf(
+					"Cannot unmarshall to int, wrong char '%s' found at pos %d",
+					string(dec.data[dec.cursor]),
+					dec.cursor,
+				),
+			)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+
 // DecodeInt16 reads the next JSON-encoded value from its input and stores it in the int16 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
@@ -90,6 +143,52 @@ func (dec *Decoder) decodeInt16(v *int16) error {
 				return err
 			}
 			*v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+func (dec *Decoder) decodeInt16Null(v **int16) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getInt16()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int16)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getInt16Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int16)
+			}
+			**v = -val
 			return nil
 		case 'n':
 			dec.cursor++
@@ -298,6 +397,52 @@ func (dec *Decoder) decodeInt8(v *int8) error {
 	}
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
+func (dec *Decoder) decodeInt8Null(v **int8) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getInt8()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int8)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getInt8Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int8)
+			}
+			**v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
 
 func (dec *Decoder) getInt8Negative() (int8, error) {
 	// look for following numbers
@@ -464,6 +609,51 @@ func (dec *Decoder) decodeInt32(v *int32) error {
 				return err
 			}
 			*v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+func (dec *Decoder) decodeInt32Null(v **int32) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getInt32()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int32)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getInt32Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int32)
+			}
+			**v = -val
 			return nil
 		case 'n':
 			dec.cursor++
@@ -652,6 +842,51 @@ func (dec *Decoder) decodeInt64(v *int64) error {
 				return err
 			}
 			*v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+func (dec *Decoder) decodeInt64Null(v **int64) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getInt64()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int64)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getInt64Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(int64)
+			}
+			**v = -val
 			return nil
 		case 'n':
 			dec.cursor++
