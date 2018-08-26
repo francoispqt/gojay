@@ -208,6 +208,22 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 			},
 		},
 		{
+			v:    new(interface{}),
+			d:    []byte(`[{"test":"test"},{"test":"test2"}]`),
+			name: "test decode interface",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.Nil(t, err, "err must be nil")
+				// v is a pointer to an interface{}, we need to extract the content
+				vCont := reflect.ValueOf(v).Elem().Interface()
+				vt := vCont.([]interface{})
+				assert.Len(t, vt, 2, "len of vt must be 2")
+				vt1 := vt[0].(map[string]interface{})
+				assert.Equal(t, "test", vt1["test"], "vt1['test'] must be equal to 'test'")
+				vt2 := vt[1].(map[string]interface{})
+				assert.Equal(t, "test2", vt2["test"], "vt2['test'] must be equal to 'test2'")
+			},
+		},
+		{
 			v:    new(uint64),
 			d:    []byte(`-1`),
 			name: "test decode uint64 negative",

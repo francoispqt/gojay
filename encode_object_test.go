@@ -86,7 +86,7 @@ func TestEncoderObjectEncodeAPI(t *testing.T) {
 		err := enc.EncodeObject(&testObject{
 			"漢字", nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil,
 			1, nil, 1, nil, 1.1, nil, 1.1, nil, true, nil,
-			&testObject{}, testSliceInts{},
+			&testObject{}, testSliceInts{}, interface{}("test"),
 		})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
@@ -103,7 +103,7 @@ func TestEncoderObjectMarshalAPI(t *testing.T) {
 		r, err := Marshal(&testObject{
 			"漢字", nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1,
 			nil, 1, nil, 1, nil, 1.1, nil, 1.1, nil, true, nil,
-			&testObject{}, testSliceInts{},
+			&testObject{}, testSliceInts{}, []interface{}{"h", "o", "l", "a"},
 		})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(

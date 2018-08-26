@@ -215,6 +215,12 @@ func Unmarshal(data []byte, v interface{}) error {
 		dec.data = make([]byte, len(data))
 		copy(dec.data, data)
 		_, err = dec.decodeArray(vt)
+	case *interface{}:
+		dec = borrowDecoder(nil, 0)
+		dec.length = len(data)
+		dec.data = make([]byte, len(data))
+		copy(dec.data, data)
+		err = dec.decodeInterface(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
@@ -318,6 +324,8 @@ func (dec *Decoder) Decode(v interface{}) error {
 		_, err = dec.decodeArray(vt)
 	case *EmbeddedJSON:
 		err = dec.decodeEmbeddedJSON(vt)
+	case *interface{}:
+		err = dec.decodeInterface(vt)
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
 	}
@@ -521,6 +529,11 @@ func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
 // AddArray decodes the next key to a UnmarshalerJSONArray.
 func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
 	return dec.Array(v)
+}
+
+// AddInterface decodes the next key to a interface{}.
+func (dec *Decoder) AddInterface(v *interface{}) error {
+	return dec.Interface(v)
 }
 
 // Int decodes the next key to an *int.
@@ -864,6 +877,16 @@ func (dec *Decoder) Array(value UnmarshalerJSONArray) error {
 		return err
 	}
 	dec.cursor = newCursor
+	dec.called |= 1
+	return nil
+}
+
+// Interface decodes the next key to an interface{}.
+func (dec *Decoder) Interface(value *interface{}) error {
+	err := dec.decodeInterface(value)
+	if err != nil {
+		return err
+	}
 	dec.called |= 1
 	return nil
 }
