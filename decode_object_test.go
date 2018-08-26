@@ -1413,6 +1413,10 @@ func TestSkipObject(t *testing.T) {
 			json: `"key":"value\\\\\\\" hello"}`,
 		},
 		{
+			name: "basic-escaped",
+			json: `"key":"value\\\\\\\\"}`,
+		},
+		{
 			name: "basic-err",
 			json: ``,
 			err:  true,
