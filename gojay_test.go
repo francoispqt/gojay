@@ -100,7 +100,7 @@ func (t *testObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 	case "testFloat64":
 		return dec.AddFloat(&t.testFloat64)
 	case "testFloat64Null":
-		return dec.AddFloat64Null(&t.testFloat64Null)
+		return dec.AddFloatNull(&t.testFloat64Null)
 	case "testFloat32":
 		return dec.AddFloat32(&t.testFloat32)
 	case "testFloat32Null":

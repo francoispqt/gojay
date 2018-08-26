@@ -468,6 +468,13 @@ func TestDecoderBoolNull(t *testing.T) {
 			testCase.expectations(t, v.b, err)
 		})
 	}
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(bool)
+		var dec = NewDecoder(strings.NewReader(`folse`))
+		err := dec.BoolNull(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderBoolDecoderAPI(t *testing.T) {

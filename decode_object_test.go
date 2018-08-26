@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -497,7 +496,6 @@ func TestDecodeObjectBasic(t *testing.T) {
 			dec := BorrowDecoder(strings.NewReader(testCase.json))
 			defer dec.Release()
 			err := dec.Decode(&s)
-			spew.Dump(s)
 			if testCase.err {
 				t.Log(err)
 				assert.NotNil(t, err, "err should not be nil")

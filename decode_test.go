@@ -85,6 +85,16 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 			},
 		},
 		{
+			v:    new(*string),
+			d:    []byte(`1`),
+			name: "test decode string null",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				vt := v.(**string)
+				assert.NotNil(t, err, "err must be nil")
+				assert.Nil(t, *vt, "v must be nil")
+			},
+		},
+		{
 
 			v:    new(int),
 			d:    []byte(`1`),
@@ -106,6 +116,14 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 			},
 		},
 		{
+			v:    new(*int),
+			d:    []byte(`""`),
+			name: "test decode int",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must be nil")
+			},
+		},
+		{
 			v:    new(*int8),
 			d:    []byte(`1`),
 			name: "test decode int",
@@ -116,6 +134,14 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 			},
 		},
 		{
+			v:    new(*int8),
+			d:    []byte(`""`),
+			name: "test decode int",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must be nil")
+			},
+		},
+		{
 			v:    new(*int16),
 			d:    []byte(`1`),
 			name: "test decode int",
@@ -123,6 +149,14 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 				vt := v.(**int16)
 				assert.Nil(t, err, "err must be nil")
 				assert.Equal(t, int16(1), **vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(*int16),
+			d:    []byte(`""`),
+			name: "test decode int",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must be nil")
 			},
 		},
 		{
@@ -143,6 +177,14 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 				vt := v.(**int64)
 				assert.Nil(t, err, "err must be nil")
 				assert.Equal(t, int64(1), **vt, "v must be equal to 1")
+			},
+		},
+		{
+			v:    new(*int64),
+			d:    []byte(`""`),
+			name: "test decode int64",
+			expectations: func(err error, v interface{}, t *testing.T) {
+				assert.NotNil(t, err, "err must be nil")
 			},
 		},
 		{

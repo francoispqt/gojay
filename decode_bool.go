@@ -9,15 +9,6 @@ func (dec *Decoder) DecodeBool(v *bool) error {
 	}
 	return dec.decodeBool(v)
 }
-
-// DecodeBoolNull is like DecodeBool but it takes a **bool
-// if the JSON is `true` or `false` and the pointer is nil, gojay assigns a new pointer to a bool
-func (dec *Decoder) DecodeBoolNull(v **bool) error {
-	if dec.isPooled == 1 {
-		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
-	}
-	return dec.decodeBoolNull(v)
-}
 func (dec *Decoder) decodeBool(v *bool) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {

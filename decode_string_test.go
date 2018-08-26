@@ -634,6 +634,13 @@ func TestDecoderStringNull(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(string)
+		var dec = NewDecoder(strings.NewReader(`a`))
+		err := dec.StringNull(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 func TestDecoderStringInvalidType(t *testing.T) {
 	json := []byte(`1`)

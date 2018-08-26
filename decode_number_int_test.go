@@ -578,6 +578,19 @@ func TestDecoderIntNull(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(int)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(int)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.IntNull(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderInt64(t *testing.T) {
@@ -1191,6 +1204,19 @@ func TestDecoderInt64Null(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(int64)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(int64)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.Int64Null(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderInt32(t *testing.T) {
@@ -1864,6 +1890,19 @@ func TestDecoderInt32Null(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(int32)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(int32)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.Int32Null(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderInt16(t *testing.T) {
@@ -2526,6 +2565,19 @@ func TestDecoderInt16Null(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(int16)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(int16)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.Int16Null(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderInt8(t *testing.T) {
@@ -3202,4 +3254,17 @@ func TestDecoderInt8Null(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(int8)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(int8)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.Int8Null(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }

@@ -622,6 +622,26 @@ func TestDecoderFloat64Null(t *testing.T) {
 			}
 		})
 	}
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(float64)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(float64)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.FloatNull(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(float64)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.AddFloat64Null(&v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
+	})
 }
 
 func TestDecoderFloat32(t *testing.T) {
@@ -1240,39 +1260,16 @@ func TestDecoderFloat32Null(t *testing.T) {
 			}
 		})
 	}
-	t.Run("pool-error", func(t *testing.T) {
-		result := float32(1)
-		dec := NewDecoder(nil)
-		dec.Release()
-		defer func() {
-			err := recover()
-			assert.NotNil(t, err, "err shouldnt be nil")
-			assert.IsType(t, InvalidUsagePooledDecoderError(""), err, "err should be of type InvalidUsagePooledDecoderError")
-		}()
-		_ = dec.DecodeFloat32(&result)
-		assert.True(t, false, "should not be called as decoder should have panicked")
+	t.Run("decoder-api-invalid-json", func(t *testing.T) {
+		var v = new(float32)
+		err := Unmarshal([]byte(``), &v)
+		assert.NotNil(t, err, "Err must not be nil")
+		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 	})
-	t.Run("decoder-api", func(t *testing.T) {
-		var v float32
-		dec := NewDecoder(strings.NewReader(`1.25`))
-		defer dec.Release()
-		err := dec.DecodeFloat32(&v)
-		assert.Nil(t, err, "Err must be nil")
-		assert.Equal(t, float32(1.25), v, "v must be equal to 1.25")
-	})
-	t.Run("decoder-api2", func(t *testing.T) {
-		var v float32
-		dec := NewDecoder(strings.NewReader(`1.25`))
-		defer dec.Release()
-		err := dec.Decode(&v)
-		assert.Nil(t, err, "Err must be nil")
-		assert.Equal(t, float32(1.25), v, "v must be equal to 1.25")
-	})
-	t.Run("decoder-api-json-error", func(t *testing.T) {
-		var v float32
-		dec := NewDecoder(strings.NewReader(``))
-		defer dec.Release()
-		err := dec.DecodeFloat32(&v)
+	t.Run("decoder-api-invalid-json2", func(t *testing.T) {
+		var v = new(float32)
+		var dec = NewDecoder(strings.NewReader(``))
+		err := dec.Float32Null(&v)
 		assert.NotNil(t, err, "Err must not be nil")
 		assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
 	})
