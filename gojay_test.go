@@ -1,21 +1,34 @@
 package gojay
 
 type testObject struct {
-	testStr       string
-	testInt       int
-	testInt64     int64
-	testInt32     int32
-	testInt16     int16
-	testInt8      int8
-	testUint64    uint64
-	testUint32    uint32
-	testUint16    uint16
-	testUint8     uint8
-	testFloat64   float64
-	testFloat32   float32
-	testBool      bool
-	testSubObject *testObject
-	testSubArray  testSliceInts
+	testStr         string
+	testStrNull     *string
+	testInt         int
+	testIntNull     *int
+	testInt64       int64
+	testInt64Null   *int64
+	testInt32       int32
+	testInt32Null   *int32
+	testInt16       int16
+	testInt16Null   *int16
+	testInt8        int8
+	testInt8Null    *int8
+	testUint64      uint64
+	testUint64Null  *uint64
+	testUint32      uint32
+	testUint32Null  *uint32
+	testUint16      uint16
+	testUint16Null  *uint16
+	testUint8       uint8
+	testUint8Null   *uint8
+	testFloat64     float64
+	testFloat64Null *float64
+	testFloat32     float32
+	testFloat32Null *float32
+	testBool        bool
+	testBoolNull    *bool
+	testSubObject   *testObject
+	testSubArray    testSliceInts
 }
 
 // make sure it implements interfaces
@@ -46,36 +59,62 @@ func (t *testObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 	switch k {
 	case "testStr":
 		return dec.AddString(&t.testStr)
+	case "testStrNull":
+		return dec.AddStringNull(&t.testStrNull)
 	case "testInt":
 		return dec.AddInt(&t.testInt)
+	case "testIntNull":
+		return dec.AddIntNull(&t.testIntNull)
 	case "testInt64":
 		return dec.AddInt64(&t.testInt64)
+	case "testInt64Null":
+		return dec.AddInt64Null(&t.testInt64Null)
 	case "testInt32":
 		return dec.AddInt32(&t.testInt32)
+	case "testInt32Null":
+		return dec.AddInt32Null(&t.testInt32Null)
 	case "testInt16":
 		return dec.AddInt16(&t.testInt16)
+	case "testInt16Null":
+		return dec.AddInt16Null(&t.testInt16Null)
 	case "testInt8":
 		return dec.AddInt8(&t.testInt8)
+	case "testInt8Null":
+		return dec.AddInt8Null(&t.testInt8Null)
 	case "testUint64":
 		return dec.AddUint64(&t.testUint64)
+	case "testUint64Null":
+		return dec.AddUint64Null(&t.testUint64Null)
 	case "testUint32":
 		return dec.AddUint32(&t.testUint32)
+	case "testUint32Null":
+		return dec.AddUint32Null(&t.testUint32Null)
 	case "testUint16":
 		return dec.AddUint16(&t.testUint16)
+	case "testUint16Null":
+		return dec.AddUint16Null(&t.testUint16Null)
 	case "testUint8":
 		return dec.AddUint8(&t.testUint8)
+	case "testUint8Null":
+		return dec.AddUint8Null(&t.testUint8Null)
 	case "testFloat64":
 		return dec.AddFloat(&t.testFloat64)
+	case "testFloat64Null":
+		return dec.AddFloat64Null(&t.testFloat64Null)
 	case "testFloat32":
 		return dec.AddFloat32(&t.testFloat32)
+	case "testFloat32Null":
+		return dec.AddFloat32Null(&t.testFloat32Null)
 	case "testBool":
 		return dec.AddBool(&t.testBool)
+	case "testBoolNull":
+		return dec.AddBoolNull(&t.testBoolNull)
 	}
 	return nil
 }
 
 func (t *testObject) NKeys() int {
-	return 13
+	return 28
 }
 
 type testObject0Keys struct {

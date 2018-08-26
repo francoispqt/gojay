@@ -3,11 +3,19 @@ package gojay
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
+
+func makePointer(v interface{}) interface{} {
+	var ptr = reflect.New(reflect.TypeOf(v))
+	ptr.Elem().Set(reflect.ValueOf(v))
+	return ptr.Interface()
+}
 
 func TestDecodeObjectBasic(t *testing.T) {
 	testCases := []struct {
@@ -22,33 +30,62 @@ func TestDecodeObjectBasic(t *testing.T) {
 			name: "basic",
 			json: `{
 						"testStr": "hello world!",
+						"testStrNull":  "hello world!",
 						"testInt": 4535,
+						"testIntNull": 4535,
 						"testBool": true,
+						"testBoolNull": true,
 						"testFloat32": 2.345,
+						"testFloat32Null": 2.345,
 						"testFloat64": 123.677,
+						"testFloat64Null": 123.677,
 						"testInt8": 23,
+						"testInt8Null": 23,
 						"testInt16": 1245,
+						"testInt16Null": 1245,
 						"testInt32": 456778,
+						"testInt32Null": 456778,
 						"testInt64": 1446685358,
+						"testInt64Null": 1446685358,
 						"testUint8": 255,
+						"testUint8Null": 255,
 						"testUint16": 3455,
+						"testUint16Null": 3455,
 						"testUint32": 343443,
-						"testUint64": 545665757
+						"testUint32Null": 343443,
+						"testUint64": 545665757,
+						"testUint64Null": 545665757,
+						"testSubObjectNull": {
+							"testStr": "1"
+						}
 					}`,
 			expectedResult: testObject{
-				testStr:     "hello world!",
-				testInt:     4535,
-				testBool:    true,
-				testFloat32: 2.345,
-				testFloat64: 123.677,
-				testInt8:    23,
-				testInt16:   1245,
-				testInt32:   456778,
-				testInt64:   1446685358,
-				testUint8:   255,
-				testUint16:  3455,
-				testUint32:  343443,
-				testUint64:  545665757,
+				testStr:         "hello world!",
+				testStrNull:     makePointer("hello world!").(*string),
+				testInt:         4535,
+				testIntNull:     makePointer(4535).(*int),
+				testBool:        true,
+				testBoolNull:    makePointer(true).(*bool),
+				testFloat32:     2.345,
+				testFloat32Null: makePointer(float32(2.345)).(*float32),
+				testFloat64:     123.677,
+				testFloat64Null: makePointer(float64(123.677)).(*float64),
+				testInt8:        23,
+				testInt8Null:    makePointer(int8(23)).(*int8),
+				testInt16:       1245,
+				testInt16Null:   makePointer(int16(1245)).(*int16),
+				testInt32:       456778,
+				testInt32Null:   makePointer(int32(456778)).(*int32),
+				testInt64:       1446685358,
+				testInt64Null:   makePointer(int64(1446685358)).(*int64),
+				testUint8:       255,
+				testUint8Null:   makePointer(uint8(255)).(*uint8),
+				testUint16:      3455,
+				testUint16Null:  makePointer(uint16(3455)).(*uint16),
+				testUint32:      343443,
+				testUint32Null:  makePointer(uint32(343443)).(*uint32),
+				testUint64:      545665757,
+				testUint64Null:  makePointer(uint64(545665757)).(*uint64),
 			},
 			err: false,
 		},
@@ -460,6 +497,7 @@ func TestDecodeObjectBasic(t *testing.T) {
 			dec := BorrowDecoder(strings.NewReader(testCase.json))
 			defer dec.Release()
 			err := dec.Decode(&s)
+			spew.Dump(s)
 			if testCase.err {
 				t.Log(err)
 				assert.NotNil(t, err, "err should not be nil")
