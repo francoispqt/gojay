@@ -870,6 +870,42 @@ func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
 	return nil
 }
 
+// ObjectNull decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) ObjectNullFactory(factory func() UnmarshalerJSONObject) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObjectNull(factory)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}
+
+// ObjectNull decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) ObjectNullReflect(v interface{}) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObjectNullReflect(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}
+
 // Array decodes the next key to a UnmarshalerJSONArray.
 func (dec *Decoder) Array(value UnmarshalerJSONArray) error {
 	newCursor, err := dec.decodeArray(value)
@@ -890,6 +926,17 @@ func (dec *Decoder) Interface(value *interface{}) error {
 	dec.called |= 1
 	return nil
 }
+
+// Array decodes the next key to a UnmarshalerJSONArray.
+// func (dec *Decoder) ArrayNull(factory func() UnmarshalerJSONArray) error {
+// 	newCursor, err := dec.decodeArrayNull(factory)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	dec.cursor = newCursor
+// 	dec.called |= 1
+// 	return nil
+// }
 
 // Non exported
 

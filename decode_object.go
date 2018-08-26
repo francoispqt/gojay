@@ -1,8 +1,13 @@
 package gojay
 
 import (
+	"reflect"
 	"unsafe"
 )
+
+type IsNiler interface {
+	IsNil() bool
+}
 
 // DecodeObject reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
 //
@@ -90,6 +95,178 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 		default:
 			// can't unmarshal to struct
 			dec.err = dec.makeInvalidUnmarshalErr(j)
+			err := dec.skipData()
+			if err != nil {
+				return 0, err
+			}
+			return dec.cursor, nil
+		}
+	}
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
+}
+func (dec *Decoder) decodeObjectNull(factory func() UnmarshalerJSONObject) (int, error) {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch dec.data[dec.cursor] {
+		case ' ', '\n', '\t', '\r', ',':
+		case '{':
+			var j = factory()
+			keys := j.NKeys()
+			dec.cursor = dec.cursor + 1
+			// if keys is zero we will parse all keys
+			// we run two loops for micro optimization
+			if keys == 0 {
+				for dec.cursor < dec.length || dec.read() {
+					k, done, err := dec.nextKey()
+					if err != nil {
+						return 0, err
+					} else if done {
+						return dec.cursor, nil
+					}
+					err = j.UnmarshalJSONObject(dec, k)
+					if err != nil {
+						dec.err = err
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
+				}
+			} else {
+				for (dec.cursor < dec.length || dec.read()) && dec.keysDone < keys {
+					k, done, err := dec.nextKey()
+					if err != nil {
+						return 0, err
+					} else if done {
+						return dec.cursor, nil
+					}
+					err = j.UnmarshalJSONObject(dec, k)
+					if err != nil {
+						dec.err = err
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
+				}
+			}
+			// will get to that point when keysDone is not lower than keys anymore
+			// in that case, we make sure cursor goes to the end of object, but we skip
+			// unmarshalling
+			if dec.child&1 != 0 {
+				end, err := dec.skipObject()
+				dec.cursor = end
+				return dec.cursor, err
+			}
+			return dec.cursor, nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return 0, err
+			}
+			dec.cursor++
+			return dec.cursor, nil
+		default:
+			// can't unmarshal to struct
+			dec.err = dec.makeInvalidUnmarshalErr((UnmarshalerJSONObject)(nil))
+			err := dec.skipData()
+			if err != nil {
+				return 0, err
+			}
+			return dec.cursor, nil
+		}
+	}
+	return 0, dec.raiseInvalidJSONErr(dec.cursor)
+}
+
+func (dec *Decoder) decodeObjectNullReflect(v interface{}) (int, error) {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch dec.data[dec.cursor] {
+		case ' ', '\n', '\t', '\r', ',':
+		case '{':
+			var vv = reflect.ValueOf(v).Elem()
+			var n = reflect.New(vv.Type().Elem())
+			vv.Set(n)
+			var j = n.Interface().(UnmarshalerJSONObject)
+			keys := j.NKeys()
+			dec.cursor = dec.cursor + 1
+			// if keys is zero we will parse all keys
+			// we run two loops for micro optimization
+			if keys == 0 {
+				for dec.cursor < dec.length || dec.read() {
+					k, done, err := dec.nextKey()
+					if err != nil {
+						return 0, err
+					} else if done {
+						return dec.cursor, nil
+					}
+					err = j.UnmarshalJSONObject(dec, k)
+					if err != nil {
+						dec.err = err
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
+				}
+			} else {
+				for (dec.cursor < dec.length || dec.read()) && dec.keysDone < keys {
+					k, done, err := dec.nextKey()
+					if err != nil {
+						return 0, err
+					} else if done {
+						return dec.cursor, nil
+					}
+					err = j.UnmarshalJSONObject(dec, k)
+					if err != nil {
+						dec.err = err
+						return 0, err
+					} else if dec.called&1 == 0 {
+						err := dec.skipData()
+						if err != nil {
+							return 0, err
+						}
+					} else {
+						dec.keysDone++
+					}
+					dec.called &= 0
+				}
+			}
+			// will get to that point when keysDone is not lower than keys anymore
+			// in that case, we make sure cursor goes to the end of object, but we skip
+			// unmarshalling
+			if dec.child&1 != 0 {
+				end, err := dec.skipObject()
+				dec.cursor = end
+				return dec.cursor, err
+			}
+			return dec.cursor, nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return 0, err
+			}
+			dec.cursor++
+			return dec.cursor, nil
+		default:
+			// can't unmarshal to struct
+			dec.err = dec.makeInvalidUnmarshalErr((UnmarshalerJSONObject)(nil))
 			err := dec.skipData()
 			if err != nil {
 				return 0, err

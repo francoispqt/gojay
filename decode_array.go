@@ -62,6 +62,56 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
+// func (dec *Decoder) decodeArrayNull(factory func() UnmarshalerJSONArray) (int, error) {
+// 	// not an array not an error, but do not know what to do
+// 	// do not check syntax
+// 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+// 		switch dec.data[dec.cursor] {
+// 		case ' ', '\n', '\t', '\r', ',':
+// 			continue
+// 		case '[':
+// 			n := 0
+// 			dec.cursor = dec.cursor + 1
+// 			// array is open, char is not space start readings
+// 			for dec.nextChar() != 0 {
+// 				// closing array
+// 				if dec.data[dec.cursor] == ']' {
+// 					dec.cursor = dec.cursor + 1
+// 					return dec.cursor, nil
+// 				}
+// 				// calling unmarshall function for each element of the slice
+// 				err := arr.UnmarshalJSONArray(dec)
+// 				if err != nil {
+// 					return 0, err
+// 				}
+// 				n++
+// 			}
+// 			return 0, dec.raiseInvalidJSONErr(dec.cursor)
+// 		case 'n':
+// 			// is null
+// 			dec.cursor++
+// 			err := dec.assertNull()
+// 			if err != nil {
+// 				return 0, err
+// 			}
+// 			dec.cursor++
+// 			return dec.cursor, nil
+// 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+// 			// can't unmarshall to struct
+// 			// we skip array and set Error
+// 			dec.err = dec.makeInvalidUnmarshalErr(arr)
+// 			err := dec.skipData()
+// 			if err != nil {
+// 				return 0, err
+// 			}
+// 			return dec.cursor, nil
+// 		default:
+// 			return 0, dec.raiseInvalidJSONErr(dec.cursor)
+// 		}
+// 	}
+// 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
+// }
+
 func (dec *Decoder) skipArray() (int, error) {
 	var arraysOpen = 1
 	var arraysClosed = 0
