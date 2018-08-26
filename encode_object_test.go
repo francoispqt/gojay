@@ -83,7 +83,11 @@ func TestEncoderObjectEncodeAPI(t *testing.T) {
 	t.Run("encode-basic", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		err := enc.EncodeObject(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true, &testObject{}, testSliceInts{}})
+		err := enc.EncodeObject(&testObject{
+			"漢字", nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil,
+			1, nil, 1, nil, 1.1, nil, 1.1, nil, true, nil,
+			&testObject{}, testSliceInts{},
+		})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
@@ -96,7 +100,11 @@ func TestEncoderObjectEncodeAPI(t *testing.T) {
 
 func TestEncoderObjectMarshalAPI(t *testing.T) {
 	t.Run("marshal-basic", func(t *testing.T) {
-		r, err := Marshal(&testObject{"漢字", 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1, 1.1, true, &testObject{}, testSliceInts{}})
+		r, err := Marshal(&testObject{
+			"漢字", nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1, nil, 1,
+			nil, 1, nil, 1, nil, 1.1, nil, 1.1, nil, true, nil,
+			&testObject{}, testSliceInts{},
+		})
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,

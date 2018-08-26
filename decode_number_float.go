@@ -48,6 +48,51 @@ func (dec *Decoder) decodeFloat64(v *float64) error {
 	}
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
+func (dec *Decoder) decodeFloat64Null(v **float64) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getFloat()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(float64)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getFloatNegative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(float64)
+			}
+			**v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
 
 func (dec *Decoder) getFloatNegative() (float64, error) {
 	// look for following numbers
@@ -178,6 +223,51 @@ func (dec *Decoder) decodeFloat32(v *float32) error {
 				return err
 			}
 			*v = -val
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			dec.cursor++
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+func (dec *Decoder) decodeFloat32Null(v **float32) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getFloat32()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(float32)
+			}
+			**v = val
+			return nil
+		case '-':
+			dec.cursor = dec.cursor + 1
+			val, err := dec.getFloat32Negative()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(float32)
+			}
+			**v = -val
 			return nil
 		case 'n':
 			dec.cursor++
