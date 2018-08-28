@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -81,3 +82,7 @@ type InvalidUsagePooledEncoderError string
 func (err InvalidUsagePooledEncoderError) Error() string {
 	return string(err)
 }
+
+// ErrUnmarshalPtrExpected is the error returned when unmarshal expects a pointer value,
+// When using `dec.ObjectNull` or `dec.ArrayNull` for example.
+var ErrUnmarshalPtrExpected = errors.New("Cannot unmarshal to given value, a pointer is expected")

@@ -887,6 +887,37 @@ func TestDecodeObjectBasic0Keys(t *testing.T) {
 	}
 }
 
+type ObjectNull struct {
+	SubObject *ObjectNull
+}
+
+func (o *ObjectNull) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "subobject":
+		return dec.ObjectNull(&o.SubObject)
+	}
+	return nil
+}
+
+func (o *ObjectNull) NKeys() int {
+	return 1
+}
+
+func TestDecodeObjectNullPtr(t *testing.T) {
+	t.Run("sub obj should not be nil", func(t *testing.T) {
+		var o = &ObjectNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subobject": {}}`), o)
+		assert.Nil(t, err)
+		assert.NotNil(t, o.SubObject)
+	})
+	t.Run("sub obj should be nil", func(t *testing.T) {
+		var o = &ObjectNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subobject": null`), o)
+		assert.Nil(t, err)
+		assert.Nil(t, o.SubObject)
+	})
+}
+
 func TestDecodeObjectComplex(t *testing.T) {
 	testCases := []struct {
 		name            string
