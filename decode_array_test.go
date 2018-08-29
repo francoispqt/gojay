@@ -371,6 +371,49 @@ func TestSliceObjects(t *testing.T) {
 	}
 }
 
+type ArrayNull []string
+
+func (a *ArrayNull) UnmarshalJSONArray(dec *Decoder) error {
+	var str string
+	if err := dec.String(&str); err != nil {
+		return err
+	}
+	*a = append(*a, str)
+	return nil
+}
+
+type ObjectArrayNull struct {
+	SubArray *ArrayNull
+}
+
+func (o *ObjectArrayNull) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "subarray":
+		return dec.ArrayNull(&o.SubArray)
+	}
+	return nil
+}
+
+func (o *ObjectArrayNull) NKeys() int {
+	return 1
+}
+
+func TestDecodeArrayNullPtr(t *testing.T) {
+	t.Run("sub obj should not be nil", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray": ["test"]}`), o)
+		assert.Nil(t, err)
+		assert.NotNil(t, o.SubArray)
+		assert.Len(t, *o.SubArray, 1)
+	})
+	t.Run("sub array should be nil", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray": null}`), o)
+		assert.Nil(t, err)
+		assert.Nil(t, o.SubArray)
+	})
+}
+
 type testChannelArray chan *TestObj
 
 func (c *testChannelArray) UnmarshalJSONArray(dec *Decoder) error {
