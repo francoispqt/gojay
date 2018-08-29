@@ -38,6 +38,8 @@ func BorrowEncoder(w io.Writer) *Encoder {
 	enc.buf = enc.buf[:0]
 	enc.isPooled = 0
 	enc.err = nil
+	enc.hasKeys = false
+	enc.keys = nil
 	return enc
 }
 

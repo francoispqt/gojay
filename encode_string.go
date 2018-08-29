@@ -117,6 +117,11 @@ func (enc *Encoder) StringNullEmpty(v string) {
 
 // StringKey adds a string to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) StringKey(key, v string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(len(key) + len(v) + 5)
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -133,6 +138,11 @@ func (enc *Encoder) StringKey(key, v string) {
 // StringKeyOmitEmpty adds a string to be encoded or skips it if it is zero value.
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) StringKeyOmitEmpty(key, v string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == "" {
 		return
 	}
@@ -152,6 +162,11 @@ func (enc *Encoder) StringKeyOmitEmpty(key, v string) {
 // StringKeyNullEmpty adds a string to be encoded or skips it if it is zero value.
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) StringKeyNullEmpty(key, v string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(len(key) + len(v) + 5)
 	r := enc.getPreviousRune()
 	if r != '{' {

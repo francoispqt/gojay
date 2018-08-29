@@ -23,11 +23,35 @@ func (enc *Encoder) EncodeObject(v MarshalerJSONObject) error {
 	return nil
 }
 
+// EncodeObjectKeys encodes an object to JSON
+func (enc *Encoder) EncodeObjectKeys(v MarshalerJSONObject, keys []string) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	enc.hasKeys = true
+	enc.keys = keys
+	_, err := enc.encodeObject(v)
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	_, err = enc.Write()
+	if err != nil {
+		enc.err = err
+		return err
+	}
+	return nil
+}
+
 func (enc *Encoder) encodeObject(v MarshalerJSONObject) ([]byte, error) {
 	enc.grow(500)
 	enc.writeByte('{')
 	if !v.IsNil() {
 		v.MarshalJSONObject(enc)
+	}
+	if enc.hasKeys {
+		enc.hasKeys = false
+		enc.keys = nil
 	}
 	enc.writeByte('}')
 	return enc.buf, enc.err
@@ -134,6 +158,11 @@ func (enc *Encoder) ObjectNullEmpty(v MarshalerJSONObject) {
 // ObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerJSONObject
 func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if value.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
@@ -162,6 +191,11 @@ func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
 func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if value.IsNil() {
 		return
 	}
@@ -181,6 +215,11 @@ func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
 func (enc *Encoder) ObjectKeyNullEmpty(key string, value MarshalerJSONObject) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -215,4 +254,16 @@ func (f EncodeObjectFunc) MarshalJSONObject(enc *Encoder) {
 // IsNil implements MarshalerJSONObject.
 func (f EncodeObjectFunc) IsNil() bool {
 	return f == nil
+}
+
+func (enc *Encoder) keyExists(k string) bool {
+	if enc.keys == nil {
+		return false
+	}
+	for _, key := range enc.keys {
+		if key == k {
+			return true
+		}
+	}
+	return false
 }

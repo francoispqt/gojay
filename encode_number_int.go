@@ -115,6 +115,11 @@ func (enc *Encoder) AddIntKeyNullEmpty(key string, v int) {
 
 // IntKey adds an int to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) IntKey(key string, v int) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -129,6 +134,11 @@ func (enc *Encoder) IntKey(key string, v int) {
 // IntKeyOmitEmpty adds an int to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) IntKeyOmitEmpty(key string, v int) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == 0 {
 		return
 	}
@@ -146,6 +156,11 @@ func (enc *Encoder) IntKeyOmitEmpty(key string, v int) {
 // IntKeyNullEmpty adds an int to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) IntKeyNullEmpty(key string, v int) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' && r != '[' {
@@ -236,6 +251,11 @@ func (enc *Encoder) AddInt64KeyNullEmpty(key string, v int64) {
 
 // Int64Key adds an int64 to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) Int64Key(key string, v int64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -267,6 +287,11 @@ func (enc *Encoder) Int64KeyOmitEmpty(key string, v int64) {
 // Int64KeyNullEmpty adds an int64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) Int64KeyNullEmpty(key string, v int64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {

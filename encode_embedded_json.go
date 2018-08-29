@@ -52,6 +52,11 @@ func (enc *Encoder) AddEmbeddedJSONOmitEmpty(v *EmbeddedJSON) {
 // It basically blindly writes the bytes to the final buffer. Therefore,
 // it expects the JSON to be of proper format.
 func (enc *Encoder) AddEmbeddedJSONKey(key string, v *EmbeddedJSON) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(len(key) + len(*v) + 5)
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -68,6 +73,11 @@ func (enc *Encoder) AddEmbeddedJSONKey(key string, v *EmbeddedJSON) {
 // It basically blindly writes the bytes to the final buffer. Therefore,
 // it expects the JSON to be of proper format.
 func (enc *Encoder) AddEmbeddedJSONKeyOmitEmpty(key string, v *EmbeddedJSON) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == nil || len(*v) == 0 {
 		return
 	}

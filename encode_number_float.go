@@ -170,6 +170,11 @@ func (enc *Encoder) AddFloat64KeyOmitEmpty(key string, v float64) {
 
 // Float64Key adds a float64 to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) Float64Key(key string, value float64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	r := enc.getPreviousRune()
 	if r != '{' {
 		enc.writeByte(',')
@@ -184,6 +189,11 @@ func (enc *Encoder) Float64Key(key string, value float64) {
 // Float64KeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) Float64KeyOmitEmpty(key string, v float64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == 0 {
 		return
 	}
@@ -201,6 +211,11 @@ func (enc *Encoder) Float64KeyOmitEmpty(key string, v float64) {
 // Float64KeyNullEmpty adds a float64 to be encoded and skips it if its value is 0,
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) Float64KeyNullEmpty(key string, v float64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -290,6 +305,11 @@ func (enc *Encoder) AddFloat32KeyNullEmpty(key string, v float32) {
 
 // Float32Key adds a float32 to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) Float32Key(key string, v float32) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -305,6 +325,11 @@ func (enc *Encoder) Float32Key(key string, v float32) {
 // Float32KeyOmitEmpty adds a float64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) Float32KeyOmitEmpty(key string, v float32) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == 0 {
 		return
 	}
@@ -322,6 +347,11 @@ func (enc *Encoder) Float32KeyOmitEmpty(key string, v float32) {
 // Float32KeyNullEmpty adds a float64 to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key
 func (enc *Encoder) Float32KeyNullEmpty(key string, v float32) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {

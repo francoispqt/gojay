@@ -205,6 +205,8 @@ type Encoder struct {
 	isPooled byte
 	w        io.Writer
 	err      error
+	hasKeys  bool
+	keys     []string
 }
 
 // AppendBytes allows a modular usage by appending bytes manually to the current state of the buffer.
