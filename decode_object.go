@@ -369,7 +369,3 @@ func (f DecodeObjectFunc) UnmarshalJSONObject(dec *Decoder, k string) error {
 func (f DecodeObjectFunc) NKeys() int {
 	return 0
 }
-
-func makeUnmarshalerJSONObject(v *interface{}) UnmarshalerJSONObject {
-	return nil
-}
