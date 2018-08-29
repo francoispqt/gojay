@@ -120,6 +120,35 @@ func (enc *Encoder) Object(v MarshalerJSONObject) {
 	enc.writeByte('}')
 }
 
+// ObjectWithKeys adds an object to be encoded, must be used inside a slice or array encoding (does not encode a key)
+// value must implement MarshalerJSONObject. It will only encode the keys in keys.
+func (enc *Encoder) ObjectWithKeys(v MarshalerJSONObject, keys []string) {
+	if v.IsNil() {
+		enc.grow(2)
+		r := enc.getPreviousRune()
+		if r != '{' && r != '[' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('{')
+		enc.writeByte('}')
+		return
+	}
+	enc.grow(4)
+	r := enc.getPreviousRune()
+	if r != '[' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('{')
+	var origKeys = enc.keys
+	var origHasKeys = enc.hasKeys
+	enc.hasKeys = true
+	enc.keys = keys
+	v.MarshalJSONObject(enc)
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+	enc.writeByte('}')
+}
+
 // ObjectOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
@@ -184,6 +213,44 @@ func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
 	value.MarshalJSONObject(enc)
+	enc.writeByte('}')
+}
+
+// ObjectKeyWithKeys adds a struct to be encoded, must be used inside an object as it will encode a key.
+// Value must implement MarshalerJSONObject. It will only encode the keys in keys.
+func (enc *Encoder) ObjectKeyWithKeys(key string, value MarshalerJSONObject, keys []string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
+	if value.IsNil() {
+		enc.grow(2 + len(key))
+		r := enc.getPreviousRune()
+		if r != '{' {
+			enc.writeByte(',')
+		}
+		enc.writeByte('"')
+		enc.writeStringEscape(key)
+		enc.writeBytes(objKeyObj)
+		enc.writeByte('}')
+		return
+	}
+	enc.grow(5 + len(key))
+	r := enc.getPreviousRune()
+	if r != '{' {
+		enc.writeByte(',')
+	}
+	enc.writeByte('"')
+	enc.writeStringEscape(key)
+	enc.writeBytes(objKeyObj)
+	var origKeys = enc.keys
+	var origHasKeys = enc.hasKeys
+	enc.hasKeys = true
+	enc.keys = keys
+	value.MarshalJSONObject(enc)
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
 	enc.writeByte('}')
 }
 

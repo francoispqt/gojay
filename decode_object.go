@@ -5,10 +5,6 @@ import (
 	"unsafe"
 )
 
-type IsNiler interface {
-	IsNil() bool
-}
-
 // DecodeObject reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
 //
 // v must implement UnmarshalerJSONObject.
