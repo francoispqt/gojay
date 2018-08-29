@@ -116,6 +116,11 @@ func (enc *Encoder) ArrayNullEmpty(v MarshalerJSONArray) {
 // ArrayKey adds an array or slice to be encoded, must be used inside an object as it will encode a key
 // value must implement Marshaler
 func (enc *Encoder) ArrayKey(key string, v MarshalerJSONArray) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
@@ -143,6 +148,11 @@ func (enc *Encoder) ArrayKey(key string, v MarshalerJSONArray) {
 // ArrayKeyOmitEmpty adds an array or slice to be encoded and skips if it is nil.
 // Must be called inside an object as it will encode a key.
 func (enc *Encoder) ArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v.IsNil() {
 		return
 	}
@@ -161,6 +171,11 @@ func (enc *Encoder) ArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
 // ArrayKeyNullEmpty adds an array or slice to be encoded and encodes `null`` if it is nil.
 // Must be called inside an object as it will encode a key.
 func (enc *Encoder) ArrayKeyNullEmpty(key string, v MarshalerJSONArray) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {

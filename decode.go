@@ -526,9 +526,19 @@ func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
 	return dec.Object(v)
 }
 
+// AddObjectNull decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObjectNull(v interface{}) error {
+	return dec.ObjectNull(v)
+}
+
 // AddArray decodes the next key to a UnmarshalerJSONArray.
 func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
 	return dec.Array(v)
+}
+
+// AddArray decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) AddArrayNull(v UnmarshalerJSONArray) error {
+	return dec.ArrayNull(v)
 }
 
 // AddInterface decodes the next key to a interface{}.
@@ -870,9 +880,44 @@ func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
 	return nil
 }
 
+// ObjectNull decodes the next key to a UnmarshalerJSONObject.
+// v should be a pointer to an UnmarshalerJSONObject,
+// if `null` value is encountered in JSON, it will leave the value v untouched,
+// else it will create a new instance of the UnmarshalerJSONObject behind v.
+func (dec *Decoder) ObjectNull(v interface{}) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObjectNull(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}
+
 // Array decodes the next key to a UnmarshalerJSONArray.
-func (dec *Decoder) Array(value UnmarshalerJSONArray) error {
-	newCursor, err := dec.decodeArray(value)
+func (dec *Decoder) Array(v UnmarshalerJSONArray) error {
+	newCursor, err := dec.decodeArray(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.called |= 1
+	return nil
+}
+
+// ArrayNull decodes the next key to a UnmarshalerJSONArray.
+// v should be a pointer to an UnmarshalerJSONArray,
+// if `null` value is encountered in JSON, it will leave the value v untouched,
+// else it will create a new instance of the UnmarshalerJSONArray behind v.
+func (dec *Decoder) ArrayNull(v interface{}) error {
+	newCursor, err := dec.decodeArrayNull(v)
 	if err != nil {
 		return err
 	}
@@ -890,6 +935,17 @@ func (dec *Decoder) Interface(value *interface{}) error {
 	dec.called |= 1
 	return nil
 }
+
+// Array decodes the next key to a UnmarshalerJSONArray.
+// func (dec *Decoder) ArrayNull(factory func() UnmarshalerJSONArray) error {
+// 	newCursor, err := dec.decodeArrayNull(factory)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	dec.cursor = newCursor
+// 	dec.called |= 1
+// 	return nil
+// }
 
 // Non exported
 

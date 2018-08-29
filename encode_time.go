@@ -32,6 +32,11 @@ func (enc *Encoder) AddTimeKey(key string, t *time.Time, format string) {
 
 // TimeKey adds an *time.Time to be encoded with the given format, must be used inside an object as it will encode a key
 func (enc *Encoder) TimeKey(key string, t *time.Time, format string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {

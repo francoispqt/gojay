@@ -3,6 +3,7 @@ package gojay
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -486,4 +487,246 @@ func TestEncoderObjectNullEmpty(t *testing.T) {
 			assert.Equal(t, testCase.expectedJSON, b.String())
 		})
 	}
+}
+
+type ObjectWithKeys struct {
+	Str          string
+	Int          int
+	Int64        int64
+	Int32        int32
+	Int16        int16
+	Int8         int8
+	Uint64       uint64
+	Uint32       uint32
+	Uint16       uint16
+	Uint8        uint8
+	Float64      float64
+	Float32      float32
+	Bool         bool
+	Obj          *ObjectWithKeys
+	Slice        TestEncodingArrStrings
+	Time         *time.Time
+	EmbeddedJSON *EmbeddedJSON
+}
+
+func (o *ObjectWithKeys) MarshalJSONObject(enc *Encoder) {
+	enc.StringKey("string", o.Str)
+	enc.StringKeyOmitEmpty("string", o.Str)
+	enc.StringKeyNullEmpty("string", o.Str)
+	enc.IntKey("int", o.Int)
+	enc.IntKeyOmitEmpty("int", o.Int)
+	enc.IntKeyNullEmpty("int", o.Int)
+	enc.Int64Key("int64", o.Int64)
+	enc.Int64KeyOmitEmpty("int64", o.Int64)
+	enc.Int64KeyNullEmpty("int64", o.Int64)
+	enc.Int32Key("int32", o.Int32)
+	enc.Int32KeyOmitEmpty("int32", o.Int32)
+	enc.Int32KeyNullEmpty("int32", o.Int32)
+	enc.Int16Key("int16", o.Int16)
+	enc.Int16KeyOmitEmpty("int16", o.Int16)
+	enc.Int16KeyNullEmpty("int16", o.Int16)
+	enc.Int8Key("int8", o.Int8)
+	enc.Int8KeyOmitEmpty("int8", o.Int8)
+	enc.Int8KeyNullEmpty("int8", o.Int8)
+	enc.Uint64KeyOmitEmpty("uint64", o.Uint64)
+	enc.Uint64KeyNullEmpty("uint64", o.Uint64)
+	enc.Uint64Key("uint64", o.Uint64)
+	enc.Uint32Key("uint32", o.Uint32)
+	enc.Uint32KeyOmitEmpty("uint32", o.Uint32)
+	enc.Uint32KeyNullEmpty("uint32", o.Uint32)
+	enc.Uint16KeyOmitEmpty("uint16", o.Uint16)
+	enc.Uint16KeyNullEmpty("uint16", o.Uint16)
+	enc.Uint16Key("uint16", o.Uint16)
+	enc.Uint8Key("uint8", o.Uint8)
+	enc.Uint8KeyOmitEmpty("uint8", o.Uint8)
+	enc.Uint8KeyNullEmpty("uint8", o.Uint8)
+	enc.Float64Key("float64", o.Float64)
+	enc.Float64KeyOmitEmpty("float64", o.Float64)
+	enc.Float64KeyNullEmpty("float64", o.Float64)
+	enc.Float32Key("float32", o.Float32)
+	enc.Float32KeyOmitEmpty("float32", o.Float32)
+	enc.Float32KeyNullEmpty("float32", o.Float32)
+	enc.BoolKey("bool", o.Bool)
+	enc.BoolKeyOmitEmpty("bool", o.Bool)
+	enc.BoolKeyNullEmpty("bool", o.Bool)
+	enc.ObjectKeyOmitEmpty("object", o.Obj)
+	enc.ObjectKeyNullEmpty("object", o.Obj)
+	enc.ObjectKey("object", o.Obj)
+	enc.ArrayKey("array", o.Slice)
+	enc.ArrayKeyOmitEmpty("array", o.Slice)
+	enc.ArrayKeyNullEmpty("array", o.Slice)
+	enc.TimeKey("time", o.Time, time.RFC3339)
+	enc.AddEmbeddedJSONKey("ejson", o.EmbeddedJSON)
+	enc.AddEmbeddedJSONKeyOmitEmpty("ejson", o.EmbeddedJSON)
+	enc.NullKey("null")
+}
+
+func (o *ObjectWithKeys) IsNil() bool {
+	return o == nil
+}
+
+type NilObject struct{}
+
+func (n *NilObject) MarshalJSONObject(enc *Encoder) {}
+func (n *NilObject) IsNil() bool                    { return true }
+
+func TestEncodeObjectWithKeys(t *testing.T) {
+	t.Run(
+		"should not encode any key",
+		func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			var o = &ObjectWithKeys{}
+			var err = enc.EncodeObjectKeys(o, []string{})
+			assert.Nil(t, err)
+			assert.Equal(t, `{}`, b.String())
+		},
+	)
+	t.Run(
+		"should encode some keys",
+		func(t *testing.T) {
+			var b strings.Builder
+			var enc = NewEncoder(&b)
+			var o = &ObjectWithKeys{Str: "hello", Int: 420}
+			var err = enc.EncodeObjectKeys(o, []string{"string", "int"})
+			assert.Nil(t, err)
+			assert.Equal(
+				t,
+				`{"string":"hello","string":"hello","string":"hello","int":420,"int":420,"int":420}`,
+				b.String(),
+			)
+		},
+	)
+	t.Run("write-error", func(t *testing.T) {
+		w := TestWriterError("")
+		enc := NewEncoder(w)
+		o := &ObjectWithKeys{Str: "hello", Int: 420}
+		err := enc.EncodeObjectKeys(o, []string{"string", "int"})
+		assert.NotNil(t, err, "Error should not be nil")
+		assert.Equal(t, "Test Error", err.Error(), "err.Error() should be 'Test Error'")
+	})
+	t.Run("pool-error", func(t *testing.T) {
+		v := &TestEncoding{}
+		enc := BorrowEncoder(nil)
+		enc.Release()
+		defer func() {
+			err := recover()
+			assert.NotNil(t, err, "err shouldnt be nil")
+			assert.IsType(t, InvalidUsagePooledEncoderError(""), err, "err should be of type InvalidUsagePooledEncoderError")
+			assert.Equal(t, "Invalid usage of pooled encoder", err.(InvalidUsagePooledEncoderError).Error(), "err should be of type InvalidUsagePooledDecoderError")
+		}()
+		_ = enc.EncodeObjectKeys(v, []string{})
+		assert.True(t, false, "should not be called as it should have panicked")
+	})
+	t.Run("interface-key-error", func(t *testing.T) {
+		builder := &strings.Builder{}
+		enc := NewEncoder(builder)
+		err := enc.EncodeObjectKeys(&testObjectWithUnknownType{struct{}{}}, []string{})
+		assert.NotNil(t, err, "Error should not be nil")
+		assert.Equal(t, "Invalid type struct {} provided to Marshal", err.Error(), "err.Error() should be 'Invalid type struct {} provided to Marshal'")
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeObjectKeys(EncodeObjectFunc(func(enc *Encoder) {
+			enc.ObjectKeyWithKeys("test", EncodeObjectFunc(func(enc *Encoder) {
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}), []string{})
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `{}`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeObject(EncodeObjectFunc(func(enc *Encoder) {
+			enc.ObjectKeyWithKeys("test", EncodeObjectFunc(func(enc *Encoder) {
+				enc.keys = nil
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `{"test":{}}`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeObject(EncodeObjectFunc(func(enc *Encoder) {
+			enc.ObjectKeyWithKeys("test", EncodeObjectFunc(func(enc *Encoder) {
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `{"test":{"test":"hello"}}`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeObject(EncodeObjectFunc(func(enc *Encoder) {
+			enc.writeByte(' ')
+			enc.ObjectKeyWithKeys("test", EncodeObjectFunc(func(enc *Encoder) {
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `{ ,"test":{"test":"hello"}}`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeObject(EncodeObjectFunc(func(enc *Encoder) {
+			enc.writeByte(' ')
+			enc.ObjectKeyWithKeys("test", &NilObject{}, []string{})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `{ ,"test":{}}`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeArray(EncodeArrayFunc(func(enc *Encoder) {
+			enc.ObjectWithKeys(EncodeObjectFunc(func(enc *Encoder) {
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `[{"test":"hello"}]`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeArray(EncodeArrayFunc(func(enc *Encoder) {
+			enc.writeByte(' ')
+			enc.ObjectWithKeys(EncodeObjectFunc(func(enc *Encoder) {
+				enc.StringKey("test", "hello")
+				enc.StringKey("test2", "hello")
+			}), []string{"test"})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `[ ,{"test":"hello"}]`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeArray(EncodeArrayFunc(func(enc *Encoder) {
+			enc.ObjectWithKeys(&NilObject{}, []string{})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `[{}]`, b.String())
+	})
+	t.Run("encode-object-with-keys", func(t *testing.T) {
+		b := &strings.Builder{}
+		enc := NewEncoder(b)
+		err := enc.EncodeArray(EncodeArrayFunc(func(enc *Encoder) {
+			enc.writeByte(' ')
+			enc.ObjectWithKeys(&NilObject{}, []string{})
+		}))
+		assert.Nil(t, err, "Error should not be nil")
+		assert.Equal(t, `[ ,{}]`, b.String())
+	})
 }

@@ -102,6 +102,11 @@ func (enc *Encoder) BoolNullEmpty(v bool) {
 
 // BoolKey adds a bool to be encoded, must be used inside an object as it will encode a key.
 func (enc *Encoder) BoolKey(key string, value bool) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -116,6 +121,11 @@ func (enc *Encoder) BoolKey(key string, value bool) {
 // BoolKeyOmitEmpty adds a bool to be encoded and skips it if it is zero value.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) BoolKeyOmitEmpty(key string, v bool) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == false {
 		return
 	}
@@ -133,6 +143,11 @@ func (enc *Encoder) BoolKeyOmitEmpty(key string, v bool) {
 // BoolKeyNullEmpty adds a bool to be encoded and skips it if it is zero value.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) BoolKeyNullEmpty(key string, v bool) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
