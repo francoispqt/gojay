@@ -96,6 +96,11 @@ func (enc *Encoder) AddUint64KeyNullEmpty(key string, v uint64) {
 
 // Uint64Key adds an int to be encoded, must be used inside an object as it will encode a key
 func (enc *Encoder) Uint64Key(key string, v uint64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
@@ -110,6 +115,11 @@ func (enc *Encoder) Uint64Key(key string, v uint64) {
 // Uint64KeyOmitEmpty adds an int to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) Uint64KeyOmitEmpty(key string, v uint64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	if v == 0 {
 		return
 	}
@@ -127,6 +137,11 @@ func (enc *Encoder) Uint64KeyOmitEmpty(key string, v uint64) {
 // Uint64KeyNullEmpty adds an int to be encoded and skips it if its value is 0.
 // Must be used inside an object as it will encode a key.
 func (enc *Encoder) Uint64KeyNullEmpty(key string, v uint64) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(10 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' && r != '[' {

@@ -22,6 +22,11 @@ func (enc *Encoder) AddNullKey(key string) {
 
 // NullKey adds a `null` to be encoded. Must be used while encoding an array.`
 func (enc *Encoder) NullKey(key string) {
+	if enc.hasKeys {
+		if !enc.keyExists(key) {
+			return
+		}
+	}
 	enc.grow(5 + len(key))
 	r := enc.getPreviousRune()
 	if r != '{' {
