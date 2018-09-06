@@ -21,7 +21,6 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = true
-			dec.cursor++
 			return nil
 		case 'f':
 			dec.cursor++
@@ -30,7 +29,6 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = false
-			dec.cursor++
 			return nil
 		case 'n':
 			dec.cursor++
@@ -39,7 +37,6 @@ func (dec *Decoder) decodeBool(v *bool) error {
 				return err
 			}
 			*v = false
-			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -67,7 +64,6 @@ func (dec *Decoder) decodeBoolNull(v **bool) error {
 				*v = new(bool)
 			}
 			**v = true
-			dec.cursor++
 			return nil
 		case 'f':
 			dec.cursor++
@@ -79,7 +75,6 @@ func (dec *Decoder) decodeBoolNull(v **bool) error {
 				*v = new(bool)
 			}
 			**v = false
-			dec.cursor++
 			return nil
 		case 'n':
 			dec.cursor++
@@ -87,7 +82,6 @@ func (dec *Decoder) decodeBoolNull(v **bool) error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -119,8 +113,8 @@ func (dec *Decoder) assertTrue() error {
 			}
 		case 3:
 			switch dec.data[dec.cursor] {
-			case ' ', '\t', '\n', ',', ']', '}':
-				dec.cursor--
+			case ' ', '\b', '\t', '\n', ',', ']', '}':
+				// dec.cursor--
 				return nil
 			default:
 				return dec.raiseInvalidJSONErr(dec.cursor)
@@ -153,7 +147,7 @@ func (dec *Decoder) assertNull() error {
 		case 3:
 			switch dec.data[dec.cursor] {
 			case ' ', '\t', '\n', ',', ']', '}':
-				dec.cursor--
+				// dec.cursor--
 				return nil
 			default:
 				return dec.raiseInvalidJSONErr(dec.cursor)
@@ -190,7 +184,7 @@ func (dec *Decoder) assertFalse() error {
 		case 4:
 			switch dec.data[dec.cursor] {
 			case ' ', '\t', '\n', ',', ']', '}':
-				dec.cursor--
+				// dec.cursor--
 				return nil
 			default:
 				return dec.raiseInvalidJSONErr(dec.cursor)

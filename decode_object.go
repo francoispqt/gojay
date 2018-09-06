@@ -86,7 +86,6 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			if err != nil {
 				return 0, err
 			}
-			dec.cursor++
 			return dec.cursor, nil
 		default:
 			// can't unmarshal to struct
@@ -186,7 +185,6 @@ func (dec *Decoder) decodeObjectNull(v interface{}) (int, error) {
 			if err != nil {
 				return 0, err
 			}
-			dec.cursor++
 			return dec.cursor, nil
 		default:
 			// can't unmarshal to struct
@@ -300,7 +298,6 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		case 't':
 			dec.cursor++
@@ -308,7 +305,6 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		// is false
 		case 'f':
@@ -317,7 +313,6 @@ func (dec *Decoder) skipData() error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		// is an object
 		case '{':

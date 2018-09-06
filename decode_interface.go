@@ -4,6 +4,7 @@ package gojay
 // the future it would be great to implement one here inside this repo
 import (
 	"encoding/json"
+	"log"
 )
 
 // DecodeInterface reads the next JSON-encoded value from its input and stores it in the value pointed to by i.
@@ -30,6 +31,7 @@ func (dec *Decoder) decodeInterface(i *interface{}) error {
 	}
 
 	object := dec.data[start:end]
+	log.Print(string(object))
 	if err = json.Unmarshal(object, i); err != nil {
 		return err
 	}
@@ -41,7 +43,7 @@ func (dec *Decoder) decodeInterface(i *interface{}) error {
 // @afiune Maybe return the type as well?
 func (dec *Decoder) getObject() (start int, end int, err error) {
 	// start cursor
-	start = dec.cursor
+	log.Print(string(dec.data[dec.cursor:]))
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':
@@ -57,9 +59,9 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 			// is a null and should not be unmarshal
 			start = dec.cursor
 			end = dec.cursor
-			dec.cursor++
 			return
 		case 't':
+			start = dec.cursor
 			dec.cursor++
 			err = dec.assertTrue()
 			if err != nil {
@@ -70,6 +72,7 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 			return
 		// is false
 		case 'f':
+			start = dec.cursor
 			dec.cursor++
 			err = dec.assertFalse()
 			if err != nil {
@@ -80,12 +83,14 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 			return
 		// is an object
 		case '{':
+			start = dec.cursor
 			dec.cursor++
 			end, err = dec.skipObject()
 			dec.cursor = end
 			return
 		// is string
 		case '"':
+			start = dec.cursor
 			dec.cursor++
 			start, end, err = dec.getString()
 			start--
@@ -93,11 +98,13 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 			return
 		// is array
 		case '[':
+			start = dec.cursor
 			dec.cursor++
 			end, err = dec.skipArray()
 			dec.cursor = end
 			return
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-':
+			start = dec.cursor
 			end, err = dec.skipNumber()
 			dec.cursor = end
 			return
