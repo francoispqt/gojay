@@ -42,7 +42,6 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 			if err != nil {
 				return 0, err
 			}
-			dec.cursor++
 			return dec.cursor, nil
 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			// can't unmarshall to struct
@@ -105,7 +104,6 @@ func (dec *Decoder) decodeArrayNull(v interface{}) (int, error) {
 			if err != nil {
 				return 0, err
 			}
-			dec.cursor++
 			return dec.cursor, nil
 		case '{', '"', 'f', 't', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			// can't unmarshall to struct

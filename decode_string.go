@@ -37,7 +37,6 @@ func (dec *Decoder) decodeString(v *string) error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
@@ -78,7 +77,6 @@ func (dec *Decoder) decodeStringNull(v **string) error {
 			if err != nil {
 				return err
 			}
-			dec.cursor++
 			return nil
 		default:
 			dec.err = dec.makeInvalidUnmarshalErr(v)
