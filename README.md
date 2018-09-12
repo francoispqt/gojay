@@ -489,13 +489,13 @@ Example of implementation:
 ```go
 type users []*user
 // implement MarshalerJSONArray
-func (u *users) MarshalJSONArray(dec *gojay.Decoder) {
+func (u *users) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range u {
-        enc.Object(e)
-    }
+		enc.Object(e)
+	}
 }
 func (u *users) IsNil() bool {
-    return len(u) == 0
+	return len(u) == 0
 }
 ```
 
