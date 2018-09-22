@@ -174,7 +174,7 @@ func (dec *Decoder) skipArray() (int, error) {
 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeArrayFunc is a custom func type implementing UnarshaleArray.
+// DecodeArrayFunc is a custom func type implementing UnmarshalerJSONArray.
 // Use it to cast a func(*Decoder) to Unmarshal an object.
 //
 //	str := ""
@@ -184,12 +184,12 @@ func (dec *Decoder) skipArray() (int, error) {
 //	}))
 type DecodeArrayFunc func(*Decoder) error
 
-// UnmarshalJSONArray implements UnarshalerArray.
+// UnmarshalJSONArray implements UnmarshalerJSONArray.
 func (f DecodeArrayFunc) UnmarshalJSONArray(dec *Decoder) error {
 	return f(dec)
 }
 
-// IsNil implements UnarshalerArray.
+// IsNil implements UnmarshalerJSONArray.
 func (f DecodeArrayFunc) IsNil() bool {
 	return f == nil
 }

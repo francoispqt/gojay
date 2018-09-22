@@ -341,7 +341,7 @@ func (dec *Decoder) skipData() error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeObjectFunc is a custom func type implementing UnarshaleObject.
+// DecodeObjectFunc is a custom func type implementing UnmarshalerJSONObject.
 // Use it to cast a func(*Decoder) to Unmarshal an object.
 //
 //	str := ""
@@ -351,12 +351,12 @@ func (dec *Decoder) skipData() error {
 //	}))
 type DecodeObjectFunc func(*Decoder, string) error
 
-// UnmarshalJSONObject implements UnarshalerObject.
+// UnmarshalJSONObject implements UnmarshalerJSONObject.
 func (f DecodeObjectFunc) UnmarshalJSONObject(dec *Decoder, k string) error {
 	return f(dec, k)
 }
 
-// NKeys implements UnarshalerObject.
+// NKeys implements UnmarshalerJSONObject.
 func (f DecodeObjectFunc) NKeys() int {
 	return 0
 }
