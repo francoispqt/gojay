@@ -66,5 +66,5 @@ var arrUnmarshalTpl = templateList{
 }
 
 func init() {
-	parseTemplates(arrUnmarshalTpl, "arrUnarshal")
+	parseTemplates(arrUnmarshalTpl, "arrUnmarshal")
 }
