@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -528,4 +529,18 @@ func TestUnmarshalJSONObjects(t *testing.T) {
 			testCase.expectations(err, testCase.v, t)
 		})
 	}
+}
+
+func TestDecodeReset(t *testing.T) {
+	var dec = NewDecoder(strings.NewReader(`"foobar"`))
+	var str string
+	var err = dec.Decode(&str)
+	assert.Nil(t, err)
+	assert.Equal(t, str, "foobar")
+	dec.Reset()
+	assert.Equal(t, 512, len(dec.data))
+	dec.SetReader(strings.NewReader(`"barfoo"`))
+	err = dec.Decode(&str)
+	assert.Nil(t, err)
+	assert.Equal(t, str, "barfoo")
 }

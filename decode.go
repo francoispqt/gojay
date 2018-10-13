@@ -335,6 +335,23 @@ func (dec *Decoder) Decode(v interface{}) error {
 	return dec.err
 }
 
+// Reset resets the decoder to free the buffer an reuse the same decoder
+func (dec *Decoder) Reset() {
+	dec.called = 0
+	dec.keysDone = 0
+	dec.cursor = 0
+	dec.err = nil
+	dec.r = nil
+	dec.length = 0
+	dec.isPooled = 0
+	dec.data = make([]byte, 512)
+}
+
+// SetReader sets the reader of the decoder
+func (dec *Decoder) SetReader(r io.Reader) {
+	dec.r = r
+}
+
 // ADD VALUES FUNCTIONS
 
 // AddInt decodes the next key to an *int.
