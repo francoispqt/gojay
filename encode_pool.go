@@ -35,7 +35,7 @@ func NewEncoder(w io.Writer) *Encoder {
 func BorrowEncoder(w io.Writer) *Encoder {
 	enc := encPool.Get().(*Encoder)
 	enc.w = w
-	enc.buf = enc.buf[:0]
+	enc.buf = make([]byte, 0, 512)
 	enc.isPooled = 0
 	enc.err = nil
 	return enc
