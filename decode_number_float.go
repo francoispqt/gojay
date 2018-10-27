@@ -125,7 +125,9 @@ func (dec *Decoder) getFloat() (float64, error) {
 				c := dec.data[i]
 				if isDigit(c) {
 					end = i
-					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					if v := (beforeDecimal << 3) + (beforeDecimal << 1); v >= beforeDecimal {
+						beforeDecimal = v
+					}
 					continue
 				} else if (c == 'e' || c == 'E') && j < i-1 {
 					afterDecimal := dec.atoi64(start, end)
@@ -156,13 +158,18 @@ func (dec *Decoder) getFloat() (float64, error) {
 			if end >= dec.length || end < start {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
-			// then we add both integers
-			// then we divide the number by the power found
-			afterDecimal := dec.atoi64(start, end)
+			var afterDecimal int64
 			expI := end - start + 2
+			// if exp is too long, just cut the number
 			if expI >= len(pow10uint64) || expI < 0 {
-				return 0, dec.raiseInvalidJSONErr(dec.cursor)
+				expI = len(pow10uint64) - 2
+				afterDecimal = dec.atoi64(start, start+expI-2)
+			} else {
+				// then we add both integers
+				// then we divide the number by the power found
+				afterDecimal = dec.atoi64(start, end)
 			}
+
 			pow := pow10uint64[expI]
 			return float64(beforeDecimal+afterDecimal) / float64(pow), nil
 		case 'e', 'E':
