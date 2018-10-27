@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"encoding/json"
-	"log"
 	"strings"
 	"testing"
 
@@ -128,7 +127,6 @@ func TestDecodeInterfaceBasic(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run("DecodeInterface()"+testCase.name, func(t *testing.T) {
-			log.Print(testCase.name)
 			var i interface{}
 			dec := BorrowDecoder(strings.NewReader(testCase.json))
 			defer dec.Release()

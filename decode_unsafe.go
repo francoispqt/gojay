@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"fmt"
-	"reflect"
 )
 
 // Unsafe is the structure holding the unsafe version of the API.
@@ -111,7 +110,7 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 		dec.data = data
 		_, err = dec.decodeArray(vt)
 	default:
-		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(vt).String()))
+		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, vt))
 	}
 	defer dec.Release()
 	if err != nil {
