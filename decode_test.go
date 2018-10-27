@@ -445,7 +445,7 @@ func allTypesTestCases() []allTypeDecodeTestCase {
 			expectations: func(err error, v interface{}, t *testing.T) {
 				assert.NotNil(t, err, "err must not be nil")
 				assert.IsType(t, InvalidUnmarshalError(""), err, "err must be of type InvalidUnmarshalError")
-				assert.Equal(t, fmt.Sprintf(invalidUnmarshalErrorMsg, reflect.TypeOf(v).String()), err.Error(), "err message should be equal to invalidUnmarshalErrorMsg")
+				assert.Equal(t, fmt.Sprintf(invalidUnmarshalErrorMsg, v), err.Error(), "err message should be equal to invalidUnmarshalErrorMsg")
 			},
 		},
 	}

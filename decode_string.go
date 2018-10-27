@@ -59,6 +59,7 @@ func (dec *Decoder) decodeStringNull(v **string) error {
 		case '"':
 			dec.cursor++
 			start, end, err := dec.getString()
+
 			if err != nil {
 				return err
 			}

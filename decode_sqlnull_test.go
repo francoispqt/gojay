@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeSQLNullString(t *testing.T) {
@@ -198,4 +199,179 @@ func TestDecodeSQLNullBool(t *testing.T) {
 			assert.True(t, false, "should not be called as decoder should have panicked")
 		},
 	)
+}
+
+type SQLDecodeObject struct {
+	S sql.NullString
+	F sql.NullFloat64
+	I sql.NullInt64
+	B sql.NullBool
+}
+
+func (s *SQLDecodeObject) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "s":
+		return dec.SQLNullString(&s.S)
+	case "f":
+		return dec.SQLNullFloat64(&s.F)
+	case "i":
+		return dec.SQLNullInt64(&s.I)
+	case "b":
+		return dec.SQLNullBool(&s.B)
+	}
+	return nil
+}
+
+func (s *SQLDecodeObject) NKeys() int {
+	return 0
+}
+
+func TestDecodeSQLNullKeys(t *testing.T) {
+	var testCases = []struct {
+		name           string
+		json           string
+		expectedResult *SQLDecodeObject
+	}{
+		{
+			name: "basic all valid",
+			json: `{
+				"s": "foo",
+				"f": 0.3,
+				"i": 3,
+				"b": true
+			}`,
+			expectedResult: &SQLDecodeObject{
+				S: sql.NullString{
+					String: "foo",
+					Valid:  true,
+				},
+				F: sql.NullFloat64{
+					Float64: 0.3,
+					Valid:   true,
+				},
+				I: sql.NullInt64{
+					Int64: 3,
+					Valid: true,
+				},
+				B: sql.NullBool{
+					Bool:  true,
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "string not valid",
+			json: `{
+				"s": null,
+				"f": 0.3,
+				"i": 3,
+				"b": true
+			}`,
+			expectedResult: &SQLDecodeObject{
+				S: sql.NullString{
+					Valid: false,
+				},
+				F: sql.NullFloat64{
+					Float64: 0.3,
+					Valid:   true,
+				},
+				I: sql.NullInt64{
+					Int64: 3,
+					Valid: true,
+				},
+				B: sql.NullBool{
+					Bool:  true,
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "string not valid, int not valid",
+			json: `{
+				"s": null,
+				"f": 0.3,
+				"i": null,
+				"b": true
+			}`,
+			expectedResult: &SQLDecodeObject{
+				S: sql.NullString{
+					Valid: false,
+				},
+				F: sql.NullFloat64{
+					Float64: 0.3,
+					Valid:   true,
+				},
+				I: sql.NullInt64{
+					Valid: false,
+				},
+				B: sql.NullBool{
+					Bool:  true,
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "keys absent",
+			json: `{
+				"f": 0.3,
+				"i": 3,
+				"b": true
+			}`,
+			expectedResult: &SQLDecodeObject{
+				S: sql.NullString{
+					Valid: false,
+				},
+				F: sql.NullFloat64{
+					Float64: 0.3,
+					Valid:   true,
+				},
+				I: sql.NullInt64{
+					Valid: true,
+					Int64: 3,
+				},
+				B: sql.NullBool{
+					Bool:  true,
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "keys all null",
+			json: `{
+				"s": null,
+				"f": null,
+				"i": null,
+				"b": null
+			}`,
+			expectedResult: &SQLDecodeObject{
+				S: sql.NullString{
+					Valid: false,
+				},
+				F: sql.NullFloat64{
+					Valid: false,
+				},
+				I: sql.NullInt64{
+					Valid: false,
+				},
+				B: sql.NullBool{
+					Valid: false,
+				},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var o = &SQLDecodeObject{}
+			var dec = NewDecoder(strings.NewReader(testCase.json))
+			var err = dec.Decode(o)
+			require.Nil(t, err)
+			require.Equal(
+				t,
+				testCase.expectedResult,
+				o,
+			)
+		})
+	}
+
 }
