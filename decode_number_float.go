@@ -120,27 +120,37 @@ func (dec *Decoder) getFloat() (float64, error) {
 			// then we get part after decimal as integer
 			start = j + 1
 			// get number after the decimal point
-			// multiple the before decimal point portion by 10 using bitwise
 			for i := j + 1; i < dec.length || dec.read(); i++ {
 				c := dec.data[i]
 				if isDigit(c) {
 					end = i
-					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					// multiply the before decimal point portion by 10 using bitwise
+					// make sure it doesn't overflow
+					if end-start < 18 {
+						beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					}
 					continue
 				} else if (c == 'e' || c == 'E') && j < i-1 {
-					afterDecimal := dec.atoi64(start, end)
-					dec.cursor = i + 1
+					// we have an exponent, convert first the value we got before the exponent
+					var afterDecimal int64
 					expI := end - start + 2
+					// if exp is too long, it means number is too long, just truncate the number
 					if expI >= len(pow10uint64) || expI < 0 {
-						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+						expI = len(pow10uint64) - 2
+						afterDecimal = dec.atoi64(start, start+expI-2)
+					} else {
+						// then we add both integers
+						// then we divide the number by the power found
+						afterDecimal = dec.atoi64(start, end)
 					}
+					dec.cursor = i + 1
 					pow := pow10uint64[expI]
 					floatVal := float64(beforeDecimal+afterDecimal) / float64(pow)
 					exp, err := dec.getExponent()
 					if err != nil {
 						return 0, err
 					}
-					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // abs
+					pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1 // absolute exponent
 					if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
@@ -156,13 +166,18 @@ func (dec *Decoder) getFloat() (float64, error) {
 			if end >= dec.length || end < start {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}
-			// then we add both integers
-			// then we divide the number by the power found
-			afterDecimal := dec.atoi64(start, end)
+			var afterDecimal int64
 			expI := end - start + 2
+			// if exp is too long, it means number is too long, just truncate the number
 			if expI >= len(pow10uint64) || expI < 0 {
-				return 0, dec.raiseInvalidJSONErr(dec.cursor)
+				expI = 19
+				afterDecimal = dec.atoi64(start, start+expI-2)
+			} else {
+				// then we add both integers
+				// then we divide the number by the power found
+				afterDecimal = dec.atoi64(start, end)
 			}
+
 			pow := pow10uint64[expI]
 			return float64(beforeDecimal+afterDecimal) / float64(pow), nil
 		case 'e', 'E':
@@ -318,15 +333,27 @@ func (dec *Decoder) getFloat32() (float32, error) {
 				c := dec.data[i]
 				if isDigit(c) {
 					end = i
-					beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					// multiply the before decimal point portion by 10 using bitwise
+					// make sure it desn't overflow
+					if end-start < 9 {
+						beforeDecimal = (beforeDecimal << 3) + (beforeDecimal << 1)
+					}
 					continue
 				} else if (c == 'e' || c == 'E') && j < i-1 {
-					afterDecimal := dec.atoi32(start, end)
-					dec.cursor = i + 1
+					// then we add both integers
+					// then we divide the number by the power found
+					var afterDecimal int32
 					expI := end - start + 2
-					if expI >= len(pow10uint64) || expI < 0 {
-						return 0, dec.raiseInvalidJSONErr(dec.cursor)
+					// if exp is too long, it means number is too long, just truncate the number
+					if expI >= 12 || expI < 0 {
+						expI = 10
+						afterDecimal = dec.atoi32(start, start+expI-2)
+					} else {
+						// then we add both integers
+						// then we divide the number by the power found
+						afterDecimal = dec.atoi32(start, end)
 					}
+					dec.cursor = i + 1
 					pow := pow10uint64[expI]
 					floatVal := float32(beforeDecimal+afterDecimal) / float32(pow)
 					exp, err := dec.getExponent()
@@ -351,10 +378,16 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			}
 			// then we add both integers
 			// then we divide the number by the power found
-			afterDecimal := dec.atoi32(start, end)
+			var afterDecimal int32
 			expI := end - start + 2
-			if expI >= len(pow10uint64) || expI < 0 {
-				return 0, dec.raiseInvalidJSONErr(dec.cursor)
+			// if exp is too long, it means number is too long, just truncate the number
+			if expI >= 12 || expI < 0 {
+				expI = 10
+				afterDecimal = dec.atoi32(start, start+expI-2)
+			} else {
+				// then we add both integers
+				// then we divide the number by the power found
+				afterDecimal = dec.atoi32(start, end)
 			}
 			pow := pow10uint64[expI]
 			return float32(beforeDecimal+afterDecimal) / float32(pow), nil
@@ -368,7 +401,6 @@ func (dec *Decoder) getFloat32() (float32, error) {
 				return 0, err
 			}
 			pExp := (exp + (exp >> 31)) ^ (exp >> 31) + 1
-			// log.Print(exp, " after")
 			if pExp >= int64(len(pow10uint64)) || pExp < 0 {
 				return 0, dec.raiseInvalidJSONErr(dec.cursor)
 			}

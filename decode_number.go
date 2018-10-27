@@ -24,7 +24,7 @@ const maxInt16Length = 5
 const maxInt8Length = 3
 const invalidNumber = int8(-1)
 
-var pow10uint64 = [20]uint64{
+var pow10uint64 = [21]uint64{
 	0,
 	1,
 	10,
@@ -45,6 +45,7 @@ var pow10uint64 = [20]uint64{
 	10000000000000000,
 	100000000000000000,
 	1000000000000000000,
+	10000000000000000000,
 }
 
 var skipNumberEndCursorIncrement [256]int
