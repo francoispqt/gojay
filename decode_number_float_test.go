@@ -830,8 +830,7 @@ func TestDecoderFloat32(t *testing.T) {
 		{
 			name:           "basic-exp-too-big",
 			json:           "1.00232492420002423545849009",
-			expectedResult: 0,
-			err:            true,
+			expectedResult: 1.0023249,
 		},
 		{
 			name:           "basic-exp-too-big",
@@ -923,7 +922,7 @@ func TestDecoderFloat32(t *testing.T) {
 			if !testCase.skipResult {
 				assert.Equal(
 					t,
-					float64(testCase.expectedResult*1000000), math.Round(float64(v*1000000)),
+					math.Round(float64(testCase.expectedResult*1000000)), math.Round(float64(v*1000000)),
 					fmt.Sprintf("v must be equal to %f", testCase.expectedResult),
 				)
 			}
@@ -1161,9 +1160,7 @@ func TestDecoderFloat32Null(t *testing.T) {
 		{
 			name:           "basic-exp-too-big",
 			json:           "1.00232492420002423545849009",
-			expectedResult: 0,
-			err:            true,
-			resultIsNil:    true,
+			expectedResult: 1.0023249,
 		},
 		{
 			name:           "basic-exp-too-big",
@@ -1262,7 +1259,7 @@ func TestDecoderFloat32Null(t *testing.T) {
 			} else {
 				assert.Equal(
 					t,
-					float64(testCase.expectedResult*1000000), math.Round(float64(*v*1000000)),
+					math.Round(float64(testCase.expectedResult*1000000)), math.Round(float64(*v*1000000)),
 					fmt.Sprintf("v must be equal to %f", testCase.expectedResult),
 				)
 			}
