@@ -50,23 +50,32 @@ func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 }
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.
-// If v is nil, not a pointer, or not an implementation of UnmarshalerJSONObject or UnmarshalerJSONArray
+// If v is nil, not an implementation of UnmarshalerJSONObject or UnmarshalerJSONArray or not one of the following types:
+//
+// *string, **string, *int, **int, *int8, **int8, *int16, **int16, *int32, **int32, *int64, **int64, *uint8, **uint8, *uint16, **uint16,
+// *uint32, **uint32, *uint64, **uint64, *float64, **float64, *float32, **float32, *bool, **bool,
+//
 // Unmarshal returns an InvalidUnmarshalError.
 //
-// Unmarshal uses the inverse of the encodings that Marshal uses, allocating maps, slices, and pointers as necessary, with the following additional rules:
-// To unmarshal JSON into a pointer, Unmarshal first handles the case of the JSON being the JSON literal null.
-// In that case, Unmarshal sets the pointer to nil.
-// Otherwise, Unmarshal unmarshals the JSON into the value pointed at by the pointer.
-// If the pointer is nil, Unmarshal allocates a new value for it to point to.
 //
-// To Unmarshal JSON into a struct, Unmarshal requires the struct to implement UnmarshalerJSONObject.
-//
-// To unmarshal a JSON array into a slice, Unmarshal requires the slice to implement UnmarshalerJSONArray.
-//
-// Unmarshal JSON does not allow yet to unmarshall an interface value
 // If a JSON value is not appropriate for a given target type, or if a JSON number
 // overflows the target type, Unmarshal skips that field and completes the unmarshaling as best it can.
-// If no more serious errors are encountered, Unmarshal returns an UnmarshalTypeError describing the earliest such error. In any case, it's not guaranteed that all the remaining fields following the problematic one will be unmarshaled into the target object.
+// If no more serious errors are encountered, Unmarshal returns an UnmarshalTypeError describing the earliest such error.
+// In any case, it's not guaranteed that all the remaining fields following the problematic one will be unmarshaled into the target object.
+//
+// Example with a valid `*string` type:
+//	var data = []byte(`"gojay"`)
+//	var str string
+//	var err = gojay.Unmarshal(data, &str)
+//
+//	fmt.Println(err) // nil
+//
+// Example with an unknown `*struct{}` type:
+//	var data = []byte(`"gojay"`)
+//	var someStruct = struct{}{}
+//	var err = gojay.Unmarshal(data, &someStruct)
+//
+//	fmt.Println(err) // "Cannot unmarshal JSON to type '*struct{}'"
 func Unmarshal(data []byte, v interface{}) error {
 	var err error
 	var dec *Decoder
@@ -229,15 +238,13 @@ func Unmarshal(data []byte, v interface{}) error {
 	return dec.err
 }
 
-// UnmarshalerJSONObject is the interface to implement for a struct to be
-// decoded
+// UnmarshalerJSONObject is the interface to implement to decode a JSON Object.
 type UnmarshalerJSONObject interface {
 	UnmarshalJSONObject(*Decoder, string) error
 	NKeys() int
 }
 
-// UnmarshalerJSONArray is the interface to implement for a slice or an array to be
-// decoded
+// UnmarshalerJSONArray is the interface to implement to decode a JSON Array.
 type UnmarshalerJSONArray interface {
 	UnmarshalJSONArray(*Decoder) error
 }
@@ -258,6 +265,12 @@ type Decoder struct {
 // Decode reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
+// The differences between Decode and Unmarshal are:
+//
+// - Decode reads from an io.Reader in the Decoder, whereas Unmarshal reads from a []byte
+//
+// - Decode leaves to the user the option of borrowing and releasing a Decoder, whereas Unmarshal internally always
+// borrows a Decoder and releases it when the unmarshaling is completed
 func (dec *Decoder) Decode(v interface{}) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
