@@ -201,14 +201,14 @@ func (dec *Decoder) assertFalse() error {
 
 // Add Values functions
 
-// AddBool decodes the next key to a *bool.
+// AddBool decodes the JSON value within an object or an array to a *bool.
 // If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
 func (dec *Decoder) AddBool(v *bool) error {
 	return dec.Bool(v)
 }
 
-// AddBoolNull decodes the next key to a *bool.
+// AddBoolNull decodes the JSON value within an object or an array to a *bool.
 // If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
 // If a `null` is encountered, gojay does not change the value of the pointer.
@@ -216,7 +216,7 @@ func (dec *Decoder) AddBoolNull(v **bool) error {
 	return dec.BoolNull(v)
 }
 
-// Bool decodes the next key to a *bool.
+// Bool decodes the JSON value within an object or an array to a *bool.
 // If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
 func (dec *Decoder) Bool(v *bool) error {
@@ -228,7 +228,7 @@ func (dec *Decoder) Bool(v *bool) error {
 	return nil
 }
 
-// BoolNull decodes the next key to a *bool.
+// BoolNull decodes the JSON value within an object or an array to a *bool.
 // If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
 func (dec *Decoder) BoolNull(v **bool) error {

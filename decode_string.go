@@ -4,7 +4,7 @@ import (
 	"unsafe"
 )
 
-// DecodeString reads the next JSON-encoded value from its input and stores it in the string pointed to by v.
+// DecodeString reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the string pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeString(v *string) error {
@@ -216,20 +216,20 @@ func (dec *Decoder) skipString() error {
 
 // Add Values functions
 
-// AddString decodes the next key to a *string.
+// AddString decodes the JSON value within an object or an array to a *string.
 // If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
 func (dec *Decoder) AddString(v *string) error {
 	return dec.String(v)
 }
 
-// AddStringNull decodes the next key to a *string.
+// AddStringNull decodes the JSON value within an object or an array to a *string.
 // If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddStringNull(v **string) error {
 	return dec.StringNull(v)
 }
 
-// String decodes the next key to a *string.
+// String decodes the JSON value within an object or an array to a *string.
 // If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
 func (dec *Decoder) String(v *string) error {
 	err := dec.decodeString(v)
@@ -240,7 +240,7 @@ func (dec *Decoder) String(v *string) error {
 	return nil
 }
 
-// StringNull decodes the next key to a **string.
+// StringNull decodes the JSON value within an object or an array to a **string.
 // If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) StringNull(v **string) error {

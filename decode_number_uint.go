@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// DecodeUint8 reads the next JSON-encoded value from its input and stores it in the uint8 pointed to by v.
+// DecodeUint8 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the uint8 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint8(v *uint8) error {
@@ -116,7 +116,7 @@ func (dec *Decoder) getUint8() (uint8, error) {
 	return dec.atoui8(start, end), nil
 }
 
-// DecodeUint16 reads the next JSON-encoded value from its input and stores it in the uint16 pointed to by v.
+// DecodeUint16 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the uint16 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint16(v *uint16) error {
@@ -228,7 +228,7 @@ func (dec *Decoder) getUint16() (uint16, error) {
 	return dec.atoui16(start, end), nil
 }
 
-// DecodeUint32 reads the next JSON-encoded value from its input and stores it in the uint32 pointed to by v.
+// DecodeUint32 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the uint32 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint32(v *uint32) error {
@@ -340,7 +340,7 @@ func (dec *Decoder) getUint32() (uint32, error) {
 	return dec.atoui32(start, end), nil
 }
 
-// DecodeUint64 reads the next JSON-encoded value from its input and stores it in the uint64 pointed to by v.
+// DecodeUint64 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the uint64 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeUint64(v *uint64) error {
@@ -574,59 +574,59 @@ func (dec *Decoder) atoui8(start, end int) uint8 {
 
 // Add Values functions
 
-// AddUint8 decodes the next key to an *int.
+// AddUint8 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddUint8(v *uint8) error {
 	return dec.Uint8(v)
 }
 
-// AddUint8Null decodes the next key to an *int.
+// AddUint8Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddUint8Null(v **uint8) error {
 	return dec.Uint8Null(v)
 }
 
-// AddUint16 decodes the next key to an *int.
+// AddUint16 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddUint16(v *uint16) error {
 	return dec.Uint16(v)
 }
 
-// AddUint16Null decodes the next key to an *int.
+// AddUint16Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddUint16Null(v **uint16) error {
 	return dec.Uint16Null(v)
 }
 
-// AddUint32 decodes the next key to an *int.
+// AddUint32 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddUint32(v *uint32) error {
 	return dec.Uint32(v)
 }
 
-// AddUint32Null decodes the next key to an *int.
+// AddUint32Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddUint32Null(v **uint32) error {
 	return dec.Uint32Null(v)
 }
 
-// AddUint64 decodes the next key to an *int.
+// AddUint64 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddUint64(v *uint64) error {
 	return dec.Uint64(v)
 }
 
-// AddUint64Null decodes the next key to an *int.
+// AddUint64Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddUint64Null(v **uint64) error {
 	return dec.Uint64Null(v)
 }
 
-// Uint8 decodes the next key to an *int.
+// Uint8 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint8(v *uint8) error {
 	err := dec.decodeUint8(v)
@@ -637,7 +637,7 @@ func (dec *Decoder) Uint8(v *uint8) error {
 	return nil
 }
 
-// Uint8Null decodes the next key to an *int.
+// Uint8Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint8, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint8Null(v **uint8) error {
 	err := dec.decodeUint8Null(v)
@@ -648,7 +648,7 @@ func (dec *Decoder) Uint8Null(v **uint8) error {
 	return nil
 }
 
-// Uint16 decodes the next key to an *int.
+// Uint16 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint16(v *uint16) error {
 	err := dec.decodeUint16(v)
@@ -659,7 +659,7 @@ func (dec *Decoder) Uint16(v *uint16) error {
 	return nil
 }
 
-// Uint16Null decodes the next key to an *int.
+// Uint16Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint16, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint16Null(v **uint16) error {
 	err := dec.decodeUint16Null(v)
@@ -670,7 +670,7 @@ func (dec *Decoder) Uint16Null(v **uint16) error {
 	return nil
 }
 
-// Uint32 decodes the next key to an *int.
+// Uint32 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint32(v *uint32) error {
 	err := dec.decodeUint32(v)
@@ -681,7 +681,7 @@ func (dec *Decoder) Uint32(v *uint32) error {
 	return nil
 }
 
-// Uint32Null decodes the next key to an *int.
+// Uint32Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint32, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint32Null(v **uint32) error {
 	err := dec.decodeUint32Null(v)
@@ -692,7 +692,7 @@ func (dec *Decoder) Uint32Null(v **uint32) error {
 	return nil
 }
 
-// Uint64 decodes the next key to an *int.
+// Uint64 decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint64(v *uint64) error {
 	err := dec.decodeUint64(v)
@@ -703,7 +703,7 @@ func (dec *Decoder) Uint64(v *uint64) error {
 	return nil
 }
 
-// Uint64Null decodes the next key to an *int.
+// Uint64Null decodes the JSON value within an object or an array to an *int.
 // If next key value overflows uint64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Uint64Null(v **uint64) error {
 	err := dec.decodeUint64Null(v)

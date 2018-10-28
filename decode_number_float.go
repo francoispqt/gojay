@@ -1,6 +1,6 @@
 package gojay
 
-// DecodeFloat64 reads the next JSON-encoded value from its input and stores it in the float64 pointed to by v.
+// DecodeFloat64 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the float64 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeFloat64(v *float64) error {
@@ -208,7 +208,7 @@ func (dec *Decoder) getFloat() (float64, error) {
 	return float64(dec.atoi64(start, end)), nil
 }
 
-// DecodeFloat32 reads the next JSON-encoded value from its input and stores it in the float32 pointed to by v.
+// DecodeFloat32 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the float32 pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeFloat32(v *float32) error {
@@ -420,58 +420,58 @@ func (dec *Decoder) getFloat32() (float32, error) {
 
 // Add Values functions
 
-// AddFloat decodes the next key to a *float64.
+// AddFloat decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddFloat(v *float64) error {
 	return dec.Float64(v)
 }
 
-// AddFloatNull decodes the next key to a *float64.
+// AddFloatNull decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddFloatNull(v **float64) error {
 	return dec.Float64Null(v)
 }
 
-// AddFloat64 decodes the next key to a *float64.
+// AddFloat64 decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddFloat64(v *float64) error {
 	return dec.Float64(v)
 }
 
-// AddFloat64Null decodes the next key to a *float64.
+// AddFloat64Null decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddFloat64Null(v **float64) error {
 	return dec.Float64Null(v)
 }
 
-// AddFloat32 decodes the next key to a *float64.
+// AddFloat32 decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) AddFloat32(v *float32) error {
 	return dec.Float32(v)
 }
 
-// AddFloat32Null decodes the next key to a *float64.
+// AddFloat32Null decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 // If a `null` is encountered, gojay does not change the value of the pointer.
 func (dec *Decoder) AddFloat32Null(v **float32) error {
 	return dec.Float32Null(v)
 }
 
-// Float decodes the next key to a *float64.
+// Float decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float(v *float64) error {
 	return dec.Float64(v)
 }
 
-// FloatNull decodes the next key to a *float64.
+// FloatNull decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) FloatNull(v **float64) error {
 	return dec.Float64Null(v)
 }
 
-// Float64 decodes the next key to a *float64.
+// Float64 decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float64(v *float64) error {
 	err := dec.decodeFloat64(v)
@@ -482,7 +482,7 @@ func (dec *Decoder) Float64(v *float64) error {
 	return nil
 }
 
-// Float64Null decodes the next key to a *float64.
+// Float64Null decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float64Null(v **float64) error {
 	err := dec.decodeFloat64Null(v)
@@ -493,7 +493,7 @@ func (dec *Decoder) Float64Null(v **float64) error {
 	return nil
 }
 
-// Float32 decodes the next key to a *float64.
+// Float32 decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float32(v *float32) error {
 	err := dec.decodeFloat32(v)
@@ -504,7 +504,7 @@ func (dec *Decoder) Float32(v *float32) error {
 	return nil
 }
 
-// Float32Null decodes the next key to a *float64.
+// Float32Null decodes the JSON value within an object or an array to a *float64.
 // If next key value overflows float64, an InvalidUnmarshalError error will be returned.
 func (dec *Decoder) Float32Null(v **float32) error {
 	err := dec.decodeFloat32Null(v)

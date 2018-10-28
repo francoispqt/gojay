@@ -203,17 +203,17 @@ func (f DecodeArrayFunc) IsNil() bool {
 
 // Add Values functions
 
-// AddArray decodes the next key to a UnmarshalerJSONArray.
+// AddArray decodes the JSON value within an object or an array to a UnmarshalerJSONArray.
 func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
 	return dec.Array(v)
 }
 
-// AddArrayNull decodes the next key to a UnmarshalerJSONArray.
+// AddArrayNull decodes the JSON value within an object or an array to a UnmarshalerJSONArray.
 func (dec *Decoder) AddArrayNull(v UnmarshalerJSONArray) error {
 	return dec.ArrayNull(v)
 }
 
-// Array decodes the next key to a UnmarshalerJSONArray.
+// Array decodes the JSON value within an object or an array to a UnmarshalerJSONArray.
 func (dec *Decoder) Array(v UnmarshalerJSONArray) error {
 	newCursor, err := dec.decodeArray(v)
 	if err != nil {
@@ -224,7 +224,7 @@ func (dec *Decoder) Array(v UnmarshalerJSONArray) error {
 	return nil
 }
 
-// ArrayNull decodes the next key to a UnmarshalerJSONArray.
+// ArrayNull decodes the JSON value within an object or an array to a UnmarshalerJSONArray.
 // v should be a pointer to an UnmarshalerJSONArray,
 // if `null` value is encountered in JSON, it will leave the value v untouched,
 // else it will create a new instance of the UnmarshalerJSONArray behind v.

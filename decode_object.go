@@ -5,7 +5,7 @@ import (
 	"unsafe"
 )
 
-// DecodeObject reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
+// DecodeObject reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by v.
 //
 // v must implement UnmarshalerJSONObject.
 //
@@ -341,13 +341,23 @@ func (dec *Decoder) skipData() error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeObjectFunc is a custom func type implementing UnmarshalerJSONObject.
-// Use it to cast a func(*Decoder) to Unmarshal an object.
+// DecodeObjectFunc is a func type implementing UnmarshalerJSONObject.
+// Use it to cast a `func(*Decoder, k string) error` to Unmarshal an object on the fly.
 //
-//	str := ""
+//	user := struct{
+//		name string
+//		email string
+//  }{}
 //	dec := gojay.NewDecoder(io.Reader)
+//
 //	dec.DecodeObject(gojay.DecodeObjectFunc(func(dec *gojay.Decoder, k string) error {
-//		return dec.AddString(&str)
+//		switch k {
+//			case "name":
+//				return dec.String(&user.name)
+// 			case "email":
+//				return dec.String(&user.email)
+//		}
+//		return nil
 //	}))
 type DecodeObjectFunc func(*Decoder, string) error
 
@@ -363,17 +373,17 @@ func (f DecodeObjectFunc) NKeys() int {
 
 // Add Values functions
 
-// AddObject decodes the next key to a UnmarshalerJSONObject.
+// AddObject decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
 func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
 	return dec.Object(v)
 }
 
-// AddObjectNull decodes the next key to a UnmarshalerJSONObject.
+// AddObjectNull decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
 func (dec *Decoder) AddObjectNull(v interface{}) error {
 	return dec.ObjectNull(v)
 }
 
-// Object decodes the next key to a UnmarshalerJSONObject.
+// Object decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
 func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
 	initialKeysDone := dec.keysDone
 	initialChild := dec.child
@@ -391,7 +401,7 @@ func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
 	return nil
 }
 
-// ObjectNull decodes the next key to a UnmarshalerJSONObject.
+// ObjectNull decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
 // v should be a pointer to an UnmarshalerJSONObject,
 // if `null` value is encountered in JSON, it will leave the value v untouched,
 // else it will create a new instance of the UnmarshalerJSONObject behind v.

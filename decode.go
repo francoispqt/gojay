@@ -255,7 +255,7 @@ type Decoder struct {
 	keysDone int
 }
 
-// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
+// Decode reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) Decode(v interface{}) error {
