@@ -173,12 +173,12 @@ func (dec *Decoder) getFloat() (float64, error) {
 				expI = 19
 				afterDecimal = dec.atoi64(start, start+expI-2)
 			} else {
-				// then we add both integers
-				// then we divide the number by the power found
 				afterDecimal = dec.atoi64(start, end)
 			}
 
 			pow := pow10uint64[expI]
+			// then we add both integers
+			// then we divide the number by the power found
 			return float64(beforeDecimal+afterDecimal) / float64(pow), nil
 		case 'e', 'E':
 			dec.cursor = j + 1
@@ -340,8 +340,7 @@ func (dec *Decoder) getFloat32() (float32, error) {
 					}
 					continue
 				} else if (c == 'e' || c == 'E') && j < i-1 {
-					// then we add both integers
-					// then we divide the number by the power found
+					// we get the number before decimal
 					var afterDecimal int32
 					expI := end - start + 2
 					// if exp is too long, it means number is too long, just truncate the number
@@ -349,12 +348,12 @@ func (dec *Decoder) getFloat32() (float32, error) {
 						expI = 10
 						afterDecimal = dec.atoi32(start, start+expI-2)
 					} else {
-						// then we add both integers
-						// then we divide the number by the power found
 						afterDecimal = dec.atoi32(start, end)
 					}
 					dec.cursor = i + 1
 					pow := pow10uint64[expI]
+					// then we add both integers
+					// then we divide the number by the power found
 					floatVal := float32(beforeDecimal+afterDecimal) / float32(pow)
 					exp, err := dec.getExponent()
 					if err != nil {
