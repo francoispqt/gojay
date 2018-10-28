@@ -4,45 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"reflect"
 )
 
 var nullBytes = []byte("null")
 
-// MarshalJSONObject returns the JSON encoding of v.
+// MarshalJSONArray returns the JSON encoding of v, an implementation of MarshalerJSONArray.
 //
-// It takes a struct implementing Marshaler to a JSON slice of byte
-// it returns a slice of bytes and an error.
-// Example with an Marshaler:
-//	type TestStruct struct {
-//		id int
-//	}
-//	func (s *TestStruct) MarshalJSONObject(enc *gojay.Encoder) {
-//		enc.AddIntKey("id", s.id)
-//	}
-//	func (s *TestStruct) IsNil() bool {
-//		return s == nil
-//	}
 //
-// 	func main() {
-//		test := &TestStruct{
-//			id: 123456,
-//		}
-//		b, _ := gojay.Marshal(test)
-// 		fmt.Println(b) // {"id":123456}
-//	}
-func MarshalJSONObject(v MarshalerJSONObject) ([]byte, error) {
-	enc := BorrowEncoder(nil)
-	enc.grow(512)
-	defer enc.Release()
-	return enc.encodeObject(v)
-}
-
-// MarshalJSONArray returns the JSON encoding of v.
-//
-// It takes an array or a slice implementing Marshaler to a JSON slice of byte
-// it returns a slice of bytes and an error.
-// Example with an Marshaler:
+// Example:
 // 	type TestSlice []*TestStruct
 //
 // 	func (t TestSlice) MarshalJSONArray(enc *Encoder) {
@@ -69,64 +38,47 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 	return enc.buf, nil
 }
 
-// Marshal returns the JSON encoding of v.
+// MarshalJSONObject returns the JSON encoding of v, an implementation of MarshalerJSONObject.
 //
-// Marshal takes interface v and encodes it according to its type.
-// Basic example with a string:
-// 	b, err := gojay.Marshal("test")
-//	fmt.Println(b) // "test"
-//
-// If v implements Marshaler or Marshaler interface
-// it will call the corresponding methods.
-//
-// If a struct, slice, or array is passed and does not implement these interfaces
-// it will return a a non nil InvalidUnmarshalError error.
-// Example with an Marshaler:
-//	type TestStruct struct {
+// Example:
+//	type Object struct {
 //		id int
 //	}
-//	func (s *TestStruct) MarshalJSONObject(enc *gojay.Encoder) {
-//		enc.AddIntKey("id", s.id)
+//	func (s *Object) MarshalJSONObject(enc *gojay.Encoder) {
+//		enc.IntKey("id", s.id)
 //	}
-//	func (s *TestStruct) IsNil() bool {
+//	func (s *Object) IsNil() bool {
 //		return s == nil
 //	}
 //
 // 	func main() {
-//		test := &TestStruct{
+//		test := &Object{
 //			id: 123456,
 //		}
 //		b, _ := gojay.Marshal(test)
 // 		fmt.Println(b) // {"id":123456}
 //	}
+func MarshalJSONObject(v MarshalerJSONObject) ([]byte, error) {
+	enc := BorrowEncoder(nil)
+	enc.grow(512)
+	defer enc.Release()
+	return enc.encodeObject(v)
+}
+
+// Marshal returns the JSON encoding of v.
+//
+// If v is nil, not an implementation MarshalerJSONObject or MarshalerJSONArray or not one of the following types:
+//	string, int, int8, int16, int32, int64, uint8, uint16, uint32, uint64, float64, float32, bool
+// Marshal returns an InvalidMarshalError.
 func Marshal(v interface{}) ([]byte, error) {
 	return marshal(v, false)
 }
 
 // MarshalAny returns the JSON encoding of v.
 //
-// MarshalAny takes interface v and encodes it according to its type.
-// Basic example with a string:
-// 	b, err := gojay.Marshal("test")
-//	fmt.Println(b) // "test"
-//
-// If v implements Marshaler or Marshaler interface
-// it will call the corresponding methods.
-//
-// If it cannot find any supported type it will be marshalled though default Go "json" package.
-// Warning, this function can be slower, than a default "Marshal"
-//
-//	type TestStruct struct {
-//		id int
-//	}
-//
-// 	func main() {
-//		test := &TestStruct{
-//			id: 123456,
-//		}
-//		b, _ := gojay.Marshal(test)
-// 		fmt.Println(b) // {"id": 123456}
-//	}
+// If v is nil, not an implementation MarshalerJSONObject or MarshalerJSONArray or not one of the following types:
+//	string, int, int8, int16, int32, int64, uint8, uint16, uint32, uint64, float64, float32, bool
+// MarshalAny falls back to "json/encoding" package to marshal the value.
 func MarshalAny(v interface{}) ([]byte, error) {
 	return marshal(v, true)
 }
@@ -178,7 +130,7 @@ func marshal(v interface{}, any bool) ([]byte, error) {
 				return json.Marshal(vt)
 			}
 
-			return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+			return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 		}
 	}()
 

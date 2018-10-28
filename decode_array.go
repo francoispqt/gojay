@@ -181,12 +181,12 @@ func (dec *Decoder) skipArray() (int, error) {
 //	strSlice := make([]string, 0)
 //	dec := gojay.NewDecoder(io.Reader)
 //
-//  err := dec.DecodeArray(	dec.DecodeArray(gojay.DecodeArrayFunc(func(dec *gojay.Decoder) error {
+//	err := dec.DecodeArray(	dec.DecodeArray(gojay.DecodeArrayFunc(func(dec *gojay.Decoder) error {
 //		var str string
 //		if err := dec.AddString(&str); err != nil {
 //			return err
 //		}
-// 		strSlice = append(strSplice, str)
+//		strSlice = append(strSplice, str)
 //		return nil
 //	})))
 type DecodeArrayFunc func(*Decoder) error

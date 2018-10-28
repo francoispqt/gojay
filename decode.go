@@ -51,10 +51,8 @@ func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.
 // If v is nil, not an implementation of UnmarshalerJSONObject or UnmarshalerJSONArray or not one of the following types:
-//
-// *string, **string, *int, **int, *int8, **int8, *int16, **int16, *int32, **int32, *int64, **int64, *uint8, **uint8, *uint16, **uint16,
-// *uint32, **uint32, *uint64, **uint64, *float64, **float64, *float32, **float32, *bool, **bool,
-//
+// 	*string, **string, *int, **int, *int8, **int8, *int16, **int16, *int32, **int32, *int64, **int64, *uint8, **uint8, *uint16, **uint16,
+// 	*uint32, **uint32, *uint64, **uint64, *float64, **float64, *float32, **float32, *bool, **bool
 // Unmarshal returns an InvalidUnmarshalError.
 //
 //
@@ -62,20 +60,6 @@ func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 // overflows the target type, Unmarshal skips that field and completes the unmarshaling as best it can.
 // If no more serious errors are encountered, Unmarshal returns an UnmarshalTypeError describing the earliest such error.
 // In any case, it's not guaranteed that all the remaining fields following the problematic one will be unmarshaled into the target object.
-//
-// Example with a valid `*string` type:
-//	var data = []byte(`"gojay"`)
-//	var str string
-//	var err = gojay.Unmarshal(data, &str)
-//
-//	fmt.Println(err) // nil
-//
-// Example with an unknown `*struct{}` type:
-//	var data = []byte(`"gojay"`)
-//	var someStruct = struct{}{}
-//	var err = gojay.Unmarshal(data, &someStruct)
-//
-//	fmt.Println(err) // "Cannot unmarshal JSON to type '*struct{}'"
 func Unmarshal(data []byte, v interface{}) error {
 	var err error
 	var dec *Decoder
@@ -266,11 +250,8 @@ type Decoder struct {
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 // The differences between Decode and Unmarshal are:
-//
-// - Decode reads from an io.Reader in the Decoder, whereas Unmarshal reads from a []byte
-//
-// - Decode leaves to the user the option of borrowing and releasing a Decoder, whereas Unmarshal internally always
-// borrows a Decoder and releases it when the unmarshaling is completed
+// 	- Decode reads from an io.Reader in the Decoder, whereas Unmarshal reads from a []byte
+// 	- Decode leaves to the user the option of borrowing and releasing a Decoder, whereas Unmarshal internally always borrows a Decoder and releases it when the unmarshaling is completed
 func (dec *Decoder) Decode(v interface{}) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
