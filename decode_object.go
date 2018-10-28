@@ -360,3 +360,54 @@ func (f DecodeObjectFunc) UnmarshalJSONObject(dec *Decoder, k string) error {
 func (f DecodeObjectFunc) NKeys() int {
 	return 0
 }
+
+// Add Values functions
+
+// AddObject decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
+	return dec.Object(v)
+}
+
+// AddObjectNull decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObjectNull(v interface{}) error {
+	return dec.ObjectNull(v)
+}
+
+// Object decodes the next key to a UnmarshalerJSONObject.
+func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObject(value)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}
+
+// ObjectNull decodes the next key to a UnmarshalerJSONObject.
+// v should be a pointer to an UnmarshalerJSONObject,
+// if `null` value is encountered in JSON, it will leave the value v untouched,
+// else it will create a new instance of the UnmarshalerJSONObject behind v.
+func (dec *Decoder) ObjectNull(v interface{}) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObjectNull(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}

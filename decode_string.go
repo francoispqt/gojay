@@ -213,3 +213,41 @@ func (dec *Decoder) skipString() error {
 	}
 	return dec.raiseInvalidJSONErr(len(dec.data) - 1)
 }
+
+// Add Values functions
+
+// AddString decodes the next key to a *string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+func (dec *Decoder) AddString(v *string) error {
+	return dec.String(v)
+}
+
+// AddStringNull decodes the next key to a *string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddStringNull(v **string) error {
+	return dec.StringNull(v)
+}
+
+// String decodes the next key to a *string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+func (dec *Decoder) String(v *string) error {
+	err := dec.decodeString(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// StringNull decodes the next key to a **string.
+// If next key is not a JSON string nor null, InvalidUnmarshalError will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) StringNull(v **string) error {
+	err := dec.decodeStringNull(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}

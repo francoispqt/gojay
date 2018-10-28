@@ -2,16 +2,17 @@ package gojay
 
 import "reflect"
 
-// DecodeArray reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
+// DecodeArray reads the next JSON-encoded value from the decoder's input (io.Reader)
+// and stores it in the value pointed to by v.
 //
 // v must implement UnmarshalerJSONArray.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
-func (dec *Decoder) DecodeArray(arr UnmarshalerJSONArray) error {
+func (dec *Decoder) DecodeArray(v UnmarshalerJSONArray) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	_, err := dec.decodeArray(arr)
+	_, err := dec.decodeArray(v)
 	return err
 }
 func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
@@ -174,14 +175,20 @@ func (dec *Decoder) skipArray() (int, error) {
 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeArrayFunc is a custom func type implementing UnmarshalerJSONArray.
-// Use it to cast a func(*Decoder) to Unmarshal an object.
+// DecodeArrayFunc is a func type implementing UnmarshalerJSONArray.
+// Use it to cast a `func(*Decoder) error` to Unmarshal an array on the fly.
 //
-//	str := ""
+//	strSlice := make([]string, 0)
 //	dec := gojay.NewDecoder(io.Reader)
-//	dec.DecodeArray(gojay.DecodeArrayFunc(func(dec *gojay.Decoder, k string) error {
-//		return dec.AddString(&str)
-//	}))
+//
+//  err := dec.DecodeArray(	dec.DecodeArray(gojay.DecodeArrayFunc(func(dec *gojay.Decoder) error {
+//		var str string
+//		if err := dec.AddString(&str); err != nil {
+//			return err
+//		}
+// 		strSlice = append(strSplice, str)
+//		return nil
+//	})))
 type DecodeArrayFunc func(*Decoder) error
 
 // UnmarshalJSONArray implements UnmarshalerJSONArray.
@@ -192,4 +199,41 @@ func (f DecodeArrayFunc) UnmarshalJSONArray(dec *Decoder) error {
 // IsNil implements UnmarshalerJSONArray.
 func (f DecodeArrayFunc) IsNil() bool {
 	return f == nil
+}
+
+// Add Values functions
+
+// AddArray decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
+	return dec.Array(v)
+}
+
+// AddArrayNull decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) AddArrayNull(v UnmarshalerJSONArray) error {
+	return dec.ArrayNull(v)
+}
+
+// Array decodes the next key to a UnmarshalerJSONArray.
+func (dec *Decoder) Array(v UnmarshalerJSONArray) error {
+	newCursor, err := dec.decodeArray(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.called |= 1
+	return nil
+}
+
+// ArrayNull decodes the next key to a UnmarshalerJSONArray.
+// v should be a pointer to an UnmarshalerJSONArray,
+// if `null` value is encountered in JSON, it will leave the value v untouched,
+// else it will create a new instance of the UnmarshalerJSONArray behind v.
+func (dec *Decoder) ArrayNull(v interface{}) error {
+	newCursor, err := dec.decodeArrayNull(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.called |= 1
+	return nil
 }

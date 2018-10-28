@@ -34,3 +34,20 @@ func (dec *Decoder) decodeTime(v *time.Time, format string) error {
 	*v = tt
 	return nil
 }
+
+// Add Values functions
+
+// AddTime decodes the next key to a *time.Time with the given format
+func (dec *Decoder) AddTime(v *time.Time, format string) error {
+	return dec.Time(v, format)
+}
+
+// Time decodes the next key to a *time.Time with the given format
+func (dec *Decoder) Time(v *time.Time, format string) error {
+	err := dec.decodeTime(v, format)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}

@@ -1158,3 +1158,180 @@ func (dec *Decoder) atoi8(start, end int) int8 {
 	}
 	return val
 }
+
+// Add Values functions
+
+// AddInt decodes the next key to an *int.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt(v *int) error {
+	return dec.Int(v)
+}
+
+// AddIntNull decodes the next key to an *int.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddIntNull(v **int) error {
+	return dec.IntNull(v)
+}
+
+// AddInt8 decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt8(v *int8) error {
+	return dec.Int8(v)
+}
+
+// AddInt8Null decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddInt8Null(v **int8) error {
+	return dec.Int8Null(v)
+}
+
+// AddInt16 decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt16(v *int16) error {
+	return dec.Int16(v)
+}
+
+// AddInt16Null decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddInt16Null(v **int16) error {
+	return dec.Int16Null(v)
+}
+
+// AddInt32 decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt32(v *int32) error {
+	return dec.Int32(v)
+}
+
+// AddInt32Null decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddInt32Null(v **int32) error {
+	return dec.Int32Null(v)
+}
+
+// AddInt64 decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddInt64(v *int64) error {
+	return dec.Int64(v)
+}
+
+// AddInt64Null decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddInt64Null(v **int64) error {
+	return dec.Int64Null(v)
+}
+
+// Int decodes the next key to an *int.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int(v *int) error {
+	err := dec.decodeInt(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// IntNull decodes the next key to an *int.
+// If next key value overflows int, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) IntNull(v **int) error {
+	err := dec.decodeIntNull(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int8 decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int8(v *int8) error {
+	err := dec.decodeInt8(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int8Null decodes the next key to an *int.
+// If next key value overflows int8, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int8Null(v **int8) error {
+	err := dec.decodeInt8Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int16 decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int16(v *int16) error {
+	err := dec.decodeInt16(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int16Null decodes the next key to an *int.
+// If next key value overflows int16, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int16Null(v **int16) error {
+	err := dec.decodeInt16Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int32 decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int32(v *int32) error {
+	err := dec.decodeInt32(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int32Null decodes the next key to an *int.
+// If next key value overflows int32, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int32Null(v **int32) error {
+	err := dec.decodeInt32Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int64 decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int64(v *int64) error {
+	err := dec.decodeInt64(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Int64Null decodes the next key to an *int.
+// If next key value overflows int64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Int64Null(v **int64) error {
+	err := dec.decodeInt64Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}

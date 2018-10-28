@@ -1,6 +1,7 @@
 package gojay
 
-// DecodeBool reads the next JSON-encoded value from its input and stores it in the boolean pointed to by v.
+// DecodeBool reads the next JSON-encoded value from the decoder's input (io.Reader)
+// and stores it in the boolean pointed to by v.
 //
 // See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
 func (dec *Decoder) DecodeBool(v *bool) error {
@@ -196,4 +197,45 @@ func (dec *Decoder) assertFalse() error {
 		return nil
 	}
 	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+
+// Add Values functions
+
+// AddBool decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
+// If next key is null, bool will be false.
+func (dec *Decoder) AddBool(v *bool) error {
+	return dec.Bool(v)
+}
+
+// AddBoolNull decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
+// If next key is null, bool will be false.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddBoolNull(v **bool) error {
+	return dec.BoolNull(v)
+}
+
+// Bool decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
+// If next key is null, bool will be false.
+func (dec *Decoder) Bool(v *bool) error {
+	err := dec.decodeBool(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// BoolNull decodes the next key to a *bool.
+// If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
+// If next key is null, bool will be false.
+func (dec *Decoder) BoolNull(v **bool) error {
+	err := dec.decodeBoolNull(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
 }

@@ -111,3 +111,20 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 	err = dec.raiseInvalidJSONErr(dec.cursor)
 	return
 }
+
+// Add Values functions
+
+// AddInterface decodes the next key to a interface{}.
+func (dec *Decoder) AddInterface(v *interface{}) error {
+	return dec.Interface(v)
+}
+
+// Interface decodes the next key to an interface{}.
+func (dec *Decoder) Interface(value *interface{}) error {
+	err := dec.decodeInterface(value)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}

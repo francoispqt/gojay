@@ -417,3 +417,100 @@ func (dec *Decoder) getFloat32() (float32, error) {
 	}
 	return float32(dec.atoi32(start, end)), nil
 }
+
+// Add Values functions
+
+// AddFloat decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat(v *float64) error {
+	return dec.Float64(v)
+}
+
+// AddFloatNull decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddFloatNull(v **float64) error {
+	return dec.Float64Null(v)
+}
+
+// AddFloat64 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat64(v *float64) error {
+	return dec.Float64(v)
+}
+
+// AddFloat64Null decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddFloat64Null(v **float64) error {
+	return dec.Float64Null(v)
+}
+
+// AddFloat32 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) AddFloat32(v *float32) error {
+	return dec.Float32(v)
+}
+
+// AddFloat32Null decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+// If a `null` is encountered, gojay does not change the value of the pointer.
+func (dec *Decoder) AddFloat32Null(v **float32) error {
+	return dec.Float32Null(v)
+}
+
+// Float decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float(v *float64) error {
+	return dec.Float64(v)
+}
+
+// FloatNull decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) FloatNull(v **float64) error {
+	return dec.Float64Null(v)
+}
+
+// Float64 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float64(v *float64) error {
+	err := dec.decodeFloat64(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Float64Null decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float64Null(v **float64) error {
+	err := dec.decodeFloat64Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Float32 decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float32(v *float32) error {
+	err := dec.decodeFloat32(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}
+
+// Float32Null decodes the next key to a *float64.
+// If next key value overflows float64, an InvalidUnmarshalError error will be returned.
+func (dec *Decoder) Float32Null(v **float32) error {
+	err := dec.decodeFloat32Null(v)
+	if err != nil {
+		return err
+	}
+	dec.called |= 1
+	return nil
+}

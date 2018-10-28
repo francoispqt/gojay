@@ -70,6 +70,12 @@ func (dec *Decoder) decodeEmbeddedJSON(ej *EmbeddedJSON) error {
 // AddEmbeddedJSON adds an EmbeddedsJSON to the value pointed by v.
 // It can be used to delay JSON decoding or precompute a JSON encoding.
 func (dec *Decoder) AddEmbeddedJSON(v *EmbeddedJSON) error {
+	return dec.EmbeddedJSON(v)
+}
+
+// EmbeddedJSON adds an EmbeddedsJSON to the value pointed by v.
+// It can be used to delay JSON decoding or precompute a JSON encoding.
+func (dec *Decoder) EmbeddedJSON(v *EmbeddedJSON) error {
 	err := dec.decodeEmbeddedJSON(v)
 	if err != nil {
 		return err
