@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"fmt"
-	"reflect"
 )
 
 // Encode encodes a value to JSON.
@@ -45,7 +44,7 @@ func (enc *Encoder) Encode(v interface{}) error {
 	case *EmbeddedJSON:
 		return enc.EncodeEmbeddedJSON(vt)
 	default:
-		return InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(vt).String()))
+		return InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 	}
 }
 
@@ -81,9 +80,8 @@ func (enc *Encoder) AddInterface(value interface{}) {
 	case float32:
 		enc.AddFloat32(vt)
 	default:
-		t := reflect.TypeOf(vt)
-		if t != nil {
-			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+		if vt != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 			return
 		}
 		return
@@ -124,9 +122,8 @@ func (enc *Encoder) AddInterfaceKey(key string, value interface{}) {
 	case float32:
 		enc.AddFloat32Key(key, vt)
 	default:
-		t := reflect.TypeOf(vt)
-		if t != nil {
-			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+		if vt != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 			return
 		}
 		return
@@ -167,9 +164,8 @@ func (enc *Encoder) AddInterfaceKeyOmitEmpty(key string, v interface{}) {
 	case float32:
 		enc.AddFloat32KeyOmitEmpty(key, vt)
 	default:
-		t := reflect.TypeOf(vt)
-		if t != nil {
-			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, t.String()))
+		if vt != nil {
+			enc.err = InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 			return
 		}
 		return

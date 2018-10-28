@@ -2,7 +2,6 @@ package gojay
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -127,7 +126,8 @@ var encoderTestCases = []struct {
 		expectations: func(t *testing.T, b string, err error) {
 			assert.NotNil(t, err, "err should be nil")
 			assert.IsType(t, InvalidMarshalError(""), err, "err should be of type InvalidMarshalError")
-			assert.Equal(t, fmt.Sprintf(invalidMarshalErrorMsg, reflect.TypeOf(&struct{}{}).String()), err.Error(), "err message should be equal to invalidMarshalErrorMsg")
+			var s = struct{}{}
+			assert.Equal(t, fmt.Sprintf(invalidMarshalErrorMsg, &s), err.Error(), "err message should be equal to invalidMarshalErrorMsg")
 		},
 	},
 }
