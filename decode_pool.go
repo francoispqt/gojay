@@ -35,7 +35,8 @@ func newDecoderPool() interface{} {
 
 // BorrowDecoder borrows a Decoder from the pool.
 // It takes an io.Reader implementation as data input.
-// It initiates the done channel returned by Done().
+//
+// In order to benefit from the pool, a borrowed decoder must be released after usage.
 func BorrowDecoder(r io.Reader) *Decoder {
 	return borrowDecoder(r, 512)
 }

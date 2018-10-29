@@ -343,22 +343,6 @@ func (dec *Decoder) skipData() error {
 
 // DecodeObjectFunc is a func type implementing UnmarshalerJSONObject.
 // Use it to cast a `func(*Decoder, k string) error` to Unmarshal an object on the fly.
-//
-//	user := struct{
-//		name string
-//		email string
-//  }{}
-//	dec := gojay.NewDecoder(io.Reader)
-//
-//	dec.DecodeObject(gojay.DecodeObjectFunc(func(dec *gojay.Decoder, k string) error {
-//		switch k {
-//			case "name":
-//				return dec.String(&user.name)
-// 			case "email":
-//				return dec.String(&user.email)
-//		}
-//		return nil
-//	}))
 type DecodeObjectFunc func(*Decoder, string) error
 
 // UnmarshalJSONObject implements UnmarshalerJSONObject.
