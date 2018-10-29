@@ -5,7 +5,7 @@ import (
 	"unsafe"
 )
 
-// DecodeObject reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
+// DecodeObject reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by v.
 //
 // v must implement UnmarshalerJSONObject.
 //
@@ -341,14 +341,8 @@ func (dec *Decoder) skipData() error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
-// DecodeObjectFunc is a custom func type implementing UnmarshalerJSONObject.
-// Use it to cast a func(*Decoder) to Unmarshal an object.
-//
-//	str := ""
-//	dec := gojay.NewDecoder(io.Reader)
-//	dec.DecodeObject(gojay.DecodeObjectFunc(func(dec *gojay.Decoder, k string) error {
-//		return dec.AddString(&str)
-//	}))
+// DecodeObjectFunc is a func type implementing UnmarshalerJSONObject.
+// Use it to cast a `func(*Decoder, k string) error` to Unmarshal an object on the fly.
 type DecodeObjectFunc func(*Decoder, string) error
 
 // UnmarshalJSONObject implements UnmarshalerJSONObject.
@@ -359,4 +353,55 @@ func (f DecodeObjectFunc) UnmarshalJSONObject(dec *Decoder, k string) error {
 // NKeys implements UnmarshalerJSONObject.
 func (f DecodeObjectFunc) NKeys() int {
 	return 0
+}
+
+// Add Values functions
+
+// AddObject decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObject(v UnmarshalerJSONObject) error {
+	return dec.Object(v)
+}
+
+// AddObjectNull decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
+func (dec *Decoder) AddObjectNull(v interface{}) error {
+	return dec.ObjectNull(v)
+}
+
+// Object decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
+func (dec *Decoder) Object(value UnmarshalerJSONObject) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObject(value)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
+}
+
+// ObjectNull decodes the JSON value within an object or an array to a UnmarshalerJSONObject.
+// v should be a pointer to an UnmarshalerJSONObject,
+// if `null` value is encountered in JSON, it will leave the value v untouched,
+// else it will create a new instance of the UnmarshalerJSONObject behind v.
+func (dec *Decoder) ObjectNull(v interface{}) error {
+	initialKeysDone := dec.keysDone
+	initialChild := dec.child
+	dec.keysDone = 0
+	dec.called = 0
+	dec.child |= 1
+	newCursor, err := dec.decodeObjectNull(v)
+	if err != nil {
+		return err
+	}
+	dec.cursor = newCursor
+	dec.keysDone = initialKeysDone
+	dec.child = initialChild
+	dec.called |= 1
+	return nil
 }

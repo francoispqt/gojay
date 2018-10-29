@@ -49,7 +49,7 @@ func (dec *Decoder) makeInvalidUnmarshalErr(v interface{}) error {
 	)
 }
 
-const invalidMarshalErrorMsg = "Invalid type %s provided to Marshal"
+const invalidMarshalErrorMsg = "Invalid type %T provided to Marshal"
 
 // InvalidMarshalError is a type representing an error returned when
 // Encoding did not find the proper way to encode

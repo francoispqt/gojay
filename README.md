@@ -172,6 +172,21 @@ func (dec *gojay.Decoder) DecodeBool(v *bool) error
 func (dec *gojay.Decoder) DecodeString(v *string) error
 ```
 
+All DecodeXxx methods are used to decode top level JSON values. If you are decoding keys or items of a JSON object or array, don't use the Decode methods.
+
+Example:
+```go
+reader := strings.NewReader(`"John Doe"`)
+dec := NewDecoder(reader)
+
+var str string
+err := dec.DecodeString(&str)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println(str) // gojay
+```
 
 ### Structs and Maps
 #### UnmarshalerJSONObject Interface
@@ -286,6 +301,28 @@ func main() {
     fmt.Println(v) // Jay
 }
 ```
+
+### Decode values methods
+When decoding a JSON object of a JSON array using `UnmarshalerJSONObject` or `UnmarshalerJSONArray` interface, the `gojay.Decoder` provides dozens of methods to Decode multiple types. 
+
+Non exhaustive list of methods available (to see all methods, check the godoc): 
+```go
+dec.Int
+dec.Int8
+dec.Int16
+dec.Int32
+dec.Int64
+dec.Uint8
+dec.Uint16
+dec.Uint32
+dec.Uint64
+dec.String
+dec.Time
+dec.Bool
+dec.SQLNullString
+dec.SQLNullInt64
+```
+
 
 ## Encoding
 

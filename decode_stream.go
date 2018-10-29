@@ -26,7 +26,7 @@ type StreamDecoder struct {
 	deadline *time.Time
 }
 
-// DecodeStream reads the next line delimited JSON-encoded value from its input and stores it in the value pointed to by c.
+// DecodeStream reads the next line delimited JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by c.
 //
 // c must implement UnmarshalerStream. Ideally c is a channel. See example for implementation.
 //
