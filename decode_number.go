@@ -61,7 +61,7 @@ func init() {
 
 	for i := 0; i < 256; i++ {
 		switch i {
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.':
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-':
 			skipNumberEndCursorIncrement[i] = 1
 		}
 	}
@@ -74,7 +74,7 @@ func (dec *Decoder) skipNumber() (int, error) {
 		end += skipNumberEndCursorIncrement[dec.data[j]]
 
 		switch dec.data[j] {
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ' ', '\n', '\t', '\r':
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E', '+', '-', ' ', '\n', '\t', '\r':
 			continue
 		case ',', '}', ']':
 			return end, nil
