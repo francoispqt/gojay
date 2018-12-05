@@ -385,8 +385,6 @@ func TestSkipString(t *testing.T) {
 			err:            true,
 			errType:        InvalidJSONError(""),
 		},
-<<<<<<< HEAD
-=======
 		{
 			name:           "string-solidus",
 			json:           `Asia\/Bangkok","enable":true}"`,
@@ -399,7 +397,6 @@ func TestSkipString(t *testing.T) {
 			expectedResult: "",
 			err:            false,
 		},
->>>>>>> da3273f... fix error when skipping unicode string
 	}
 
 	for _, testCase := range testCases {
