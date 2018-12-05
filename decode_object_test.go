@@ -411,7 +411,7 @@ func TestDecodeObjectBasic(t *testing.T) {
 			err: false,
 		},
 		{
-			name: "basic-skip-data",
+			name: "basic-skip-data-error-uint8-negative",
 			json: `{
 				"testStr": "hello world!",
 				"testInt": 4535,
@@ -433,7 +433,7 @@ func TestDecodeObjectBasic(t *testing.T) {
 				"testUint32": 343443,
 				"testUint64": 545665757,
 				"skipString": "skipping string with escaped \\n new line",
-				"skipInt": 3,
+				"skipInt": 3
 			}`,
 			expectedResult: testObject{
 				testStr:     "hello world!",
@@ -451,6 +451,48 @@ func TestDecodeObjectBasic(t *testing.T) {
 				testUint64:  545665757,
 			},
 			err: true,
+		},
+		{
+			name: "skip-data-with-unicode",
+			json: `{
+				"skipString": "hello\u1234\u2123",
+				"testStr": "hello world!",
+				"testInt": 4535,
+				"testBool": true,
+				"testFloat32": 2.345,
+				"testFloat64": 123.677,
+				"testInt8": 23,
+				"skipObject": {
+					"escapedString": "string with unicode \u1234\u1234\u1234"
+				},
+				"testInt16": 1245,
+				"testInt32": 456778,
+				"testInt64": 1446685358,
+				"testUint8": 255,
+				"skipArray": [[],[],{}],
+				"testUint16": 3455,
+				"skipBool": true,
+				"skipNull": null,
+				"testUint32": 343443,
+				"testUint64": 545665757,
+				"skipInt": 3
+			}`,
+			expectedResult: testObject{
+				testStr:     "hello world!",
+				testInt:     4535,
+				testBool:    true,
+				testFloat32: 2.345,
+				testFloat64: 123.677,
+				testInt8:    23,
+				testInt16:   1245,
+				testInt32:   456778,
+				testInt64:   1446685358,
+				testUint8:   255,
+				testUint16:  3455,
+				testUint32:  343443,
+				testUint64:  545665757,
+			},
+			err: false,
 		},
 	}
 

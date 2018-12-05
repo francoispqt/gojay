@@ -214,9 +214,12 @@ func (dec *Decoder) skipEscapedString() error {
 					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				return nil
-			case 'u':
-				// is unicode
-				return dec.skipString()
+			case 'u': // is unicode, we skip the following characters and place the cursor one one byte backward to avoid it breaking when returning to skipString
+				if err := dec.skipString(); err != nil {
+					return err
+				}
+				dec.cursor--
+				return nil
 			case 'n', 'r', 't', '/', 'f', 'b':
 				return nil
 			default:
@@ -234,11 +237,12 @@ func (dec *Decoder) skipEscapedString() error {
 func (dec *Decoder) skipString() error {
 	for dec.cursor < dec.length || dec.read() {
 		switch dec.data[dec.cursor] {
-		// string found
+		// found the closing quote
+		// let's return
 		case '"':
 			dec.cursor = dec.cursor + 1
 			return nil
-		// slash found
+		// solidus found start parsing an escaped string
 		case '\\':
 			dec.cursor = dec.cursor + 1
 			err := dec.skipEscapedString()
