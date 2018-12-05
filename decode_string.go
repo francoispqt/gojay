@@ -178,6 +178,9 @@ func (dec *Decoder) skipEscapedString() error {
 					return dec.raiseInvalidJSONErr(dec.cursor)
 				}
 				return nil
+			case 'u':
+				// is unicode
+				return dec.skipString()
 			case 'n', 'r', 't', '/', 'f', 'b':
 				return nil
 			default:

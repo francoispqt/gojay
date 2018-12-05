@@ -738,10 +738,15 @@ func TestSkipString(t *testing.T) {
 			expectedResult: "",
 			err:            false,
 		},
+		{
+			name:           "string-unicode",
+			json:           `[2]\u66fe\u5b97\u5357"`,
+			expectedResult: "",
+			err:            false,
+		},
 	}
 
 	for _, testCase := range testCases {
-		str := ""
 		dec := NewDecoder(strings.NewReader(testCase.json))
 		err := dec.skipString()
 		if testCase.err {
@@ -749,9 +754,8 @@ func TestSkipString(t *testing.T) {
 			if testCase.errType != nil {
 				assert.IsType(t, testCase.errType, err, "err should be of expected type")
 			}
-		} else {
-			assert.Nil(t, err, "err should be nil")
+			return
 		}
-		assert.Equal(t, testCase.expectedResult, str, fmt.Sprintf("str should be equal to '%s'", testCase.expectedResult))
+		assert.Nil(t, err, "err should be nil")
 	}
 }
