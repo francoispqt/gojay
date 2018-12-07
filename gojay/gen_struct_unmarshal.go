@@ -38,7 +38,7 @@ func (g *Gen) structGenUnmarshalObj(n string, s *ast.StructType) (int, error) {
 		// add accordingly
 		for _, field := range s.Fields.List {
 			// check if has hide tag
-			if field.Tag != nil && hasTagUnmarshalHide(field.Tag) {
+			if field.Tag != nil && hasTagUnmarshalHide(field.Tag, g.tag) {
 				continue
 			}
 			switch t := field.Type.(type) {
@@ -72,7 +72,7 @@ func (g *Gen) structGenUnmarshalObj(n string, s *ast.StructType) (int, error) {
 }
 
 func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, ptr bool) (int, error) {
-	var keyV = getStructFieldJSONKey(field)
+	var keyV = getStructFieldJSONKey(field, g.tag)
 
 	switch i.String() {
 	case "string":

@@ -21,6 +21,7 @@ type Gen struct {
 	pkg      string
 	src      string
 	types    []string
+	tag      string
 	genTypes map[string]*ast.TypeSpec
 	vis      *vis
 }
@@ -52,12 +53,13 @@ func parseTemplates(tpls templateList, pfx string) {
 }
 
 // NewGen returns a new generator
-func NewGen(p string, types []string) *Gen {
+func NewGen(p string, types []string, tag string) *Gen {
 	g := &Gen{
 		src:      p,
 		types:    types,
 		b:        &strings.Builder{},
 		genTypes: make(map[string]*ast.TypeSpec),
+		tag:      tag,
 	}
 	return g
 }

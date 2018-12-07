@@ -31,10 +31,10 @@ func (g *Gen) structGenMarshalObj(n string, s *ast.StructType) (int, error) {
 			// check if has hide tag
 			var omitEmpty string
 			if field.Tag != nil {
-				if hasTagMarshalHide(field.Tag) {
+				if hasTagMarshalHide(field.Tag, g.tag) {
 					continue
 				}
-				if hasTagOmitEmpty(field.Tag) {
+				if hasTagOmitEmpty(field.Tag, g.tag) {
 					omitEmpty = omitEmptyFuncName
 				}
 			}
@@ -67,7 +67,7 @@ func (g *Gen) structGenMarshalObj(n string, s *ast.StructType) (int, error) {
 }
 
 func (g *Gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, omitEmpty string, ptr bool) (int, error) {
-	var keyV = getStructFieldJSONKey(field)
+	var keyV = getStructFieldJSONKey(field, g.tag)
 
 	switch i.String() {
 	case "string":

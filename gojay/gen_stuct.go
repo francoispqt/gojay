@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func getStructFieldJSONKey(field *ast.Field) string {
+func getStructFieldJSONKey(field *ast.Field, tagName string) string {
 	var keyV string
 	if field.Tag != nil {
-		keyV = tagKeyName(field.Tag)
+		keyV = tagKeyName(field.Tag, tagName)
 	}
 	if keyV == "" {
 		keyV = strings.ToLower(field.Names[0].String()[:1]) + field.Names[0].String()[1:]

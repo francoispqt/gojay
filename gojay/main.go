@@ -16,6 +16,7 @@ var dst = flag.String("o", "", "destination file to output generated implementat
 var src = flag.String("s", "", "source dir or file (absolute or relative path)")
 var pkg = flag.String("p", "", "go package")
 var types = flag.String("t", "", "types to generate")
+var tag = flag.String("g", "gojay", "tag for gojay generator")
 
 var ErrNoPathProvided = errors.New("You must provide a path or a package name")
 
@@ -98,7 +99,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// parse source files
-	g := NewGen(p, t)
+	g := NewGen(p, t, *tag)
 	err = g.parse()
 	if err != nil {
 		log.Fatal(err)

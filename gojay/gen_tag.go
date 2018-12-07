@@ -13,20 +13,21 @@ const unmarshalHideTag = "-u"
 const marshalHideTag = "-m"
 const omitEmptyTag = "omitempty"
 
-func getGojayTagValue(tags *ast.BasicLit) (*structtag.Tag, error) {
+func getGojayTagValue(tags *ast.BasicLit, tagName string) (*structtag.Tag, error) {
 	t, err := structtag.Parse(tags.Value[1 : len(tags.Value)-1])
 	if err != nil {
 		return nil, err
 	}
-	v, err := t.Get(gojayTag)
+
+	v, err := t.Get(tagName)
 	if err != nil {
 		return nil, err
 	}
 	return v, nil
 }
 
-func hasTagUnmarshalHide(tags *ast.BasicLit) bool {
-	v, err := getGojayTagValue(tags)
+func hasTagUnmarshalHide(tags *ast.BasicLit, tagName string) bool {
+	v, err := getGojayTagValue(tags, tagName)
 	if err != nil {
 		log.Print(err)
 		return false
@@ -34,8 +35,8 @@ func hasTagUnmarshalHide(tags *ast.BasicLit) bool {
 	return (v.Name == unmarshalHideTag || v.Name == hideTag) || v.HasOption(unmarshalHideTag)
 }
 
-func hasTagMarshalHide(tags *ast.BasicLit) bool {
-	v, err := getGojayTagValue(tags)
+func hasTagMarshalHide(tags *ast.BasicLit, tagName string) bool {
+	v, err := getGojayTagValue(tags, tagName)
 	if err != nil {
 		log.Print(err)
 		return false
@@ -43,8 +44,8 @@ func hasTagMarshalHide(tags *ast.BasicLit) bool {
 	return (v.Name == marshalHideTag || v.Name == hideTag) || v.HasOption(marshalHideTag)
 }
 
-func hasTagOmitEmpty(tags *ast.BasicLit) bool {
-	v, err := getGojayTagValue(tags)
+func hasTagOmitEmpty(tags *ast.BasicLit, tagName string) bool {
+	v, err := getGojayTagValue(tags, tagName)
 	if err != nil {
 		log.Print(err)
 		return false
@@ -52,8 +53,8 @@ func hasTagOmitEmpty(tags *ast.BasicLit) bool {
 	return v.Name == omitEmptyTag || v.HasOption(omitEmptyTag)
 }
 
-func tagKeyName(tags *ast.BasicLit) string {
-	v, err := getGojayTagValue(tags)
+func tagKeyName(tags *ast.BasicLit, tagName string) string {
+	v, err := getGojayTagValue(tags, tagName)
 	if err != nil {
 		log.Print(err)
 		return ""

@@ -8,7 +8,7 @@ import (
 )
 
 func MakeGenFromReader(input io.Reader) (*Gen, error) {
-	g := NewGen("", []string{})
+	g := NewGen("", []string{}, gojayTag)
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", input, parser.ParseComments)
 	if err != nil {
