@@ -34,7 +34,12 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 	enc.writeByte('[')
 	v.(MarshalerJSONArray).MarshalJSONArray(enc)
 	enc.writeByte(']')
-	defer enc.Release()
+
+	defer func() {
+		enc.buf = make([]byte, 0, 512)
+		enc.Release()
+	}()
+
 	return enc.buf, nil
 }
 
@@ -61,7 +66,12 @@ func MarshalJSONArray(v MarshalerJSONArray) ([]byte, error) {
 func MarshalJSONObject(v MarshalerJSONObject) ([]byte, error) {
 	enc := BorrowEncoder(nil)
 	enc.grow(512)
-	defer enc.Release()
+
+	defer func() {
+		enc.buf = make([]byte, 0, 512)
+		enc.Release()
+	}()
+
 	return enc.encodeObject(v)
 }
 
@@ -90,6 +100,11 @@ func marshal(v interface{}, any bool) ([]byte, error) {
 		buf []byte
 		err error
 	)
+
+	defer func() {
+		enc.buf = make([]byte, 0, 512)
+		enc.Release()
+	}()
 
 	buf, err = func() ([]byte, error) {
 		switch vt := v.(type) {
@@ -133,8 +148,6 @@ func marshal(v interface{}, any bool) ([]byte, error) {
 			return nil, InvalidMarshalError(fmt.Sprintf(invalidMarshalErrorMsg, vt))
 		}
 	}()
-
-	enc.Release()
 	return buf, err
 }
 

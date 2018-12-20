@@ -44,7 +44,7 @@ func (enc *Encoder) EncodeObjectKeys(v MarshalerJSONObject, keys []string) error
 }
 
 func (enc *Encoder) encodeObject(v MarshalerJSONObject) ([]byte, error) {
-	enc.grow(500)
+	enc.grow(512)
 	enc.writeByte('{')
 	if !v.IsNil() {
 		v.MarshalJSONObject(enc)
