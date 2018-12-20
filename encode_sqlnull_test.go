@@ -51,7 +51,7 @@ func TestEncoceSQLNullString(t *testing.T) {
 		func(t *testing.T) {
 			builder := &strings.Builder{}
 			enc := NewEncoder(builder)
-			enc.Release()
+			enc.isPooled = 1
 			defer func() {
 				err := recover()
 				assert.NotNil(t, err, "err should not be nil")
@@ -329,7 +329,7 @@ func TestEncoceSQLNullInt64(t *testing.T) {
 		func(t *testing.T) {
 			builder := &strings.Builder{}
 			enc := NewEncoder(builder)
-			enc.Release()
+			enc.isPooled = 1
 			defer func() {
 				err := recover()
 				assert.NotNil(t, err, "err should not be nil")
@@ -606,7 +606,7 @@ func TestEncoceSQLNullFloat64(t *testing.T) {
 		func(t *testing.T) {
 			builder := &strings.Builder{}
 			enc := NewEncoder(builder)
-			enc.Release()
+			enc.isPooled = 1
 			defer func() {
 				err := recover()
 				assert.NotNil(t, err, "err should not be nil")
@@ -884,7 +884,7 @@ func TestEncoceSQLNullBool(t *testing.T) {
 		func(t *testing.T) {
 			builder := &strings.Builder{}
 			enc := NewEncoder(builder)
-			enc.Release()
+			enc.isPooled = 1
 			defer func() {
 				err := recover()
 				assert.NotNil(t, err, "err should not be nil")
