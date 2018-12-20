@@ -122,7 +122,7 @@ func TestEncoderStringEncodeAPIErrors(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		v := ""
 		enc := BorrowEncoder(nil)
-		enc.Release()
+		enc.isPooled = 1
 		defer func() {
 			err := recover()
 			assert.NotNil(t, err, "err shouldnt be nil")

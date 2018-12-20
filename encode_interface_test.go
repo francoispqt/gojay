@@ -153,7 +153,7 @@ func TestEncoderInterfaceEncodeAPI(t *testing.T) {
 		v := ""
 		w := TestWriterError("")
 		enc := BorrowEncoder(w)
-		enc.Release()
+		enc.isPooled = 1
 		defer func() {
 			err := recover()
 			assert.NotNil(t, err, "err should not be nil")

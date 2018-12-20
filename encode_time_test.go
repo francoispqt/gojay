@@ -41,7 +41,7 @@ func TestEncodeTime(t *testing.T) {
 	t.Run("encode-time-pool-error", func(t *testing.T) {
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
-		enc.Release()
+		enc.isPooled = 1
 		defer func() {
 			err := recover()
 			assert.NotNil(t, err, "err should not be nil")
