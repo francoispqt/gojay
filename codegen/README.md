@@ -1,5 +1,4 @@
 # Gojay code generator
-
 This package provides a command line tool to generate gojay's marshaling and unmarshing interface implementation for custom type(s)
 
 
@@ -12,7 +11,6 @@ go install github.com/francoispqt/gojay/gojaygen
 ## Generate code 
 
 ### Basic command
-
 The basic command is straightforward and easy to use:
 ```sh
 cd $GOPATH/src/mycoany/myproject
@@ -21,9 +19,8 @@ gojaygen -p myproject
 If you just want to the output to stdout, omit the third parameter. 
 
 ### Using flags
-
-- s file/dir to path, can be a relative or absolute path
-- t root types to generate with its all dependencies (comma separated)
+- s file/dir path, can be a relative or absolute path
+- t root types to generate with all its dependencies (comma separated)
 - a annotation tag used to read meta data (default: json)
 - o output file (relative or absolute path)
 - p reuse object witt sync.Pool
@@ -35,19 +32,18 @@ Examples:
 gojay -s /tmp/myproj -t SomeType -o output.go
 ```
 
-- Specific types  in a go package,  with custom tag, write to a file::
+- Specific types in a file, with custom tag, write to stdout
 ```sh
 gojay -s somegofile.go -a gojay -t SomeType
 ```
 
 
 ## Generator tags
-
 You can add tags to your structs to control:
 
 - the JSON key
 - skip a struct field
-- the use of omit empty methods for marshaling
+- the use of omitempty methods for marshaling
 - timeFormat (java style data format)
 - timeLayout (golang time layout)
  

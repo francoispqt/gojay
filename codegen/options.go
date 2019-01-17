@@ -20,9 +20,6 @@ func (o *Options) Validate() error {
 	if o.Source == "" {
 		return errors.New("Source was empty")
 	}
-	if o.Dest == "" {
-		return errors.New("Dest was empty")
-	}
 	if len(o.Types) == 0 {
 		return errors.New("Types was empty")
 	}
