@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"go/format"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -92,11 +93,19 @@ func (g *Generator) writeCode() error {
 	if err != nil {
 		return err
 	}
+
+	code, err := format.Source([]byte(expandedCode))
+
+	if err != nil {
+		return err
+	}
+
 	if g.options.Dest == "" {
-		fmt.Print(expandedCode)
+		fmt.Print(string(code))
 		return nil
 	}
-	return ioutil.WriteFile(g.options.Dest, []byte(expandedCode), 0644)
+
+	return ioutil.WriteFile(g.options.Dest, code, 0644)
 }
 
 func (g *Generator) generatePrimitiveArray(field *Field) error {

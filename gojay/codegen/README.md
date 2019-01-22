@@ -1,5 +1,5 @@
 # Gojay code generator
-This package provides a command line tool to generate gojay's marshaling and unmarshing interface implementation for custom type(s)
+This package provides a command line tool to generate gojay's marshaling and unmarshing interface implementation for custom struct type(s)
 
 
 ## Get started
@@ -13,10 +13,10 @@ go install github.com/francoispqt/gojay/gojaygen
 ### Basic command
 The basic command is straightforward and easy to use:
 ```sh
-cd $GOPATH/src/mycoany/myproject
-gojaygen -p myproject
+cd $GOPATH/src/github.com/user/project
+gojaygen -s . -p true -t MyType -o output.go
 ```
-If you just want to the output to stdout, omit the third parameter. 
+If you just want to the output to stdout, omit the -o flag. 
 
 ### Using flags
 - s file/dir path, can be a relative or absolute path

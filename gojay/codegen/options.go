@@ -2,10 +2,11 @@ package codegen
 
 import (
 	"flag"
+	"strings"
+
 	"github.com/go-errors/errors"
 	"github.com/viant/toolbox"
 	"github.com/viant/toolbox/url"
-	"strings"
 )
 
 type Options struct {

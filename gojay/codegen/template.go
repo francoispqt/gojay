@@ -106,7 +106,7 @@ var fieldTemplate = map[int]string{
     }{{else}}    enc.TimeKey("{{.Key}}", {{.PointerModifier}}{{.Accessor}}, {{.TimeLayout}}){{end}}`,
 	decodeSQLNull: `		case "{{.Key}}":
 			var value = {{.Init}}
-			err := dec.DecodeSQLNull{{.NullType}}({{.PointerModifier}}value, format)
+			err := dec.DecodeSQLNull{{.NullType}}({{.PointerModifier}}value)
 			if err == nil {
 				{{.Mutator}} = value
 			}
