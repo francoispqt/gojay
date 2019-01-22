@@ -63,7 +63,7 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:3e18fb0fe710202b9c43173c899175dc1bddb044dda2be257a3b961a836a1a14"
+  digest = "1:09674c02bd92bd0991b8680d49ef03663f1fd3f41ba8546a1369449d6a7266eb"
   name = "github.com/viant/toolbox"
   packages = [
     ".",
@@ -73,12 +73,12 @@
     "url",
   ]
   pruneopts = ""
-  revision = "a7e3c8c3c49e598d5f2ba1d4ca7e4694a9b7919b"
-  version = "v0.9.0"
+  revision = "028b0d7fdbc4fc800667de944031b61b7e87eeac"
+  version = "v0.10.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:59b49c47c11a48f1054529207f65907c014ecf5f9a7c0d9c0f1616dec7b062ed"
+  digest = "1:4d6de5daef5a9b4368238ba29487f3cbc15c97dbd55ab460d12553c0365ce999"
   name = "golang.org/x/crypto"
   packages = [
     "blowfish",
@@ -91,11 +91,11 @@
     "ssh",
   ]
   pruneopts = ""
-  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+  revision = "64072686203f69e3fd20143576b27200f18ab0fa"
 
 [[projects]]
   branch = "master"
-  digest = "1:7ec13687f85b25087fe05f6ea8dd116013a8263f8eb7e057da7664bc7599d2d4"
+  digest = "1:552c5a9b4a2cd4d21efdba35fff561e13f0c666bf4c82fcedbb4e031b704aa61"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -103,7 +103,7 @@
     "websocket",
   ]
   pruneopts = ""
-  revision = "915654e7eabcea33ae277abbecf52f0d8b7a9fdc"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
 
 [[projects]]
   branch = "master"
