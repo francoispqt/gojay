@@ -6,6 +6,27 @@ import (
 	"time"
 )
 
+type SubMessages []SubMessage
+
+func (s *SubMessages) UnmarshalJSONArray(dec *gojay.Decoder) error {
+	var value = SubMessage{}
+	if err := dec.Object(&value); err != nil {
+		return err
+	}
+	*s = append(*s, value)
+	return nil
+}
+
+func (s SubMessages) MarshalJSONArray(enc *gojay.Encoder) {
+	for i := range s {
+		enc.Object(&s[i])
+	}
+}
+
+func (s SubMessages) IsNil() bool {
+	return len(s) == 0
+}
+
 type Ints []int
 
 // UnmarshalJSONArray decodes JSON array elements into slice
@@ -75,27 +96,6 @@ func (s SubMessagesPtr) IsNil() bool {
 	return len(s) == 0
 }
 
-type SubMessages []SubMessage
-
-func (s *SubMessages) UnmarshalJSONArray(dec *gojay.Decoder) error {
-	var value = SubMessage{}
-	if err := dec.Object(&value); err != nil {
-		return err
-	}
-	*s = append(*s, value)
-	return nil
-}
-
-func (s SubMessages) MarshalJSONArray(enc *gojay.Encoder) {
-	for i := range s {
-		enc.Object(&s[i])
-	}
-}
-
-func (s SubMessages) IsNil() bool {
-	return len(s) == 0
-}
-
 // MarshalJSONObject implements MarshalerJSONObject
 func (m *SubMessage) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.IntKey("id", m.Id)
@@ -124,7 +124,7 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	case "startDate":
 		var format = "2006-01-02 15:04:05"
 		var value = time.Time{}
-		err := dec.DecodeTime(&value, format)
+		err := dec.Time(&value, format)
 		if err == nil {
 			m.StartTime = value
 		}
@@ -133,7 +133,7 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	case "endDate":
 		var format = "2006-01-02 15:04:05"
 		var value = &time.Time{}
-		err := dec.DecodeTime(value, format)
+		err := dec.Time(value, format)
 		if err == nil {
 			m.EndTime = value
 		}

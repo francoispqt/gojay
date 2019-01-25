@@ -124,7 +124,7 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	case "StartTime":
 		var format = time.RFC3339
 		var value = time.Time{}
-		err := dec.DecodeTime(&value, format)
+		err := dec.Time(&value, format)
 		if err == nil {
 			m.StartTime = value
 		}
@@ -133,7 +133,7 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	case "EndTime":
 		var format = time.RFC3339
 		var value = &time.Time{}
-		err := dec.DecodeTime(value, format)
+		err := dec.Time(value, format)
 		if err == nil {
 			m.EndTime = value
 		}

@@ -15,6 +15,7 @@ type Options struct {
 	Types       []string
 	PoolObjects bool
 	TagName     string
+	Pkg         string
 }
 
 func (o *Options) Validate() error {
@@ -33,6 +34,7 @@ const (
 	optionKeyTypes       = "t"
 	optionKeyTagName     = "a"
 	optionKeyPoolObjects = "p"
+	optionKeyPkg         = "pkg"
 )
 
 //NewOptionsWithFlagSet creates a new options for the supplide flagset
@@ -45,6 +47,7 @@ func NewOptionsWithFlagSet(set *flag.FlagSet) *Options {
 	result.PoolObjects = toolbox.AsBoolean(set.Lookup(optionKeyPoolObjects).Value.String())
 	result.TagName = set.Lookup(optionKeyTagName).Value.String()
 	result.Types = strings.Split(set.Lookup(optionKeyTypes).Value.String(), ",")
+	result.Pkg = set.Lookup(optionKeyPkg).Value.String()
 	if result.Source == "" {
 		result.Source = url.NewResource(".").ParsedURL.Path
 	}

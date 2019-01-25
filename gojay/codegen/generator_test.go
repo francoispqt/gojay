@@ -57,8 +57,8 @@ func TestGenerator_Generate(t *testing.T) {
 	}
 
 	for _, useCase := range useCases {
-		gen := &Generator{}
-		err := gen.Generate(useCase.options)
+		gen := NewGenerator(useCase.options)
+		err := gen.Generate()
 		if useCase.hasError {
 			assert.NotNil(t, err, useCase.description)
 			continue

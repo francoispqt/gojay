@@ -8,20 +8,20 @@ import (
 )
 
 func init() {
-	MessagePool = &sync.Pool{
-		New: func() interface{} {
-			return &Message{}
-		},
-	}
 	SubMessagePool = &sync.Pool{
 		New: func() interface{} {
 			return &SubMessage{}
 		},
 	}
+	MessagePool = &sync.Pool{
+		New: func() interface{} {
+			return &Message{}
+		},
+	}
 }
 
-var SubMessagePool *sync.Pool
 var MessagePool *sync.Pool
+var SubMessagePool *sync.Pool
 
 type Ints []int
 
@@ -111,6 +111,63 @@ func (s SubMessages) MarshalJSONArray(enc *gojay.Encoder) {
 
 func (s SubMessages) IsNil() bool {
 	return len(s) == 0
+}
+
+// MarshalJSONObject implements MarshalerJSONObject
+func (m *SubMessage) MarshalJSONObject(enc *gojay.Encoder) {
+	enc.IntKey("Id", m.Id)
+	enc.StringKey("Description", m.Description)
+	enc.TimeKey("StartTime", &m.StartTime, time.RFC3339)
+	if m.EndTime != nil {
+		enc.TimeKey("EndTime", m.EndTime, time.RFC3339)
+	}
+}
+
+// IsNil checks if instance is nil
+func (m *SubMessage) IsNil() bool {
+	return m == nil
+}
+
+// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
+func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+
+	switch k {
+	case "Id":
+		return dec.Int(&m.Id)
+
+	case "Description":
+		return dec.String(&m.Description)
+
+	case "StartTime":
+		var format = time.RFC3339
+		var value = time.Time{}
+		err := dec.Time(&value, format)
+		if err == nil {
+			m.StartTime = value
+		}
+		return err
+
+	case "EndTime":
+		var format = time.RFC3339
+		var value = &time.Time{}
+		err := dec.Time(value, format)
+		if err == nil {
+			m.EndTime = value
+		}
+		return err
+
+	}
+	return nil
+}
+
+// NKeys returns the number of keys to unmarshal
+func (m *SubMessage) NKeys() int { return 4 }
+
+// Reset reset fields
+func (m *SubMessage) Reset() {
+	m.Id = 0
+	m.Description = ""
+	m.EndTime = nil
 }
 
 // MarshalJSONObject implements MarshalerJSONObject
@@ -241,61 +298,4 @@ func (m *Message) Reset() {
 	m.MessagesY = nil
 	m.IsTrue = nil
 	m.Payload = nil
-}
-
-// MarshalJSONObject implements MarshalerJSONObject
-func (m *SubMessage) MarshalJSONObject(enc *gojay.Encoder) {
-	enc.IntKey("Id", m.Id)
-	enc.StringKey("Description", m.Description)
-	enc.TimeKey("StartTime", &m.StartTime, time.RFC3339)
-	if m.EndTime != nil {
-		enc.TimeKey("EndTime", m.EndTime, time.RFC3339)
-	}
-}
-
-// IsNil checks if instance is nil
-func (m *SubMessage) IsNil() bool {
-	return m == nil
-}
-
-// UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
-func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
-
-	switch k {
-	case "Id":
-		return dec.Int(&m.Id)
-
-	case "Description":
-		return dec.String(&m.Description)
-
-	case "StartTime":
-		var format = time.RFC3339
-		var value = time.Time{}
-		err := dec.DecodeTime(&value, format)
-		if err == nil {
-			m.StartTime = value
-		}
-		return err
-
-	case "EndTime":
-		var format = time.RFC3339
-		var value = &time.Time{}
-		err := dec.DecodeTime(value, format)
-		if err == nil {
-			m.EndTime = value
-		}
-		return err
-
-	}
-	return nil
-}
-
-// NKeys returns the number of keys to unmarshal
-func (m *SubMessage) NKeys() int { return 4 }
-
-// Reset reset fields
-func (m *SubMessage) Reset() {
-	m.Id = 0
-	m.Description = ""
-	m.EndTime = nil
 }

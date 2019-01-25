@@ -190,7 +190,6 @@ func (s *Struct) generateFieldDecoding(fields []*toolbox.FieldInfo) (string, []s
 						return "", nil, err
 					}
 				}
-				// if is time.Time
 			} else if _, k, ok := s.typedFieldDecode(field, field.Type); ok {
 				templateKey = k
 			} else {

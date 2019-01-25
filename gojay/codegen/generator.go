@@ -11,6 +11,9 @@ import (
 	"github.com/viant/toolbox"
 )
 
+const gojayPackage = "github.com/francoispqt/gojay"
+
+// Generator holds the content to generate the gojay code
 type Generator struct {
 	fileInfo      *toolbox.FileSetInfo
 	types         map[string]string
@@ -27,14 +30,17 @@ type Generator struct {
 	options       *Options
 }
 
+// Returns the type from the the fileInfo
 func (g *Generator) Type(typeName string) *toolbox.TypeInfo {
 	return g.fileInfo.Type(typeName)
 }
 
+// addImport adds an import package to be printed on the generated code
 func (g *Generator) addImport(pkg string) {
 	g.imports[`"`+pkg+`"`] = true
 }
 
+// we initiate the variables containing the code to be generated
 func (g *Generator) init() {
 	g.filedInit = []string{}
 	g.imports = map[string]bool{}
@@ -42,27 +48,41 @@ func (g *Generator) init() {
 	g.structTypes = map[string]string{}
 	g.sliceTypes = map[string]string{}
 	g.poolInit = map[string]string{}
-	g.addImport("github.com/francoispqt/gojay")
-}
-
-func (g *Generator) Generate(options *Options) error {
-	if err := options.Validate(); err != nil {
-		return err
-	}
-	g.options = options
-	g.init()
-
-	if options.PoolObjects {
+	g.addImport(gojayPackage)
+	// if we want pools, add the sync package right away
+	if g.options.PoolObjects {
 		g.addImport("sync")
 	}
-	if err := g.readPackageCode(options.Source); err != nil {
+}
+
+// NewGenerator creates a new generator with the given options
+func NewGenerator(options *Options) *Generator {
+	var g = &Generator{}
+	// first we validate the flags
+	if err := options.Validate(); err != nil {
+		panic(err)
+	}
+	g.options = options
+	// we initiate the values on the generator
+	g.init()
+	return g
+}
+
+// Generate generates the gojay implementation code
+func (g *Generator) Generate() error {
+	// first we read the code from which we should find the types
+	if err := g.readPackageCode(g.options.Source); err != nil {
 		return err
 	}
-	for _, rootType := range options.Types {
+
+	// then we generate code for the types given
+	for _, rootType := range g.options.Types {
 		if err := g.generateStructCode(rootType); err != nil {
 			return err
 		}
 	}
+
+	//
 	g.Imports = strings.Join(toolbox.MapKeysToStringSlice(g.imports), "\n")
 	return g.writeCode()
 }
@@ -93,8 +113,6 @@ func (g *Generator) writeCode() error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(expandedCode))
 
 	code, err := format.Source([]byte(expandedCode))
 
@@ -222,5 +240,11 @@ func (g *Generator) readPackageCode(pkgPath string) error {
 		g.Pkg = filepath.Base(p)
 		g.fileInfo, err = toolbox.NewFileSetInfo(p)
 	}
+
+	// if Pkg flag is set use it
+	if g.options.Pkg != "" {
+		g.Pkg = g.options.Pkg
+	}
+
 	return err
 }
