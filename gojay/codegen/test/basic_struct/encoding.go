@@ -8,7 +8,7 @@ import (
 
 type Ints []int
 
-//UnmarshalJSONArray decodes JSON array elements into slice
+// UnmarshalJSONArray decodes JSON array elements into slice
 func (a *Ints) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	var value int
 	if err := dec.Int(&value); err != nil {
@@ -18,21 +18,21 @@ func (a *Ints) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	return nil
 }
 
-//MarshalJSONArray encodes arrays into JSON
+// MarshalJSONArray encodes arrays into JSON
 func (a Ints) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, item := range a {
 		enc.Int(item)
 	}
 }
 
-//IsNil checks if array is nil
+// IsNil checks if array is nil
 func (a Ints) IsNil() bool {
 	return len(a) == 0
 }
 
 type Float32sPtr []*float32
 
-//UnmarshalJSONArray decodes JSON array elements into slice
+// UnmarshalJSONArray decodes JSON array elements into slice
 func (a *Float32sPtr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	var value float32
 	if err := dec.Float32(&value); err != nil {
@@ -42,14 +42,14 @@ func (a *Float32sPtr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	return nil
 }
 
-//MarshalJSONArray encodes arrays into JSON
+// MarshalJSONArray encodes arrays into JSON
 func (a Float32sPtr) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, item := range a {
 		enc.Float32(*item)
 	}
 }
 
-//IsNil checks if array is nil
+// IsNil checks if array is nil
 func (a Float32sPtr) IsNil() bool {
 	return len(a) == 0
 }
@@ -96,7 +96,7 @@ func (s SubMessages) IsNil() bool {
 	return len(s) == 0
 }
 
-//MarshalJSONObject implements MarshalerJSONObject
+// MarshalJSONObject implements MarshalerJSONObject
 func (m *SubMessage) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.IntKey("Id", m.Id)
 	enc.StringKey("Description", m.Description)
@@ -106,7 +106,7 @@ func (m *SubMessage) MarshalJSONObject(enc *gojay.Encoder) {
 	}
 }
 
-//IsNil checks if instance is nil
+// IsNil checks if instance is nil
 func (m *SubMessage) IsNil() bool {
 	return m == nil
 }
@@ -125,6 +125,9 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 		var format = time.RFC3339
 		var value = time.Time{}
 		err := dec.DecodeTime(&value, format)
+		if err == nil {
+			m.StartTime = value
+		}
 		return err
 
 	case "EndTime":
@@ -143,7 +146,7 @@ func (m *SubMessage) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 // NKeys returns the number of keys to unmarshal
 func (m *SubMessage) NKeys() int { return 4 }
 
-//MarshalJSONObject implements MarshalerJSONObject
+// MarshalJSONObject implements MarshalerJSONObject
 func (m *Message) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.IntKey("Id", m.Id)
 	enc.StringKey("Name", m.Name)
@@ -163,7 +166,7 @@ func (m *Message) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.AddEmbeddedJSONKey("Payload", &payloadSlice)
 }
 
-//IsNil checks if instance is nil
+// IsNil checks if instance is nil
 func (m *Message) IsNil() bool {
 	return m == nil
 }

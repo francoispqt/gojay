@@ -2,8 +2,9 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/viant/toolbox"
 	"strings"
+
+	"github.com/viant/toolbox"
 )
 
 type Struct struct {
@@ -178,29 +179,20 @@ func (s *Struct) generateFieldDecoding(fields []*toolbox.FieldInfo) (string, []s
 
 				break main
 			} else if field.IsSlice {
-				templateKey = decodeStructSlice
-				if err = s.generateObjectArray(field); err != nil {
-					return "", nil, err
+				if f, _, ok := s.typedFieldDecode(field, field.ComponentType); ok {
+					templateKey = decodeStructSlice
+					if err = f(field); err != nil {
+						return "", nil, err
+					}
+				} else {
+					templateKey = decodeStructSlice
+					if err = s.generateObjectArray(field); err != nil {
+						return "", nil, err
+					}
 				}
 				// if is time.Time
-			} else if strings.HasSuffix(field.Type, "time.Time") {
-				templateKey = decodeTime
-				s.addImport("time")
-				// if is sql.NullXxx
-			} else if strings.Contains(field.Type, "sql.Null") {
-				templateKey = decodeSQLNull
-				s.addImport("database/sql")
-				if strings.Contains(field.Type, "Bool") {
-					field.NullType = "Bool"
-				} else if strings.Contains(field.Type, "Float64") {
-					field.NullType = "Float64"
-				} else if strings.Contains(field.Type, "Int64") {
-					field.NullType = "Int64"
-				} else if strings.Contains(field.Type, "String") {
-					field.NullType = "String"
-				} else {
-					templateKey = decodeUnknown
-				}
+			} else if _, k, ok := s.typedFieldDecode(field, field.Type); ok {
+				templateKey = k
 			} else {
 				templateKey = decodeUnknown
 			}
@@ -283,20 +275,10 @@ func (s *Struct) generateFieldEncoding(fields []*toolbox.FieldInfo) ([]string, e
 				templateKey = encodeStructSlice
 				break main
 			} else if field.IsSlice {
+				s.typedFieldDecode(field, field.ComponentType)
 				templateKey = encodeStructSlice
-			} else if strings.HasSuffix(field.Type, "time.Time") {
-				templateKey = encodeTime
-			} else if strings.Contains(field.Type, "sql.Null") {
-				templateKey = encodeSQLNull
-				if strings.Contains(field.Type, "Bool") {
-					field.NullType = "Bool"
-				} else if strings.Contains(field.Type, "Float64") {
-					field.NullType = "Float64"
-				} else if strings.Contains(field.Type, "Int64") {
-					field.NullType = "Int64"
-				} else if strings.Contains(field.Type, "String") {
-					field.NullType = "String"
-				}
+			} else if _, k, ok := s.typedFieldEncode(field, field.Type); ok {
+				templateKey = k
 			} else {
 				templateKey = encodeUnknown
 			}
@@ -311,6 +293,46 @@ func (s *Struct) generateFieldEncoding(fields []*toolbox.FieldInfo) ([]string, e
 
 	}
 	return fieldCases, nil
+}
+
+var sqlNullTypes = []string{
+	"Bool",
+	"Float64",
+	"Int64",
+	"String",
+	"Time",
+}
+
+func (s *Struct) typedFieldEncode(field *Field, typeName string) (func(*Field) error, int, bool) {
+	if strings.Contains(typeName, "time.Time") {
+		return s.generateTimeArray, encodeTime, true
+	} else if strings.Contains(typeName, "sql.Null") {
+		for _, nullType := range sqlNullTypes {
+			if strings.Contains(typeName, nullType) {
+				field.NullType = nullType
+				field.GojayMethod = "SQLNull" + nullType
+			}
+		}
+		return s.generateTypedArray, encodeSQLNull, true
+	}
+	return nil, 0, false
+}
+
+func (s *Struct) typedFieldDecode(field *Field, typeName string) (func(*Field) error, int, bool) {
+	if strings.Contains(typeName, "time.Time") {
+		s.addImport("time")
+		return s.generateTimeArray, decodeTime, true
+	} else if strings.Contains(typeName, "sql.Null") {
+		for _, nullType := range sqlNullTypes {
+			if strings.Contains(typeName, nullType) {
+				field.NullType = nullType
+				field.GojayMethod = "SQLNull" + nullType
+			}
+		}
+		s.addImport("database/sql")
+		return s.generateTypedArray, decodeSQLNull, true
+	}
+	return nil, 0, false
 }
 
 func NewStruct(info *toolbox.TypeInfo, generator *Generator) *Struct {

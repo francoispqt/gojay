@@ -94,6 +94,8 @@ func (g *Generator) writeCode() error {
 		return err
 	}
 
+	fmt.Println(string(expandedCode))
+
 	code, err := format.Source([]byte(expandedCode))
 
 	if err != nil {
@@ -127,6 +129,32 @@ func (g *Generator) generateObjectArray(field *Field) error {
 		return err
 	}
 	code, err := expandBlockTemplate(structTypeSlice, field)
+	if err != nil {
+		return err
+	}
+	g.sliceTypes[field.RawComponentType] = code
+	return err
+}
+
+func (g *Generator) generateTimeArray(field *Field) error {
+	if _, ok := g.sliceTypes[field.RawComponentType]; ok {
+		return nil
+	}
+
+	code, err := expandBlockTemplate(timeSlice, field)
+	if err != nil {
+		return err
+	}
+	g.sliceTypes[field.RawComponentType] = code
+	return err
+}
+
+func (g *Generator) generateTypedArray(field *Field) error {
+	if _, ok := g.sliceTypes[field.RawComponentType]; ok {
+		return nil
+	}
+
+	code, err := expandBlockTemplate(typeSlice, field)
 	if err != nil {
 		return err
 	}

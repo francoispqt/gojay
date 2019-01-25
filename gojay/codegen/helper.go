@@ -43,11 +43,12 @@ func getSliceHelperTypeName(typeName string, isPointer bool) string {
 	if typeName == "" {
 		return ""
 	}
+
 	var pluralName = firstLetterToUppercase(typeName) + "s"
 	if isPointer {
 		pluralName += "Ptr"
 	}
-	return pluralName
+	return strings.Replace(pluralName, ".", "", -1)
 }
 
 func isSkipable(options *Options, field *toolbox.FieldInfo) bool {
@@ -70,7 +71,7 @@ func wrapperIfNeeded(text, wrappingChar string) string {
 
 func getPoolName(typeName string) string {
 	typeName = strings.Replace(typeName, "*", "", 1)
-	return typeName + "Pool"
+	return strings.Replace(typeName+"Pool", ".", "", -1)
 }
 
 func getJSONKey(options *Options, field *toolbox.FieldInfo) string {

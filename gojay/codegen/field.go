@@ -42,6 +42,8 @@ type Field struct {
 	IsAnonymous     bool
 	IsPointer       bool
 	IsSlice         bool
+
+	GojayMethod string
 }
 
 //NewField returns a new field
@@ -95,7 +97,7 @@ func NewField(owner *Struct, field *toolbox.FieldInfo, fieldType *toolbox.TypeIn
 	}
 
 	if owner.options.PoolObjects {
-		if field.IsPointer && !strings.HasSuffix(field.TypeName, ".Time") {
+		if field.IsPointer && !strings.HasSuffix(field.TypeName, ".Time") && !strings.Contains(field.TypeName, "sql.Null") {
 			poolName := getPoolName(field.TypeName)
 			result.Init = fmt.Sprintf(`%v.Get().(*%v)`, poolName, field.TypeName)
 		}

@@ -53,7 +53,7 @@ func TestMessage_Unmarshal(t *testing.T) {
   "data": "123"
 }`
 
-	expacted := `{
+	expected := `{
   "Id": 1022,
   "Name": "name acc",
   "Price": 13.3,
@@ -102,7 +102,7 @@ func TestMessage_Unmarshal(t *testing.T) {
 	if !assert.Nil(t, err) {
 		log.Fatal(err)
 	}
-	assertly.AssertValues(t, expacted, message)
+	assertly.AssertValues(t, expected, message)
 }
 
 func TestMessage_Marshal(t *testing.T) {
@@ -149,7 +149,7 @@ func TestMessage_Marshal(t *testing.T) {
   "data": "123"
 }`
 
-	expacted := `{
+	expected := `{
   "Id": 1022,
   "Name": "name acc",
   "Price": 13.3,
@@ -198,7 +198,7 @@ func TestMessage_Marshal(t *testing.T) {
 	if !assert.Nil(t, err) {
 		log.Fatal(err)
 	}
-	assertly.AssertValues(t, expacted, message)
+	assertly.AssertValues(t, expected, message)
 	var writer = new(bytes.Buffer)
 	encoder := gojay.NewEncoder(writer)
 	err = encoder.Encode(message)

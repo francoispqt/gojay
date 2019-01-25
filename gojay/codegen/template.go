@@ -94,7 +94,7 @@ var fieldTemplate = map[int]string{
 	decodeTime: `		case "{{.Key}}":
 			var format = {{.TimeLayout}}
 			var value = {{.Init}}
-			err := dec.DecodeTime({{.PointerModifier}}value, format)
+			err := dec.Time({{.PointerModifier}}value, format)
 			if err == nil {
 				{{.Mutator}} = value
 			}
@@ -106,7 +106,7 @@ var fieldTemplate = map[int]string{
     }{{else}}    enc.TimeKey("{{.Key}}", {{.PointerModifier}}{{.Accessor}}, {{.TimeLayout}}){{end}}`,
 	decodeSQLNull: `		case "{{.Key}}":
 			var value = {{.Init}}
-			err := dec.DecodeSQLNull{{.NullType}}({{.PointerModifier}}value)
+			err := dec.SQLNull{{.NullType}}({{.PointerModifier}}value)
 			if err == nil {
 				{{.Mutator}} = value
 			}
@@ -144,6 +144,8 @@ const (
 	poolVar
 	poolInit
 	embeddedStructInit
+	timeSlice
+	typeSlice
 )
 
 var blockTemplate = map[int]string{
@@ -235,7 +237,50 @@ func (s {{.HelperType}})  IsNil() bool {
 	return len(s) == 0
 }
 `,
+	typeSlice: `
+type {{.HelperType}} {{.RawType}}
 
+func (s *{{.HelperType}}) UnmarshalJSONArray(dec *gojay.Decoder) error {
+	var value = {{.ComponentInit}}
+	if err := dec.{{.GojayMethod}}({{.ComponentPointerModifier}}value); err != nil {
+		return err
+	}
+	*s = append(*s, value)
+	return nil
+}
+
+func (s {{.HelperType}})  MarshalJSONArray(enc *gojay.Encoder) {
+	for i  := range s {
+		enc.{{.GojayMethod}}({{.ComponentPointerModifier}}s[i])
+	}
+}
+
+func (s {{.HelperType}})  IsNil() bool {
+	return len(s) == 0
+}
+`,
+	timeSlice: `
+type {{.HelperType}} {{.RawType}}
+
+func (s *{{.HelperType}}) UnmarshalJSONArray(dec *gojay.Decoder) error {
+	var value = {{.ComponentInit}}
+	if err := dec.Time({{.ComponentPointerModifier}}value, {{.TimeLayout}}); err != nil {
+		return err
+	}
+	*s = append(*s, value)
+	return nil
+}
+
+func (s {{.HelperType}})  MarshalJSONArray(enc *gojay.Encoder) {
+	for i  := range s {
+		enc.Time({{.ComponentPointerModifier}}s[i], {{.TimeLayout}})
+	}
+}
+
+func (s {{.HelperType}})  IsNil() bool {
+	return len(s) == 0
+}
+`,
 	resetStruct: `
 // Reset reset fields 
 func ({{.Receiver}}) Reset()  {
