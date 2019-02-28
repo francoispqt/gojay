@@ -16,6 +16,12 @@ func (dec *Decoder) DecodeArray(v UnmarshalerJSONArray) error {
 	return err
 }
 func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
+	// remember last array index in case of nested arrays
+	lastArrayIndex := dec.arrayIndex
+	dec.arrayIndex = 0
+	defer func() {
+		dec.arrayIndex = lastArrayIndex
+	}()
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':
@@ -34,6 +40,7 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 				if err != nil {
 					return 0, err
 				}
+				dec.arrayIndex++
 			}
 			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		case 'n':
@@ -60,6 +67,12 @@ func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {
 	return 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 func (dec *Decoder) decodeArrayNull(v interface{}) (int, error) {
+	// remember last array index in case of nested arrays
+	lastArrayIndex := dec.arrayIndex
+	dec.arrayIndex = 0
+	defer func() {
+		dec.arrayIndex = lastArrayIndex
+	}()
 	vv := reflect.ValueOf(v)
 	vvt := vv.Type()
 	if vvt.Kind() != reflect.Ptr || vvt.Elem().Kind() != reflect.Ptr {
@@ -96,6 +109,7 @@ func (dec *Decoder) decodeArrayNull(v interface{}) (int, error) {
 				if err != nil {
 					return 0, err
 				}
+				dec.arrayIndex++
 			}
 			return 0, dec.raiseInvalidJSONErr(dec.cursor)
 		case 'n':
@@ -225,4 +239,9 @@ func (dec *Decoder) ArrayNull(v interface{}) error {
 	dec.cursor = newCursor
 	dec.called |= 1
 	return nil
+}
+
+// Index returns the index of an array being decoded.
+func (dec *Decoder) Index() int {
+	return dec.arrayIndex
 }

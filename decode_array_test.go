@@ -627,3 +627,74 @@ func TestDecoderArrayFunc(t *testing.T) {
 	var f DecodeArrayFunc
 	assert.True(t, f.IsNil())
 }
+
+type testArrayStrings [3]string
+
+func (a *testArrayStrings) UnmarshalJSONArray(dec *Decoder) error {
+	var str string
+	if err := dec.String(&str); err != nil {
+		return err
+	}
+	a[dec.Index()] = str
+	return nil
+}
+
+func TestArrayStrings(t *testing.T) {
+	data := []byte(`["a", "b", "c"]`)
+	arr := testArrayStrings{}
+	err := Unmarshal(data, &arr)
+	assert.Nil(t, err, "err must be nil")
+	assert.Equal(t, "a", arr[0], "arr[0] must be equal to 'a'")
+	assert.Equal(t, "b", arr[1], "arr[1] must be equal to 'b'")
+	assert.Equal(t, "c", arr[2], "arr[2] must be equal to 'c'")
+}
+
+type testSliceArraysStrings struct {
+	arrays []testArrayStrings
+	t      *testing.T
+}
+
+func (s *testSliceArraysStrings) UnmarshalJSONArray(dec *Decoder) error {
+	var a testArrayStrings
+	assert.Equal(s.t, len(s.arrays), dec.Index(), "decoded array index must be equal to current slice len")
+	if err := dec.AddArray(&a); err != nil {
+		return err
+	}
+	assert.Equal(s.t, len(s.arrays), dec.Index(), "decoded array index must be equal to current slice len")
+	s.arrays = append(s.arrays, a)
+	return nil
+}
+
+func TestIndex(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult []testArrayStrings
+	}{
+		{
+			name:           "basic-test",
+			json:           `[["a","b","c"],["1","2","3"],["x","y","z"]]`,
+			expectedResult: []testArrayStrings{{"a", "b", "c"}, {"1", "2", "3"}, {"x", "y", "z"}},
+		},
+		{
+			name:           "basic-test-null",
+			json:           `[["a","b","c"],null,["x","y","z"]]`,
+			expectedResult: []testArrayStrings{{"a", "b", "c"}, {"", "", ""}, {"x", "y", "z"}},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			s := make([]testArrayStrings, 0)
+			dec := BorrowDecoder(strings.NewReader(testCase.json))
+			defer dec.Release()
+			a := testSliceArraysStrings{arrays: s, t: t}
+			err := dec.Decode(&a)
+			assert.Nil(t, err, "err should be nil")
+			assert.Zero(t, dec.Index(), "Index() must return zero after decoding")
+			for k, v := range testCase.expectedResult {
+				assert.Equal(t, v, a.arrays[k], "value at given index should be the same as expected results")
+			}
+		})
+	}
+}

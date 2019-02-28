@@ -286,6 +286,20 @@ func (c ChannelArray) UnmarshalJSONArray(dec *gojay.Decoder) error {
 }
 ```
 
+Example of implementation with an array:
+```go
+type testArray [3]string
+// implement UnmarshalerJSONArray
+func (a *testArray) UnmarshalJSONArray(dec *Decoder) error {
+	var str string
+	if err := dec.String(&str); err != nil {
+		return err
+	}
+	a[dec.Index()] = str
+	return nil
+}
+```
+
 ### Other types
 To decode other types (string, int, int32, int64, uint32, uint64, float, booleans), you don't need to implement any interface. 
 
