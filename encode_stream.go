@@ -125,14 +125,15 @@ func (s *StreamEncoder) Value(key interface{}) interface{} {
 //
 // After calling cancel, Done() will return a closed channel.
 func (s *StreamEncoder) Cancel(err error) {
-	s.mux.RLock()
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	
 	select {
 	case <-s.done:
 	default:
 		s.err = err
 		close(s.done)
 	}
-	s.mux.RUnlock()
 }
 
 // AddObject adds an object to be encoded.
