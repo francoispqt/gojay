@@ -59,6 +59,9 @@ func (v *{{.StructName}}) NKeys() int { return {{.NKeys}} }
 		return dec.Array(v.{{.Field}})
 `,
 	},
+	"sql": &genTpl{
+		strTpl: "\t\treturn dec.SQL{{.SqlName}}(&v.{{.Field}})\n",
+	},
 	"any": &genTpl{
 		strTpl: "\t\treturn dec.Any(&v.{{.Field}})\n",
 	},

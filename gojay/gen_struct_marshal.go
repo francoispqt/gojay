@@ -56,6 +56,17 @@ func (g *Gen) structGenMarshalObj(n string, s *ast.StructType) (int, error) {
 				default:
 					return 0, fmt.Errorf("Unknown type %s", n)
 				}
+			case *ast.SelectorExpr:
+				switch ptrExp := t.X.(type) {
+				case *ast.Ident:
+					var err error
+					keys, err = g.structGenMarshalIdent(field, ptrExp, keys, omitEmpty, false)
+					if err != nil {
+						return 0, err
+					}
+				default:
+					return 0, fmt.Errorf("Unknown type %s", n)
+				}
 			}
 		}
 	}
@@ -109,6 +120,9 @@ func (g *Gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, om
 	case "float32":
 		g.structMarshalFloat(field, keyV, "32", omitEmpty, ptr)
 		keys++
+	case "sql":
+		g.structGenMarshalSql(field, keyV, omitEmpty, ptr)
+		keys++
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
@@ -135,6 +149,24 @@ func (g *Gen) structGenMarshalIdent(field *ast.Field, i *ast.Ident, keys int, om
 		}
 	}
 	return keys, nil
+}
+
+func (g *Gen) structGenMarshalSql(field *ast.Field, keyV string, omitEmpty string, ptr bool) {
+	key := field.Names[0].String()
+	ptrStr := ""
+	if ptr {
+		ptrStr = "*"
+	}
+	err := structMarshalTpl["sql"].tpl.Execute(g.b, struct {
+		Field     string
+		Key       string
+		OmitEmpty string
+		Ptr       string
+		SqlName   string
+	}{key, keyV, omitEmpty, ptrStr, field.Type.(*ast.SelectorExpr).Sel.Name})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *Gen) structMarshalNonPrim(field *ast.Field, keyV string, sp *ast.TypeSpec, omitEmpty string, ptr bool) error {

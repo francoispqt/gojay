@@ -59,6 +59,17 @@ func (g *Gen) structGenUnmarshalObj(n string, s *ast.StructType) (int, error) {
 				default:
 					return 0, fmt.Errorf("Unknown type %s", n)
 				}
+			case *ast.SelectorExpr:
+				switch ptrExp := t.X.(type) {
+				case *ast.Ident:
+					var err error
+					keys, err = g.structGenUnmarshalIdent(field, ptrExp, keys, false)
+					if err != nil {
+						return 0, err
+					}
+				default:
+					return 0, fmt.Errorf("Unknown type %s", n)
+				}
 			}
 		}
 		// close  switch statement
@@ -114,6 +125,9 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 	case "float32":
 		g.structUnmarshalFloat(field, keyV, "32", ptr)
 		keys++
+	case "sql":
+		g.structUnmarshalSql(field, keyV)
+		keys++
 	default:
 		// if ident is already in our spec list
 		if sp, ok := g.genTypes[i.Name]; ok {
@@ -141,6 +155,24 @@ func (g *Gen) structGenUnmarshalIdent(field *ast.Field, i *ast.Ident, keys int, 
 		}
 	}
 	return keys, nil
+}
+
+func (g *Gen) structUnmarshalSql(field *ast.Field, keyV string) {
+	key := field.Names[0].String()
+	err := structUnmarshalTpl["case"].tpl.Execute(g.b, struct {
+		Key string
+	}{keyV})
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = structUnmarshalTpl["sql"].tpl.Execute(g.b, struct {
+		Field string
+		Ptr   string
+		SqlName string
+	}{key, "", field.Type.(*ast.SelectorExpr).Sel.Name})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *Gen) structUnmarshalNonPrim(field *ast.Field, keyV string, sp *ast.TypeSpec, ptr bool) error {
