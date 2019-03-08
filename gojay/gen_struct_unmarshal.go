@@ -166,8 +166,8 @@ func (g *Gen) structUnmarshalSql(field *ast.Field, keyV string) {
 		log.Fatal(err)
 	}
 	err = structUnmarshalTpl["sql"].tpl.Execute(g.b, struct {
-		Field string
-		Ptr   string
+		Field   string
+		Ptr     string
 		SqlName string
 	}{key, "", field.Type.(*ast.SelectorExpr).Sel.Name})
 	if err != nil {
