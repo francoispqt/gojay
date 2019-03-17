@@ -120,6 +120,7 @@ func (g *Generator) writeCode() error {
 		return err
 	}
 
+	// code destination is empty, we just print to stdout
 	if g.options.Dest == "" {
 		fmt.Print(string(code))
 		return nil

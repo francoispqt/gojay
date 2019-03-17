@@ -101,6 +101,7 @@ func (s *Struct) generateFieldReset(fields []*toolbox.FieldInfo) ([]string, erro
 }
 
 func (s *Struct) generateFieldDecoding(fields []*toolbox.FieldInfo) (string, []string, error) {
+
 	fieldCases := []string{}
 	var initCode = ""
 	for i := range fields {

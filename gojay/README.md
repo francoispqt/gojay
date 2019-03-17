@@ -19,20 +19,20 @@ gojaygen -s . -p true -t MyType -o output.go
 If you just want to the output to stdout, omit the -o flag. 
 
 ### Using flags
-- s file/dir path, can be a relative or absolute path
-- t root types to generate with all its dependencies (comma separated)
-- a annotation tag used to read meta data (default: json)
-- o output file (relative or absolute path)
-- p reuse object witt sync.Pool
+- s Source file/dir path, can be a relative or absolute path
+- t Types to generate with all its dependencies (comma separated)
+- a Annotation tag used to read metadata (default: json)
+- o Output file (relative or absolute path)
+- p Pool to reuse object (using sync.Pool)
 
 Examples: 
 
-- Specific type in a go package, write to a file:
+- Generate `SomeType` type in `/tmp/myproj` go package, write to file `output.go`:
 ```sh
 gojay -s /tmp/myproj -t SomeType -o output.go
 ```
 
-- Specific types in a file, with custom tag, write to stdout
+- Generate type `SomeType` in file `somegofile.go`, with custom tag `gojay`, write to stdout:
 ```sh
 gojay -s somegofile.go -a gojay -t SomeType
 ```

@@ -5,7 +5,7 @@ type Message struct {
 	Name        string
 	Price       float64
 	Ints        []int
-	Floats      []*float32
+	Floats      []float64
 	SubMessageX *SubMessage
 	MessagesX   []*SubMessage
 	SubMessageY SubMessage
