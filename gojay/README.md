@@ -1,63 +1,61 @@
 # Gojay code generator
+This package provides a command line tool to generate gojay's marshaling and unmarshing interface implementation for custom struct type(s)
 
-This package provides a command line tool to generate gojay's marshaling and unmarshing interface implementation for struct, slice and map types. 
 
 ## Get started
 
 ```sh
-go install github.com/francoispqt/gojay/gojay
+go install github.com/francoispqt/gojay/gojaygen
 ```
 
 ## Generate code 
 
 ### Basic command
-
 The basic command is straightforward and easy to use:
 ```sh
-gojay github.com/some/package TypeA,TypeB,TypeC output.go 
+cd $GOPATH/src/github.com/user/project
+gojaygen -s . -p true -t MyType -o output.go
 ```
-If you just want to the output to stdout, omit the third parameter. 
+If you just want to the output to stdout, omit the -o flag. 
 
 ### Using flags
-
-- p package to parse, relative path to $GOPATH/src
-- s file/dir to path, can be a relative or absolute path
-- t types to generate (comma separated)
-- o output file (relative or absolute path)
+- s Source file/dir path, can be a relative or absolute path
+- t Types to generate with all its dependencies (comma separated)
+- a Annotation tag used to read metadata (default: json)
+- o Output file (relative or absolute path)
+- p Pool to reuse object (using sync.Pool)
 
 Examples: 
-- Specific types in a go package, to stdout:
+
+- Generate `SomeType` type in `/tmp/myproj` go package, write to file `output.go`:
 ```sh
-gojay -p github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice 
+gojay -s /tmp/myproj -t SomeType -o output.go
 ```
 
-- Specific types in a go package, write to a file:
+- Generate type `SomeType` in file `somegofile.go`, with custom tag `gojay`, write to stdout:
 ```sh
-gojay -p github.com/francoispqt/gojay/gojay/tests -t A,B,StrSlice -o output.go
-```
-
-- Specific types in a go file, to stdout: 
-```sh
-gojay -s somegofile.go -t SomeType
+gojay -s somegofile.go -a gojay -t SomeType
 ```
 
 
-## Gojay tags
-
+## Generator tags
 You can add tags to your structs to control:
+
 - the JSON key
-- skip a struct field only for unmarshaling
-- skip a struct field only for marshaling
 - skip a struct field
-- the use of omit empty methods for marshaling
+- the use of omitempty methods for marshaling
+- timeFormat (java style data format)
+- timeLayout (golang time layout)
+ 
 
 ### Example: 
 ```go
 type A struct {
-    Str             string  `gojay:"string"`
-    StrOmitEmpty    string  `gojay:"string,omitempty"`
-    SkipUnmarshal   string  `gojay:"skipUnmarshal,-u"`
-    SkipMarshal     string  `gojay:"skipMarshal,-m"`
-    Skip            string  `gojay:"-"`
+    Str             string  `json:"string"`
+    StrOmitEmpty    string  `json:"stringOrEmpty,omitempty"`
+    Skip            string  `json:"-"`
+	StartTime time.Time `json:"startDate" timeFormat:"yyyy-MM-dd HH:mm:ss"`
+	EndTime *time.Time `json:"endDate" timeLayout:"2006-01-02 15:04:05"`
 }
 ```
+

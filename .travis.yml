@@ -6,8 +6,9 @@ go:
   - master
 
 script:
-  - go get github.com/stretchr/testify
-  - go test ./gojay -race
+  - go get github.com/golang/dep/cmd/dep github.com/stretchr/testify
+  - dep ensure -v -vendor-only
+  - go test ./gojay/codegen/test/... -race
   - go test -race -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
