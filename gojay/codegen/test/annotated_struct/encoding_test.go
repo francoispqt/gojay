@@ -6,7 +6,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/francoispqt/gojay"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
