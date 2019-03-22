@@ -116,7 +116,17 @@ func (enc *Encoder) Object(v MarshalerJSONObject) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
 	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
@@ -139,13 +149,17 @@ func (enc *Encoder) ObjectWithKeys(v MarshalerJSONObject, keys []string) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
+
 	var origKeys = enc.keys
 	var origHasKeys = enc.hasKeys
 	enc.hasKeys = true
 	enc.keys = keys
+
 	v.MarshalJSONObject(enc)
+
 	enc.hasKeys = origHasKeys
 	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
@@ -162,7 +176,17 @@ func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
 	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
@@ -180,19 +204,29 @@ func (enc *Encoder) ObjectNullEmpty(v MarshalerJSONObject) {
 		return
 	}
 	enc.writeByte('{')
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
 	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
 // ObjectKey adds a struct to be encoded, must be used inside an object as it will encode a key
 // value must implement MarshalerJSONObject
-func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
+func (enc *Encoder) ObjectKey(key string, v MarshalerJSONObject) {
 	if enc.hasKeys {
 		if !enc.keyExists(key) {
 			return
 		}
 	}
-	if value.IsNil() {
+	if v.IsNil() {
 		enc.grow(2 + len(key))
 		r := enc.getPreviousRune()
 		if r != '{' {
@@ -212,7 +246,17 @@ func (enc *Encoder) ObjectKey(key string, value MarshalerJSONObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
-	value.MarshalJSONObject(enc)
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
+	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
@@ -257,13 +301,13 @@ func (enc *Encoder) ObjectKeyWithKeys(key string, value MarshalerJSONObject, key
 // ObjectKeyOmitEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
-func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
+func (enc *Encoder) ObjectKeyOmitEmpty(key string, v MarshalerJSONObject) {
 	if enc.hasKeys {
 		if !enc.keyExists(key) {
 			return
 		}
 	}
-	if value.IsNil() {
+	if v.IsNil() {
 		return
 	}
 	enc.grow(5 + len(key))
@@ -274,14 +318,24 @@ func (enc *Encoder) ObjectKeyOmitEmpty(key string, value MarshalerJSONObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKeyObj)
-	value.MarshalJSONObject(enc)
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
+	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
 // ObjectKeyNullEmpty adds an object to be encoded or skips it if IsNil returns true.
 // Must be used inside a slice or array encoding (does not encode a key)
 // value must implement MarshalerJSONObject
-func (enc *Encoder) ObjectKeyNullEmpty(key string, value MarshalerJSONObject) {
+func (enc *Encoder) ObjectKeyNullEmpty(key string, v MarshalerJSONObject) {
 	if enc.hasKeys {
 		if !enc.keyExists(key) {
 			return
@@ -295,12 +349,22 @@ func (enc *Encoder) ObjectKeyNullEmpty(key string, value MarshalerJSONObject) {
 	enc.writeByte('"')
 	enc.writeStringEscape(key)
 	enc.writeBytes(objKey)
-	if value.IsNil() {
+	if v.IsNil() {
 		enc.writeBytes(nullBytes)
 		return
 	}
 	enc.writeByte('{')
-	value.MarshalJSONObject(enc)
+
+	var origHasKeys = enc.hasKeys
+	var origKeys = enc.keys
+	enc.hasKeys = false
+	enc.keys = nil
+
+	v.MarshalJSONObject(enc)
+
+	enc.hasKeys = origHasKeys
+	enc.keys = origKeys
+
 	enc.writeByte('}')
 }
 
