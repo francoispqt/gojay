@@ -70,12 +70,12 @@ func (enc *Encoder) SliceFloat64(s []float64) {
 	}))
 }
 
-// AddSliceFloat64Key marshals the given []string s
+// AddSliceFloat64Key marshals the given []float64 s
 func (enc *Encoder) AddSliceFloat64Key(k string, s []float64) {
 	enc.SliceFloat64Key(k, s)
 }
 
-// SliceFloat64Key marshals the given []string s
+// SliceFloat64Key marshals the given []float64 s
 func (enc *Encoder) SliceFloat64Key(k string, s []float64) {
 	enc.ArrayKey(k, EncodeArrayFunc(func(enc *Encoder) {
 		for _, i := range s {
