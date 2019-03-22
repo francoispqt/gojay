@@ -87,3 +87,101 @@ func TestEncodeSlices(t *testing.T) {
 		)
 	}
 }
+
+type testSliceSliceString [][]string
+
+func (t testSliceSliceString) MarshalJSONArray(enc *Encoder) {
+	for _, s := range t {
+		enc.AddSliceString(s)
+	}
+}
+
+func (t testSliceSliceString) IsNil() bool {
+	return t == nil
+}
+
+type testSliceSliceBool [][]bool
+
+func (t testSliceSliceBool) MarshalJSONArray(enc *Encoder) {
+	for _, s := range t {
+		enc.AddSliceBool(s)
+	}
+}
+
+func (t testSliceSliceBool) IsNil() bool {
+	return t == nil
+}
+
+type testSliceSliceInt [][]int
+
+func (t testSliceSliceInt) MarshalJSONArray(enc *Encoder) {
+	for _, s := range t {
+		enc.AddSliceInt(s)
+	}
+}
+
+func (t testSliceSliceInt) IsNil() bool {
+	return t == nil
+}
+
+type testSliceSliceFloat64 [][]float64
+
+func (t testSliceSliceFloat64) MarshalJSONArray(enc *Encoder) {
+	for _, s := range t {
+		enc.AddSliceFloat64(s)
+	}
+}
+
+func (t testSliceSliceFloat64) IsNil() bool {
+	return t == nil
+}
+
+func TestEncodeSliceSlices(t *testing.T) {
+	testCases := []struct {
+		name string
+		s    MarshalerJSONArray
+		json string
+	}{
+		{
+			name: "slice of strings",
+			s: testSliceSliceString{
+				[]string{"foo", "bar"},
+			},
+			json: `[["foo","bar"]]`,
+		},
+		{
+			name: "slice of ints",
+			s: testSliceSliceInt{
+				[]int{1, 2},
+			},
+			json: `[[1,2]]`,
+		},
+		{
+			name: "slice of float",
+			s: testSliceSliceFloat64{
+				[]float64{1.1, 1.2},
+			},
+			json: `[[1.1,1.2]]`,
+		},
+		{
+			name: "slice of bool",
+			s: testSliceSliceBool{
+				[]bool{true, false},
+			},
+			json: `[[true,false]]`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(
+			testCase.name,
+			func(t *testing.T) {
+				b := strings.Builder{}
+				enc := BorrowEncoder(&b)
+				err := enc.Encode(testCase.s)
+				require.Nil(t, err, "err should be nil")
+				require.JSONEq(t, testCase.json, b.String())
+			},
+		)
+	}
+}
