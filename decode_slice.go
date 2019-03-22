@@ -1,6 +1,6 @@
 package gojay
 
-// SliceString unmarshals the next JSON array of strings to the given *[]string s
+// AddSliceString unmarshals the next JSON array of strings to the given *[]string s
 func (dec *Decoder) AddSliceString(s *[]string) error {
 	return dec.SliceString(s)
 }
@@ -22,7 +22,7 @@ func (dec *Decoder) SliceString(s *[]string) error {
 	return nil
 }
 
-// SliceInt unmarshals the next JSON array of integers to the given *[]int s
+// AddSliceInt unmarshals the next JSON array of integers to the given *[]int s
 func (dec *Decoder) AddSliceInt(s *[]int) error {
 	return dec.SliceInt(s)
 }
