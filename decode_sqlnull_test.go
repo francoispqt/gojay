@@ -211,13 +211,13 @@ type SQLDecodeObject struct {
 func (s *SQLDecodeObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 	switch k {
 	case "s":
-		return dec.SQLNullString(&s.S)
+		return dec.AddSQLNullString(&s.S)
 	case "f":
-		return dec.SQLNullFloat64(&s.F)
+		return dec.AddSQLNullFloat64(&s.F)
 	case "i":
-		return dec.SQLNullInt64(&s.I)
+		return dec.AddSQLNullInt64(&s.I)
 	case "b":
-		return dec.SQLNullBool(&s.B)
+		return dec.AddSQLNullBool(&s.B)
 	}
 	return nil
 }
