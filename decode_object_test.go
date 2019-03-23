@@ -1039,6 +1039,15 @@ func TestDecodeObjectNull(t *testing.T) {
 		},
 	)
 	t.Run(
+		"err empty json",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
+			var dec = NewDecoder(strings.NewReader(``))
+			var _, err = dec.decodeObjectNull(&o)
+			assert.NotNil(t, err)
+		},
+	)
+	t.Run(
 		"should return an error as type is not ptr",
 		func(t *testing.T) {
 			var err = UnmarshalJSONObject([]byte(`{"key":{}}`), DecodeObjectFunc(func(dec *Decoder, k string) error {

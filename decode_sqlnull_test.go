@@ -231,6 +231,7 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 		name           string
 		json           string
 		expectedResult *SQLDecodeObject
+		err            bool
 	}{
 		{
 			name: "basic all valid",
@@ -358,6 +359,42 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "err string key",
+			json: `{
+				"s": "`,
+			err: true,
+		},
+		{
+			name: "err float key",
+			json: `{
+				"s": null,
+				"f": 1",
+				"i": null,
+				"b": null
+			}`,
+			err: true,
+		},
+		{
+			name: "err int key",
+			json: `{
+				"s": null,
+				"f": null,
+				"i": 1",
+				"b": null
+			}`,
+			err: true,
+		},
+		{
+			name: "err bool key",
+			json: `{
+				"s": null,
+				"f": null,
+				"i": null,
+				"b": tra
+			}`,
+			err: true,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -365,6 +402,12 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 			var o = &SQLDecodeObject{}
 			var dec = NewDecoder(strings.NewReader(testCase.json))
 			var err = dec.Decode(o)
+
+			if testCase.err {
+				require.NotNil(t, err)
+				return
+			}
+
 			require.Nil(t, err)
 			require.Equal(
 				t,
