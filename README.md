@@ -11,17 +11,17 @@
 
 <img src="https://github.com/francoispqt/gojay/raw/feature/generator/gojay.png" width="200px">
 
-GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)). 
+GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)).
 
-It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices. 
+It has a simple API and doesn't use reflection. It relies on small interfaces to decode/encode structures and slices.
 
 Gojay also comes with powerful stream decoding features and an even faster [Unsafe](#unsafe-api) API.
 
-There is also a [code generation tool](https://github.com/francoispqt/gojay/tree/master/gojay) to make usage easier and faster. 
+There is also a [code generation tool](https://github.com/francoispqt/gojay/tree/master/gojay) to make usage easier and faster.
 
 # Why another JSON parser?
 
-I looked at other fast decoder/encoder and realised it was mostly hardly readable static code generation or a lot of reflection, poor streaming features, and not so fast in the end. 
+I looked at other fast decoder/encoder and realised it was mostly hardly readable static code generation or a lot of reflection, poor streaming features, and not so fast in the end.
 
 Also, I wanted to build a decoder that could consume an io.Reader of line or comma delimited JSON, in a JIT way. To consume a flow of JSON objects from a TCP connection for example or from a standard output. Same way I wanted to build an encoder that could encode a flow of data to a io.Writer.
 
@@ -46,7 +46,7 @@ Decoding is done through two different API similar to standard `encoding/json`:
 
 
 Example of basic stucture decoding with Unmarshal:
-```go 
+```go
 import "github.com/francoispqt/gojay"
 
 type user struct {
@@ -96,7 +96,7 @@ func main() {
 
 Unmarshal API decodes a `[]byte` to a given pointer with a single function.
 
-Behind the doors, Unmarshal API borrows a `*gojay.Decoder` resets its settings and decodes the data to the given pointer and releases the `*gojay.Decoder` to the pool when it finishes, whether it encounters an error or not. 
+Behind the doors, Unmarshal API borrows a `*gojay.Decoder` resets its settings and decodes the data to the given pointer and releases the `*gojay.Decoder` to the pool when it finishes, whether it encounters an error or not.
 
 If it cannot find the right Decoding strategy for the type of the given pointer, it returns an `InvalidUnmarshalError`. You can test the error returned by doing `if ok := err.(InvalidUnmarshalError); ok {}`.
 
@@ -106,7 +106,7 @@ Unmarshal API comes with three functions:
 func Unmarshal(data []byte, v interface{}) error
 ```
 
-* UnmarshalJSONObject 
+* UnmarshalJSONObject
 ```go
 func UnmarshalJSONObject(data []byte, v gojay.UnmarshalerJSONObject) error
 ```
@@ -119,7 +119,7 @@ func UnmarshalJSONArray(data []byte, v gojay.UnmarshalerJSONArray) error
 
 ### Decode API
 
-Decode API decodes a `[]byte` to a given pointer by creating or borrowing a `*gojay.Decoder` with an `io.Reader` and calling `Decode` methods. 
+Decode API decodes a `[]byte` to a given pointer by creating or borrowing a `*gojay.Decoder` with an `io.Reader` and calling `Decode` methods.
 
 __Getting a *gojay.Decoder or Borrowing__
 
@@ -127,7 +127,7 @@ You can either get a fresh `*gojay.Decoder` calling `dec := gojay.NewDecoder(io.
 
 After using a decoder, you can release it by calling `dec.Release()`. Beware, if you reuse the decoder after releasing it, it will panic with an error of type `InvalidUsagePooledDecoderError`. If you want to fully benefit from the pooling, you must release your decoders after using.
 
-Example getting a fresh an releasing: 
+Example getting a fresh an releasing:
 ```go
 str := ""
 dec := gojay.NewDecoder(strings.NewReader(`"test"`))
@@ -136,7 +136,7 @@ if err := dec.Decode(&str); err != nil {
     log.Fatal(err)
 }
 ```
-Example borrowing a decoder and releasing: 
+Example borrowing a decoder and releasing:
 ```go
 str := ""
 dec := gojay.BorrowDecoder(strings.NewReader(`"test"`))
@@ -185,7 +185,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-fmt.Println(str) // gojay
+fmt.Println(str) // John Doe
 ```
 
 ### Structs and Maps
@@ -197,13 +197,13 @@ type UnmarshalerJSONObject interface {
 	UnmarshalJSONObject(*gojay.Decoder, string) error
 	NKeys() int
 }
-``` 
-`UnmarshalJSONObject` method takes two arguments, the first one is a pointer to the Decoder (*gojay.Decoder) and the second one is the string value of the current key being parsed. If the JSON data is not an object, the UnmarshalJSONObject method will never be called. 
+```
+`UnmarshalJSONObject` method takes two arguments, the first one is a pointer to the Decoder (*gojay.Decoder) and the second one is the string value of the current key being parsed. If the JSON data is not an object, the UnmarshalJSONObject method will never be called.
 
-`NKeys` method must return the number of keys to Unmarshal in the JSON object or 0. If zero is returned, all keys will be parsed. 
+`NKeys` method must return the number of keys to Unmarshal in the JSON object or 0. If zero is returned, all keys will be parsed.
 
-Example of implementation for a struct: 
-```go 
+Example of implementation for a struct:
+```go
 type user struct {
     id int
     name string
@@ -211,7 +211,7 @@ type user struct {
 }
 // implement UnmarshalerJSONObject
 func (u *user) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
-    switch k {
+    switch key {
     case "id":
         return dec.Int(&u.id)
     case "name":
@@ -226,7 +226,7 @@ func (u *user) NKeys() int {
 }
 ```
 
-Example of implementation for a `map[string]string`: 
+Example of implementation for a `map[string]string`:
 ```go
 // define our custom map type implementing UnmarshalerJSONObject
 type message map[string]string
@@ -256,13 +256,13 @@ type UnmarshalerJSONArray interface {
 	UnmarshalJSONArray(*gojay.Decoder) error
 }
 ```
-UnmarshalJSONArray method takes one argument, a pointer to the Decoder (*gojay.Decoder). If the JSON data is not an array, the Unmarshal method will never be called. 
+UnmarshalJSONArray method takes one argument, a pointer to the Decoder (*gojay.Decoder). If the JSON data is not an array, the Unmarshal method will never be called.
 
-Example of implementation with a slice: 
+Example of implementation with a slice:
 ```go
 type testSlice []string
 // implement UnmarshalerJSONArray
-func (t *testStringArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
+func (t *testSlice) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	str := ""
 	if err := dec.String(&str); err != nil {
 		return err
@@ -270,19 +270,44 @@ func (t *testStringArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	*t = append(*t, str)
 	return nil
 }
+
+func main() {
+	dec := gojay.BorrowDecoder(strings.NewReader(`["Tom", "Jim"]`))
+	var slice testSlice
+	err := dec.DecodeArray(&slice)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(slice) // [Tom Jim]
+	dec.Release()
+}
 ```
 
-Example of implementation with a channel: 
+Example of implementation with a channel:
 ```go
-type ChannelString chan string
+type testChannel chan string
 // implement UnmarshalerJSONArray
-func (c ChannelArray) UnmarshalJSONArray(dec *gojay.Decoder) error {
+func (c testChannel) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	str := ""
 	if err := dec.String(&str); err != nil {
 		return err
 	}
 	c <- str
 	return nil
+}
+
+func main() {
+	dec := gojay.BorrowDecoder(strings.NewReader(`["Tom", "Jim"]`))
+	c := make(testChannel, 2)
+	err := dec.DecodeArray(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		fmt.Println(<-c)
+	}
+	close(c)
+	dec.Release()
 }
 ```
 
@@ -298,10 +323,18 @@ func (a *testArray) UnmarshalJSONArray(dec *Decoder) error {
 	a[dec.Index()] = str
 	return nil
 }
+
+func main() {
+	dec := gojay.BorrowDecoder(strings.NewReader(`["Tom", "Jim", "Bob"]`))
+	var a testArray
+	err := dec.DecodeArray(&a)
+	fmt.Println(a) // [Tom Jim Bob]
+	dec.Release()
+}
 ```
 
 ### Other types
-To decode other types (string, int, int32, int64, uint32, uint64, float, booleans), you don't need to implement any interface. 
+To decode other types (string, int, int32, int64, uint32, uint64, float, booleans), you don't need to implement any interface.
 
 Example of encoding strings:
 ```go
@@ -317,9 +350,9 @@ func main() {
 ```
 
 ### Decode values methods
-When decoding a JSON object of a JSON array using `UnmarshalerJSONObject` or `UnmarshalerJSONArray` interface, the `gojay.Decoder` provides dozens of methods to Decode multiple types. 
+When decoding a JSON object of a JSON array using `UnmarshalerJSONObject` or `UnmarshalerJSONArray` interface, the `gojay.Decoder` provides dozens of methods to Decode multiple types.
 
-Non exhaustive list of methods available (to see all methods, check the godoc): 
+Non exhaustive list of methods available (to see all methods, check the godoc):
 ```go
 dec.Int
 dec.Int8
@@ -345,38 +378,38 @@ Encoding is done through two different API similar to standard `encoding/json`:
 * [Encode](#encode-api)
 
 Example of basic structure encoding with Marshal:
-```go 
+```go
 import "github.com/francoispqt/gojay"
 
 type user struct {
-    id int
-    name string
-    email string
+	id    int
+	name  string
+	email string
 }
+
 // implement MarshalerJSONObject
 func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
-    enc.IntKey("id", u.id)
-    enc.StringKey("name", u.name)
-    enc.StringKey("email", u.email)
+	enc.IntKey("id", u.id)
+	enc.StringKey("name", u.name)
+	enc.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
-    return u == nil
+	return u == nil
 }
 
 func main() {
-    u := &user{1, "gojay", "gojay@email.com"}
-    b, err := gojay.MarshalJSONObject(u)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
+	u := &user{1, "gojay", "gojay@email.com"}
+	b, err := gojay.MarshalJSONObject(u)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(b)) // {"id":1,"name":"gojay","email":"gojay@email.com"}
 }
 ```
 
 with Encode:
 ```go
 func main() {
-    func main() {
 	u := &user{1, "gojay", "gojay@email.com"}
 	b := strings.Builder{}
 	enc := gojay.NewEncoder(&b)
@@ -391,7 +424,7 @@ func main() {
 
 Marshal API encodes a value to a JSON `[]byte` with a single function.
 
-Behind the doors, Marshal API borrows a `*gojay.Encoder` resets its settings and encodes the data to an internal byte buffer and releases the `*gojay.Encoder` to the pool when it finishes, whether it encounters an error or not. 
+Behind the doors, Marshal API borrows a `*gojay.Encoder` resets its settings and encodes the data to an internal byte buffer and releases the `*gojay.Encoder` to the pool when it finishes, whether it encounters an error or not.
 
 If it cannot find the right Encoding strategy for the type of the given value, it returns an `InvalidMarshalError`. You can test the error returned by doing `if ok := err.(InvalidMarshalError); ok {}`.
 
@@ -401,7 +434,7 @@ Marshal API comes with three functions:
 func Marshal(v interface{}) ([]byte, error)
 ```
 
-* MarshalJSONObject 
+* MarshalJSONObject
 ```go
 func MarshalJSONObject(v gojay.MarshalerJSONObject) ([]byte, error)
 ```
@@ -413,7 +446,7 @@ func MarshalJSONArray(v gojay.MarshalerJSONArray) ([]byte, error)
 
 ### Encode API
 
-Encode API decodes a value to JSON by creating or borrowing a `*gojay.Encoder` sending it to an `io.Writer` and calling `Encode` methods. 
+Encode API decodes a value to JSON by creating or borrowing a `*gojay.Encoder` sending it to an `io.Writer` and calling `Encode` methods.
 
 __Getting a *gojay.Encoder or Borrowing__
 
@@ -421,7 +454,7 @@ You can either get a fresh `*gojay.Encoder` calling `enc := gojay.NewEncoder(io.
 
 After using an encoder, you can release it by calling `enc.Release()`. Beware, if you reuse the encoder after releasing it, it will panic with an error of type `InvalidUsagePooledEncoderError`. If you want to fully benefit from the pooling, you must release your encoders after using.
 
-Example getting a fresh encoder an releasing: 
+Example getting a fresh encoder an releasing:
 ```go
 str := "test"
 b := strings.Builder{}
@@ -431,7 +464,7 @@ if err := enc.Encode(str); err != nil {
     log.Fatal(err)
 }
 ```
-Example borrowing an encoder and releasing: 
+Example borrowing an encoder and releasing:
 ```go
 str := "test"
 b := strings.Builder{}
@@ -449,19 +482,19 @@ func (enc *gojay.Encoder) Encode(v interface{}) error
 ```
 * EncodeObject
 ```go
-func (enc *gojay.Encoder) EncodeObject(v gojay.MarshalerJSONObject) error 
+func (enc *gojay.Encoder) EncodeObject(v gojay.MarshalerJSONObject) error
 ```
 * EncodeArray
 ```go
-func (enc *gojay.Encoder) EncodeArray(v gojay.MarshalerJSONArray) error 
+func (enc *gojay.Encoder) EncodeArray(v gojay.MarshalerJSONArray) error
 ```
 * EncodeInt
 ```go
-func (enc *gojay.Encoder) EncodeInt(n int) error 
+func (enc *gojay.Encoder) EncodeInt(n int) error
 ```
 * EncodeInt64
 ```go
-func (enc *gojay.Encoder) EncodeInt64(n int64) error 
+func (enc *gojay.Encoder) EncodeInt64(n int64) error
 ```
 * EncodeFloat
 ```go
@@ -485,29 +518,30 @@ type MarshalerJSONObject interface {
 	IsNil() bool
 }
 ```
-`MarshalJSONObject` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all the keys in the JSON Object by calling Decoder's methods. 
+`MarshalJSONObject` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all the keys in the JSON Object by calling Decoder's methods.
 
-IsNil method returns a boolean indicating if the interface underlying value is nil or not. It is used to safely ensure that the underlying value is not nil without using Reflection. 
+IsNil method returns a boolean indicating if the interface underlying value is nil or not. It is used to safely ensure that the underlying value is not nil without using Reflection.
 
-Example of implementation for a struct: 
-```go 
+Example of implementation for a struct:
+```go
 type user struct {
-    id int
-    name string
-    email string
+	id    int
+	name  string
+	email string
 }
+
 // implement MarshalerJSONObject
 func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
-    enc.IntKey("id", u.id)
-    enc.StringKey("name", u.name)
-    enc.StringKey("email", u.email)
+	enc.IntKey("id", u.id)
+	enc.StringKey("name", u.name)
+	enc.StringKey("email", u.email)
 }
 func (u *user) IsNil() bool {
-    return u == nil
+	return u == nil
 }
 ```
 
-Example of implementation for a `map[string]string`: 
+Example of implementation for a `map[string]string`:
 ```go
 // define our custom map type implementing MarshalerJSONObject
 type message map[string]string
@@ -528,15 +562,15 @@ func (m message) IsNil() bool {
 To encode an array or a slice, the slice/array must implement the MarshalerJSONArray interface:
 ```go
 type MarshalerJSONArray interface {
-    MarshalJSONArray(enc *gojay.Encoder)
-    IsNil() bool
+	MarshalJSONArray(enc *gojay.Encoder)
+	IsNil() bool
 }
 ```
-`MarshalJSONArray` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods. 
+`MarshalJSONArray` method takes one argument, a pointer to the Encoder (*gojay.Encoder). The method must add all element in the JSON Array by calling Decoder's methods.
 
-`IsNil` method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature. 
+`IsNil` method returns a boolean indicating if the interface underlying value is nil(empty) or not. It is used to safely ensure that the underlying value is not nil without using Reflection and also to in `OmitEmpty` feature.
 
-Example of implementation: 
+Example of implementation:
 ```go
 type users []*user
 // implement MarshalerJSONArray
@@ -551,17 +585,17 @@ func (u *users) IsNil() bool {
 ```
 
 ### Other types
-To encode other types (string, int, float, booleans), you don't need to implement any interface. 
+To encode other types (string, int, float, booleans), you don't need to implement any interface.
 
 Example of encoding strings:
 ```go
 func main() {
-    name := "Jay"
-    b, err := gojay.Marshal(&name)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(string(b)) // "Jay"
+	name := "Jay"
+	b, err := gojay.Marshal(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(b)) // "Jay"
 }
 ```
 
@@ -570,9 +604,9 @@ func main() {
 ### Stream Decoding
 GoJay ships with a powerful stream decoder.
 
-It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming. 
+It allows to read continuously from an io.Reader stream and do JIT decoding writing unmarshalled JSON to a channel to allow async consuming.
 
-When using the Stream API, the Decoder implements context.Context to provide graceful cancellation. 
+When using the Stream API, the Decoder implements context.Context to provide graceful cancellation.
 
 To decode a stream of JSON, you must call `gojay.Stream.DecodeStream` and pass it a `UnmarshalerStream` implementation.
 
@@ -582,7 +616,7 @@ type UnmarshalerStream interface {
 }
 ```
 
-Example of implementation of stream reading from a WebSocket connection: 
+Example of implementation of stream reading from a WebSocket connection:
 ```go
 // implement UnmarshalerStream
 type ChannelStream chan *user
@@ -597,37 +631,39 @@ func (c ChannelStream) UnmarshalStream(dec *gojay.StreamDecoder) error {
 }
 
 func main() {
-    // get our websocket connection
-    origin := "http://localhost/"
-    url := "ws://localhost:12345/ws"
-    ws, err := websocket.Dial(url, "", origin)
-    if err != nil {
-        log.Fatal(err)
-    }
-    // create our channel which will receive our objects
-    streamChan := ChannelStream(make(chan *user))
-    // borrow a decoder
-    dec := gojay.Stream.BorrowDecoder(ws)
-    // start decoding, it will block until a JSON message is decoded from the WebSocket
-    // or until Done channel is closed
-    go dec.DecodeStream(streamChan)
-    for {
-        select {
-        case v := <-streamChan:
-            // Got something from my websocket!
-        case <-dec.Done():
-            os.Exit("finished reading from WebSocket")
-        }
-    }
+	// get our websocket connection
+	origin := "http://localhost/"
+	url := "ws://localhost:12345/ws"
+	ws, err := websocket.Dial(url, "", origin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// create our channel which will receive our objects
+	streamChan := ChannelStream(make(chan *user))
+	// borrow a decoder
+	dec := gojay.Stream.BorrowDecoder(ws)
+	// start decoding, it will block until a JSON message is decoded from the WebSocket
+	// or until Done channel is closed
+	go dec.DecodeStream(streamChan)
+	for {
+		select {
+		case v := <-streamChan:
+			// Got something from my websocket!
+			log.Println(v)
+		case <-dec.Done():
+			log.Println("finished reading from WebSocket")
+			os.Exit(0)
+		}
+	}
 }
 ```
 
 ### Stream Encoding
 GoJay ships with a powerful stream encoder part of the Stream API.
 
-It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine. 
+It allows to write continuously to an io.Writer and do JIT encoding of data fed to a channel to allow async consuming. You can set multiple consumers on the channel to be as performant as possible. Consumers are non blocking and are scheduled individually in their own go routine.
 
-When using the Stream API, the Encoder implements context.Context to provide graceful cancellation. 
+When using the Stream API, the Encoder implements context.Context to provide graceful cancellation.
 
 To encode a stream of data, you must call `EncodeStream` and pass it a `MarshalerStream` implementation.
 
@@ -637,13 +673,13 @@ type MarshalerStream interface {
 }
 ```
 
-Example of implementation of stream writing to a WebSocket: 
+Example of implementation of stream writing to a WebSocket:
 ```go
 // Our structure which will be pushed to our stream
 type user struct {
-    id int
-    name string
-    email string
+	id    int
+	name  string
+	email string
 }
 
 func (u *user) MarshalJSONObject(enc *gojay.Encoder) {
@@ -669,50 +705,50 @@ func (s StreamChan) MarshalStream(enc *gojay.StreamEncoder) {
 
 // Our main function
 func main() {
-    // get our websocket connection
-    origin := "http://localhost/"
-    url := "ws://localhost:12345/ws"
-    ws, err := websocket.Dial(url, "", origin)
-    if err != nil {
-        log.Fatal(err)
-    }
-    // we borrow an encoder set stdout as the writer, 
-    // set the number of consumer to 10
-    // and tell the encoder to separate each encoded element 
-    // added to the channel by a new line character
-    enc := gojay.Stream.BorrowEncoder(ws).NConsumer(10).LineDelimited()
-    // instantiate our MarshalerStream
-    s := StreamChan(make(chan *user))
-    // start the stream encoder
-    // will block its goroutine until enc.Cancel(error) is called
-    // or until something is written to the channel
-    go enc.EncodeStream(s)
-    // write to our MarshalerStream
-    for i := 0; i < 1000; i++ {
-        s<-&user{i,"username","user@email.com"}
-    }
-    // Wait
-    <-enc.Done()
+	// get our websocket connection
+	origin := "http://localhost/"
+	url := "ws://localhost:12345/ws"
+	ws, err := websocket.Dial(url, "", origin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// we borrow an encoder set stdout as the writer,
+	// set the number of consumer to 10
+	// and tell the encoder to separate each encoded element
+	// added to the channel by a new line character
+	enc := gojay.Stream.BorrowEncoder(ws).NConsumer(10).LineDelimited()
+	// instantiate our MarshalerStream
+	s := StreamChan(make(chan *user))
+	// start the stream encoder
+	// will block its goroutine until enc.Cancel(error) is called
+	// or until something is written to the channel
+	go enc.EncodeStream(s)
+	// write to our MarshalerStream
+	for i := 0; i < 1000; i++ {
+		s <- &user{i, "username", "user@email.com"}
+	}
+	// Wait
+	<-enc.Done()
 }
 ```
 
 # Unsafe API
 
-Unsafe API has the same functions than the regular API, it only has `Unmarshal API` for now. It is unsafe because it makes assumptions on the quality of the given JSON. 
+Unsafe API has the same functions than the regular API, it only has `Unmarshal API` for now. It is unsafe because it makes assumptions on the quality of the given JSON.
 
-If you are not sure if your JSON is valid, don't use the Unsafe API. 
+If you are not sure if your JSON is valid, don't use the Unsafe API.
 
-Also, the `Unsafe` API does not copy the buffer when using Unmarshal API, which, in case of string decoding, can lead to data corruption if a byte buffer is reused. Using the `Decode` API makes `Unsafe` API safer as the io.Reader relies on `copy` builtin method and `Decoder` will have its own internal buffer :) 
+Also, the `Unsafe` API does not copy the buffer when using Unmarshal API, which, in case of string decoding, can lead to data corruption if a byte buffer is reused. Using the `Decode` API makes `Unsafe` API safer as the io.Reader relies on `copy` builtin method and `Decoder` will have its own internal buffer :)
 
 Access the `Unsafe` API this way:
 ```go
-gojay.Unsafe.Unmarshal(b, v) 
+gojay.Unsafe.Unmarshal(b, v)
 ```
 
 
 # Benchmarks
 
-Benchmarks encode and decode three different data based on size (small, medium, large). 
+Benchmarks encode and decode three different data based on size (small, medium, large).
 
 To run benchmark for decoder:
 ```bash
@@ -813,7 +849,7 @@ cd $GOPATH/src/github.com/francoispqt/gojay/benchmarks/encoder && make bench
 
 # Contributing
 
-Contributions are welcome :) 
+Contributions are welcome :)
 
 If you encounter issues please report it in Github and/or send an email at [francois@parquet.ninja](mailto:francois@parquet.ninja)
 
