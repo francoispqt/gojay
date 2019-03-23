@@ -211,13 +211,13 @@ type SQLDecodeObject struct {
 func (s *SQLDecodeObject) UnmarshalJSONObject(dec *Decoder, k string) error {
 	switch k {
 	case "s":
-		return dec.SQLNullString(&s.S)
+		return dec.AddSQLNullString(&s.S)
 	case "f":
-		return dec.SQLNullFloat64(&s.F)
+		return dec.AddSQLNullFloat64(&s.F)
 	case "i":
-		return dec.SQLNullInt64(&s.I)
+		return dec.AddSQLNullInt64(&s.I)
 	case "b":
-		return dec.SQLNullBool(&s.B)
+		return dec.AddSQLNullBool(&s.B)
 	}
 	return nil
 }
@@ -231,6 +231,7 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 		name           string
 		json           string
 		expectedResult *SQLDecodeObject
+		err            bool
 	}{
 		{
 			name: "basic all valid",
@@ -358,6 +359,42 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "err string key",
+			json: `{
+				"s": "`,
+			err: true,
+		},
+		{
+			name: "err float key",
+			json: `{
+				"s": null,
+				"f": 1",
+				"i": null,
+				"b": null
+			}`,
+			err: true,
+		},
+		{
+			name: "err int key",
+			json: `{
+				"s": null,
+				"f": null,
+				"i": 1",
+				"b": null
+			}`,
+			err: true,
+		},
+		{
+			name: "err bool key",
+			json: `{
+				"s": null,
+				"f": null,
+				"i": null,
+				"b": tra
+			}`,
+			err: true,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -365,6 +402,12 @@ func TestDecodeSQLNullKeys(t *testing.T) {
 			var o = &SQLDecodeObject{}
 			var dec = NewDecoder(strings.NewReader(testCase.json))
 			var err = dec.Decode(o)
+
+			if testCase.err {
+				require.NotNil(t, err)
+				return
+			}
+
 			require.Nil(t, err)
 			require.Equal(
 				t,

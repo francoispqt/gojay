@@ -939,13 +939,32 @@ func (o *ObjectNull) UnmarshalJSONObject(dec *Decoder, k string) error {
 	case "subobject":
 		return dec.ObjectNull(&o.SubObject)
 	case "subarray":
-		return dec.ArrayNull(&o.SubArray)
+		return dec.AddArrayNull(&o.SubArray)
 	}
 	return nil
 }
 
 func (o *ObjectNull) NKeys() int {
 	return 2
+}
+
+type ObjectNullZeroNKeys struct {
+	SubObject *ObjectNullZeroNKeys
+	SubArray  *testSliceBools
+}
+
+func (o *ObjectNullZeroNKeys) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "subobject":
+		return dec.AddObjectNull(&o.SubObject)
+	case "subarray":
+		return dec.AddArrayNull(&o.SubArray)
+	}
+	return nil
+}
+
+func (o *ObjectNullZeroNKeys) NKeys() int {
+	return 0
 }
 
 func TestDecodeObjectNull(t *testing.T) {
@@ -983,6 +1002,49 @@ func TestDecodeObjectNull(t *testing.T) {
 			}))
 			assert.Nil(t, err)
 			assert.Nil(t, o.SubObject)
+		},
+	)
+	t.Run(
+		"skip data",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobject": {},
+					"subarray": [],
+					"subarray": [],
+					"skipped": ""
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.Nil(t, err)
+			assert.NotNil(t, o.SubObject)
+			assert.Nil(t, o.SubArray)
+		},
+	)
+	t.Run(
+		"skip data not child",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
+			var dec = NewDecoder(strings.NewReader(`{
+					"subobject": {},
+					"subarray": [],
+					"subarray": [],
+					"skipped": ""
+			}`))
+			var _, err = dec.decodeObjectNull(&o)
+			assert.Nil(t, err)
+			assert.NotNil(t, o.SubObject)
+		},
+	)
+	t.Run(
+		"err empty json",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
+			var dec = NewDecoder(strings.NewReader(``))
+			var _, err = dec.decodeObjectNull(&o)
+			assert.NotNil(t, err)
 		},
 	)
 	t.Run(
@@ -1064,7 +1126,29 @@ func TestDecodeObjectNull(t *testing.T) {
 		"invalid JSON for object",
 		func(t *testing.T) {
 			var o = &ObjectNull{}
+			var err = UnmarshalJSONObject([]byte(`{"subobject":{"subobject":{"a":a}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.NotNil(t, err)
+			assert.IsType(t, InvalidJSONError(""), err)
+		},
+	)
+	t.Run(
+		"invalid JSON for object",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
 			var err = UnmarshalJSONObject([]byte(`{"subobject":{"subobject":a}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.NotNil(t, err)
+			assert.IsType(t, InvalidJSONError(""), err)
+		},
+	)
+	t.Run(
+		"invalid JSON for object",
+		func(t *testing.T) {
+			var o = &ObjectNull{}
+			var err = UnmarshalJSONObject([]byte(`{"subobject":{"subobject":{"sub}}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
 				return dec.ObjectNull(&o.SubObject)
 			}))
 			assert.NotNil(t, err)
@@ -1118,6 +1202,92 @@ func TestDecodeObjectNull(t *testing.T) {
 		func(t *testing.T) {
 			var o = &ObjectNull{}
 			var err = UnmarshalJSONObject([]byte(`{"subobject": na`), o)
+			assert.NotNil(t, err)
+			assert.IsType(t, InvalidJSONError(""), err)
+		},
+	)
+	t.Run(
+		"zero nkeys, no error, two keys",
+		func(t *testing.T) {
+			var o = &ObjectNullZeroNKeys{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobject": {
+						"subobject":{}
+					},
+					"subarray": []
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.Nil(t, err)
+		},
+	)
+	t.Run(
+		"zero nkeys, no error, two keys, skip data",
+		func(t *testing.T) {
+			var o = &ObjectNullZeroNKeys{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobject": {
+						"subobject":{}
+					},
+					"subarray": [],
+					"skipped": 1
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.Nil(t, err)
+		},
+	)
+	t.Run(
+		"zero nkeys, error skip data",
+		func(t *testing.T) {
+			var o = &ObjectNullZeroNKeys{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobject": {
+						"subobject":{}
+					},
+					"subarray": [],
+					"skippedInvalid": "q
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.NotNil(t, err)
+			assert.IsType(t, InvalidJSONError(""), err)
+		},
+	)
+	t.Run(
+		"zero nkeys, error invalid json in keys",
+		func(t *testing.T) {
+			var o = &ObjectNullZeroNKeys{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobj
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
+			assert.NotNil(t, err)
+			assert.IsType(t, InvalidJSONError(""), err)
+		},
+	)
+	t.Run(
+		"zero nkeys, error invalid json, sub object",
+		func(t *testing.T) {
+			var o = &ObjectNullZeroNKeys{}
+			var err = UnmarshalJSONObject([]byte(`{
+				"subobject": {
+					"subobject": {
+						"subobj
+					}	
+				}
+			}`), DecodeObjectFunc(func(dec *Decoder, k string) error {
+				return dec.ObjectNull(&o.SubObject)
+			}))
 			assert.NotNil(t, err)
 			assert.IsType(t, InvalidJSONError(""), err)
 		},

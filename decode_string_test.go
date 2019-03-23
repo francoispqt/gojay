@@ -702,6 +702,14 @@ func TestDecoderSkipEscapedStringError3(t *testing.T) {
 	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
 }
 
+func TestDecoderSkipEscapedStringError4(t *testing.T) {
+	dec := NewDecoder(strings.NewReader(`\u12`))
+	defer dec.Release()
+	err := dec.skipEscapedString()
+	assert.NotNil(t, err, "Err must be nil")
+	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+}
+
 func TestDecoderSkipStringError(t *testing.T) {
 	dec := NewDecoder(strings.NewReader(`invalid`))
 	defer dec.Release()
