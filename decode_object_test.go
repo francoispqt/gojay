@@ -939,7 +939,7 @@ func (o *ObjectNull) UnmarshalJSONObject(dec *Decoder, k string) error {
 	case "subobject":
 		return dec.ObjectNull(&o.SubObject)
 	case "subarray":
-		return dec.ArrayNull(&o.SubArray)
+		return dec.AddArrayNull(&o.SubArray)
 	}
 	return nil
 }

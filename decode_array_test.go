@@ -412,6 +412,26 @@ func TestDecodeArrayNullPtr(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Nil(t, o.SubArray)
 	})
+	t.Run("sub array err, not closing arr", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray": [    `), o)
+		assert.NotNil(t, err)
+	})
+	t.Run("sub array err, invalid string", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray":[",]}`), o)
+		assert.NotNil(t, err)
+	})
+	t.Run("sub array err, invalid null", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray":nll}`), o)
+		assert.NotNil(t, err)
+	})
+	t.Run("sub array err, empty", func(t *testing.T) {
+		var o = &ObjectArrayNull{}
+		var err = UnmarshalJSONObject([]byte(`{"subarray":`), o)
+		assert.NotNil(t, err)
+	})
 }
 
 type testChannelArray chan *TestObj

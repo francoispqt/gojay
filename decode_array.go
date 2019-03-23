@@ -212,7 +212,7 @@ func (dec *Decoder) AddArray(v UnmarshalerJSONArray) error {
 }
 
 // AddArrayNull decodes the JSON value within an object or an array to a UnmarshalerJSONArray.
-func (dec *Decoder) AddArrayNull(v UnmarshalerJSONArray) error {
+func (dec *Decoder) AddArrayNull(v interface{}) error {
 	return dec.ArrayNull(v)
 }
 

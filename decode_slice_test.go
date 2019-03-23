@@ -78,28 +78,28 @@ func TestDecodeSlices(t *testing.T) {
 		{
 			name: "err slice float64",
 			json: `{
-				"sliceFloat64": ["",2.4,3.1]
+				"sliceFloat64": [1.3",2.4,3.1]
 			}`,
 			err: true,
 		},
 		{
 			name: "err slice str",
 			json: `{
-				"sliceString": [1,2.4,3.1]
+				"sliceString": [",""]
 			}`,
 			err: true,
 		},
 		{
 			name: "err slice int",
 			json: `{
-				"sliceInt": [true,2.4,3.1]
+				"sliceInt": [1t,2,3]
 			}`,
 			err: true,
 		},
 		{
 			name: "err slice bool",
 			json: `{
-				"sliceBool": [1,2.4,3.1]
+				"sliceBool": [truo,false]
 			}`,
 			err: true,
 		},
