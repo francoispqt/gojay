@@ -9,7 +9,7 @@
 
 # GoJay
 
-<img src="https://github.com/francoispqt/gojay/raw/feature/generator/gojay.png" width="200px">
+<img src="https://github.com/francoispqt/gojay/raw/master/gojay.png" width="200px">
 
 GoJay is a performant JSON encoder/decoder for Golang (currently the most performant, [see benchmarks](#benchmark-results)).
 
