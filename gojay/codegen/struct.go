@@ -276,13 +276,12 @@ func (s *Struct) generateFieldEncoding(fields []*toolbox.FieldInfo) ([]string, e
 				templateKey = encodeStructSlice
 				break main
 			} else if field.IsSlice {
-				s.typedFieldDecode(field, field.ComponentType)
 				templateKey = encodeStructSlice
 			} else if _, k, ok := s.typedFieldEncode(field, field.Type); ok {
 				templateKey = k
 			} else {
 				// templateKey = decodeUnknown
-				return "", nil, fmt.Errorf("Unknown type %s for field %s", field.Type, field.Name)
+				return nil, fmt.Errorf("Unknown type %s for field %s", field.Type, field.Name)
 			}
 		}
 		if templateKey != -1 {
