@@ -116,15 +116,11 @@ var fieldTemplate = map[int]string{
         enc.SQLNull{{.NullType}}Key{{.OmitEmpty}}("{{.Key}}", {{.PointerModifier}}{{.Accessor}})
     }{{else}}    enc.SQLNull{{.NullType}}Key{{.OmitEmpty}}("{{.Key}}", {{.PointerModifier}}{{.Accessor}}){{end}}`,
 	decodeUnknown: `		case "{{.Key}}":
-			//TODO
-			//dec.Any({{.Accessor}})
-			return nil
+			return dec.Any({{.PointerModifier}}{{.Accessor}})
 `,
-	encodeUnknown: `
-			//TODO
-			//enc.Any({{.Accessor}})
-
-`,
+	encodeUnknown: `{{if .IsPointer}}    if {{.Accessor}} != nil {	
+		enc.Any({{.Accessor}})
+	}{{else}}enc.Any({{.Accessor}}){{end}}`,
 	resetFieldValue: `{{if .ResetDependency}}{{.ResetDependency}}
 {{end}}    {{.Mutator}} = {{.Reset}}`,
 	poolInstanceRelease: `	{{.PoolName}}.Put({{.Accessor}})`,
