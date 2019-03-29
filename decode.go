@@ -344,6 +344,9 @@ func (dec *Decoder) read() bool {
 		// if we reach the end, double the buffer to ensure there's always more space
 		if len(dec.data) == dec.length {
 			nLen := dec.length * 2
+			if nLen == 0 {
+				nLen = 512
+			}
 			Buf := make([]byte, nLen, nLen)
 			copy(Buf, dec.data)
 			dec.data = Buf
