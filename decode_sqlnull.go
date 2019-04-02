@@ -52,8 +52,8 @@ func (dec *Decoder) DecodeSQLNullFloat64(v *sql.NullFloat64) error {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 
-	dec.reset()
 	err := dec.decodeSQLNullFloat64(v)
+	dec.reset()
 
 	return err
 }

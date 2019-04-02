@@ -55,14 +55,20 @@ func borrowDecoder(r io.Reader, bufSize int) *Decoder {
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (dec *Decoder) Release() {
 	dec.isPooled = 1
+	dec.length = 0
+	dec.data = dec.data[:0]
 	decPool.Put(dec)
 }
 
 func (dec *Decoder) reset() {
 	dec.called = 0
 	dec.keysDone = 0
-	dec.cursor = 0
 	dec.err = nil
-	dec.length = 0
-	dec.data = dec.data[:0]
+	if dec.cursor > 0 {
+		dec.data = dec.data[dec.cursor:]
+	} else {
+		dec.data = dec.data[:0]
+	}
+	dec.length = len(dec.data)
+	dec.cursor = 0
 }

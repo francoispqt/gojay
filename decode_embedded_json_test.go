@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type Request struct {
@@ -177,4 +178,27 @@ func TestDecodeEmbeededJSONNil2(t *testing.T) {
 	err := dec.AddEmbeddedJSON(ej)
 	assert.NotNil(t, err, `err should not be nil a nil pointer is given`)
 	assert.IsType(t, InvalidUnmarshalError(""), err, `err should not be of type InvalidUnmarshalError`)
+}
+
+func TestDecoderReuse(t *testing.T) {
+	r := strings.NewReader(`{"foo":"bar"}{"foo":"baz"}{"foo":"world"}`)
+
+	dec := NewDecoder(r)
+	var ej EmbeddedJSON
+
+	dec.Decode(&ej)
+
+	require.Equal(t, `{"foo":"bar"}`, string(ej))
+
+	ej = ej[:0]
+
+	dec.Decode(&ej)
+
+	assert.Equal(t, `{"foo":"baz"}`, string(ej))
+
+	ej = ej[:0]
+
+	dec.Decode(&ej)
+
+	assert.Equal(t, `{"foo":"world"}`, string(ej))
 }
