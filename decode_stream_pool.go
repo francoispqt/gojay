@@ -54,6 +54,7 @@ func (s stream) borrowDecoder(r io.Reader, bufSize int) *StreamDecoder {
 // If a decoder is used after calling Release
 // a panic will be raised with an InvalidUsagePooledDecoderError error.
 func (dec *StreamDecoder) Release() {
+	dec.reset()
 	dec.isPooled = 1
 	streamDecPool.Put(dec)
 }

@@ -275,6 +275,7 @@ func TestDecoderInt(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := int(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
@@ -886,6 +887,7 @@ func TestDecoderInt64(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := int64(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
@@ -1547,6 +1549,7 @@ func TestDecoderInt32(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := int32(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
@@ -2233,6 +2236,7 @@ func TestDecoderInt16(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := int16(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
@@ -2922,6 +2926,7 @@ func TestDecoderInt8(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := int8(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()

@@ -1746,6 +1746,7 @@ func TestDecoderObjectDecoderInvalidJSONError4(t *testing.T) {
 func TestDecoderObjectPoolError(t *testing.T) {
 	result := jsonDecodePartial{}
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

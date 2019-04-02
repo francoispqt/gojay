@@ -35,11 +35,13 @@ func (dec *StreamDecoder) DecodeStream(c UnmarshalerStream) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
+
 	if dec.r == nil {
 		dec.err = NoReaderError("No reader given to decode stream")
 		close(dec.done)
 		return dec.err
 	}
+
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',':

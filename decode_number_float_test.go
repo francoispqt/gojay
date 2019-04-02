@@ -298,6 +298,7 @@ func TestDecoderFloat64(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := float64(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
@@ -931,6 +932,7 @@ func TestDecoderFloat32(t *testing.T) {
 	t.Run("pool-error", func(t *testing.T) {
 		result := float32(1)
 		dec := NewDecoder(nil)
+		dec.reset()
 		dec.Release()
 		defer func() {
 			err := recover()
