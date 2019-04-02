@@ -1561,7 +1561,7 @@ func TestDecodeObjectPartial(t *testing.T) {
 		"testSkipNumber": 123.23
 	}`)
 	dec.length = len(dec.data)
-	err := dec.DecodeObject(&result)
+	_, err := dec.decodeObject(&result)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotEqual(t, len(dec.data), dec.cursor)
 }

@@ -13,6 +13,8 @@ func (dec *Decoder) DecodeArray(v UnmarshalerJSONArray) error {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
 	_, err := dec.decodeArray(v)
+	dec.reset()
+
 	return err
 }
 func (dec *Decoder) decodeArray(arr UnmarshalerJSONArray) (int, error) {

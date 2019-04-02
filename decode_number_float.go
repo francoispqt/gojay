@@ -7,7 +7,11 @@ func (dec *Decoder) DecodeFloat64(v *float64) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeFloat64(v)
+
+	err := dec.decodeFloat64(v)
+	dec.reset()
+
+	return err
 }
 func (dec *Decoder) decodeFloat64(v *float64) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
@@ -215,7 +219,11 @@ func (dec *Decoder) DecodeFloat32(v *float32) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeFloat32(v)
+
+	err := dec.decodeFloat32(v)
+	dec.reset()
+
+	return err
 }
 func (dec *Decoder) decodeFloat32(v *float32) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {

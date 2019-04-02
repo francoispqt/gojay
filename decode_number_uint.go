@@ -11,7 +11,11 @@ func (dec *Decoder) DecodeUint8(v *uint8) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeUint8(v)
+
+	err := dec.decodeUint8(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeUint8(v *uint8) error {
@@ -123,7 +127,11 @@ func (dec *Decoder) DecodeUint16(v *uint16) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeUint16(v)
+
+	err := dec.decodeUint16(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeUint16(v *uint16) error {
@@ -235,7 +243,11 @@ func (dec *Decoder) DecodeUint32(v *uint32) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeUint32(v)
+
+	err := dec.decodeUint32(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeUint32(v *uint32) error {
@@ -347,7 +359,11 @@ func (dec *Decoder) DecodeUint64(v *uint64) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeUint64(v)
+
+	err := dec.decodeUint64(v)
+	dec.reset()
+
+	return err
 }
 func (dec *Decoder) decodeUint64(v *uint64) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {

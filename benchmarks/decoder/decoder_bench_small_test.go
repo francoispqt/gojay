@@ -12,7 +12,7 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func BenchmarkJSONDecodeObjSmall(b *testing.B) {
+func BenchmarkEncodingJSONObjSmall(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		result := benchmarks.SmallPayload{}
@@ -36,7 +36,7 @@ func BenchmarkJSONParserSmall(b *testing.B) {
 	}
 }
 
-func BenchmarkJsonIterDecodeObjSmall(b *testing.B) {
+func BenchmarkJSONIterDecodeObjSmall(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		result := benchmarks.SmallPayload{}
@@ -44,7 +44,7 @@ func BenchmarkJsonIterDecodeObjSmall(b *testing.B) {
 	}
 }
 
-func BenchmarkEasyJsonDecodeObjSmall(b *testing.B) {
+func BenchmarkEasyJSONDecodeObjSmall(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.SmallPayload{}

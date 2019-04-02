@@ -42,12 +42,7 @@ func BorrowDecoder(r io.Reader) *Decoder {
 }
 func borrowDecoder(r io.Reader, bufSize int) *Decoder {
 	dec := decPool.Get().(*Decoder)
-	dec.called = 0
-	dec.keysDone = 0
-	dec.cursor = 0
-	dec.err = nil
 	dec.r = r
-	dec.length = 0
 	dec.isPooled = 0
 	if bufSize > 0 {
 		dec.data = make([]byte, bufSize)
@@ -61,4 +56,13 @@ func borrowDecoder(r io.Reader, bufSize int) *Decoder {
 func (dec *Decoder) Release() {
 	dec.isPooled = 1
 	decPool.Put(dec)
+}
+
+func (dec *Decoder) reset() {
+	dec.called = 0
+	dec.keysDone = 0
+	dec.cursor = 0
+	dec.err = nil
+	dec.length = 0
+	dec.data = dec.data[:0]
 }

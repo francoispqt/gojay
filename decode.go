@@ -13,17 +13,25 @@ import (
 // overflows the target type, UnmarshalJSONArray skips that field and completes the unmarshaling as best it can.
 func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
-	defer dec.Release()
+
+	defer func() {
+		dec.reset()
+		dec.Release()
+	}()
+
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
+
 	_, err := dec.decodeArray(v)
 	if err != nil {
 		return err
 	}
+
 	if dec.err != nil {
 		return dec.err
 	}
+
 	return nil
 }
 
@@ -35,14 +43,21 @@ func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 // overflows the target type, UnmarshalJSONObject skips that field and completes the unmarshaling as best it can.
 func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
-	defer dec.Release()
+
+	defer func() {
+		dec.reset()
+		dec.Release()
+	}()
+
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
 	dec.length = len(data)
+
 	_, err := dec.decodeObject(v)
 	if err != nil {
 		return err
 	}
+
 	if dec.err != nil {
 		return dec.err
 	}
@@ -215,11 +230,15 @@ func Unmarshal(data []byte, v interface{}) error {
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, vt))
 	}
-	defer dec.Release()
-	if err != nil {
-		return err
+
+	if err == nil {
+		err = dec.err
 	}
-	return dec.err
+
+	dec.reset()
+	dec.Release()
+
+	return err
 }
 
 // UnmarshalerJSONObject is the interface to implement to decode a JSON Object.
@@ -257,7 +276,9 @@ func (dec *Decoder) Decode(v interface{}) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
+
 	var err error
+
 	switch vt := v.(type) {
 	case *string:
 		err = dec.decodeString(vt)
@@ -322,10 +343,14 @@ func (dec *Decoder) Decode(v interface{}) error {
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, vt))
 	}
-	if err != nil {
-		return err
+
+	if err == nil {
+		err = dec.err
 	}
-	return dec.err
+
+	dec.reset()
+
+	return err
 }
 
 // Non exported

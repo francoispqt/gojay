@@ -11,7 +11,10 @@ func (dec *Decoder) DecodeInterface(i *interface{}) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
+
 	err := dec.decodeInterface(i)
+	dec.reset()
+
 	return err
 }
 

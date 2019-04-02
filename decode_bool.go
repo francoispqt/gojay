@@ -8,7 +8,11 @@ func (dec *Decoder) DecodeBool(v *bool) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeBool(v)
+
+	err := dec.decodeBool(v)
+	dec.reset()
+
+	return err
 }
 func (dec *Decoder) decodeBool(v *bool) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {

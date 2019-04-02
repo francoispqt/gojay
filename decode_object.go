@@ -14,7 +14,10 @@ func (dec *Decoder) DecodeObject(j UnmarshalerJSONObject) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
+
 	_, err := dec.decodeObject(j)
+	dec.reset()
+
 	return err
 }
 func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
