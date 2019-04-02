@@ -14,10 +14,7 @@ import (
 func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
 
-	defer func() {
-		dec.reset()
-		dec.Release()
-	}()
+	defer dec.Release()
 
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
@@ -44,10 +41,7 @@ func UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 func UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
 
-	defer func() {
-		dec.reset()
-		dec.Release()
-	}()
+	defer dec.Release()
 
 	dec.data = make([]byte, len(data))
 	copy(dec.data, data)
@@ -235,7 +229,6 @@ func Unmarshal(data []byte, v interface{}) error {
 		err = dec.err
 	}
 
-	dec.reset()
 	dec.Release()
 
 	return err

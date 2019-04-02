@@ -60,6 +60,8 @@ func (dec *Decoder) Release() {
 	dec.data = dec.data[:0]
 	dec.cursor = 0
 	dec.err = nil
+	dec.called = 0
+	dec.keysDone = 0
 	decPool.Put(dec)
 }
 
