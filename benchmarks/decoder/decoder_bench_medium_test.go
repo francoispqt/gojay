@@ -36,7 +36,7 @@ func BenchmarkJSONParserDecodeObjMedium(b *testing.B) {
 	}
 }
 
-func BenchmarkEncodingJSONStructMedium(b *testing.B) {
+func BenchmarkEncodingJSONDecodeObjMedium(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var data = benchmarks.MediumPayload{}
 		json.Unmarshal(benchmarks.MediumFixture, &data)

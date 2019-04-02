@@ -12,7 +12,7 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func BenchmarkEncodingJSONObjSmall(b *testing.B) {
+func BenchmarkEncodingJSONDecodeObjSmall(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		result := benchmarks.SmallPayload{}
