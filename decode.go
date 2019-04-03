@@ -326,9 +326,11 @@ func (dec *Decoder) Decode(v interface{}) error {
 	case **bool:
 		err = dec.decodeBoolNull(vt)
 	case UnmarshalerJSONObject:
-		_, err = dec.decodeObject(vt)
+		dec.cursor, err = dec.decodeObject(vt)
+		dec.cursor++
 	case UnmarshalerJSONArray:
-		_, err = dec.decodeArray(vt)
+		dec.cursor, err = dec.decodeArray(vt)
+		dec.cursor++
 	case *EmbeddedJSON:
 		err = dec.decodeEmbeddedJSON(vt)
 	case *interface{}:
