@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"runtime/debug"
 	"time"
@@ -42,6 +43,9 @@ func read(dec *gojay.Decoder, r io.Reader) {
 		err := dec.Decode(&msg)
 		if err != nil {
 			dec = gojay.NewDecoder(r)
+			fmt.Println(err)
+		} else {
+			fmt.Println(string(msg))
 		}
 		time.Sleep(1 * time.Millisecond)
 	}
