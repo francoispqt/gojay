@@ -70,10 +70,11 @@ func (dec *Decoder) reset() {
 	dec.keysDone = 0
 	dec.err = nil
 	if dec.cursor > 0 && dec.cursor < len(dec.data) {
-		dec.data = dec.data[dec.cursor:]
+		dec.data = dec.data[dec.cursor+1:]
+		dec.length = dec.length - dec.cursor - 1
 	} else {
 		dec.data = dec.data[:0]
+		dec.length = 0
 	}
-	dec.length = len(dec.data)
 	dec.cursor = 0
 }
