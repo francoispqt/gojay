@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
 	"github.com/viant/toolbox"
 )
 
@@ -89,19 +88,24 @@ func (g *Generator) Generate() error {
 
 func (g *Generator) writeCode() error {
 	var generatedCode = []string{}
-	for _, code := range g.pooledObjects {
+
+	for _, key := range sortedKeys(g.pooledObjects) {
+		code := g.pooledObjects[key]
 		generatedCode = append(generatedCode, code)
 	}
 	generatedCode = append(generatedCode, "")
-	for _, code := range g.sliceTypes {
+	for _, key := range sortedKeys(g.sliceTypes) {
+		code := g.sliceTypes[key]
 		generatedCode = append(generatedCode, code)
 	}
 	generatedCode = append(generatedCode, "")
-	for _, code := range g.structTypes {
+	for _, key := range sortedKeys(g.structTypes) {
+		code := g.structTypes[key]
 		generatedCode = append(generatedCode, code)
 	}
 
-	for _, code := range g.poolInit {
+	for _, key := range sortedKeys(g.poolInit) {
+		code := g.poolInit[key]
 		if g.Init != "" {
 			g.Init += "\n"
 		}
