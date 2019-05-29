@@ -4,6 +4,7 @@ import (
 	"github.com/viant/toolbox"
 	"reflect"
 	"strings"
+	"sort"
 )
 
 func firstLetterToUppercase(text string) string {
@@ -86,4 +87,15 @@ func getJSONKey(options *Options, field *toolbox.FieldInfo) string {
 
 func normalizeTypeName(typeName string) string {
 	return strings.Replace(typeName, "*", "", strings.Count(typeName, "*"))
+}
+
+func sortedKeys(m map[string]string) ([]string) {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
 }
