@@ -324,7 +324,7 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			continue
 		case '.':
 			// we get part before decimal as integer
-			beforeDecimal := dec.atoi32(start, end)
+			beforeDecimal := dec.atoi64(start, end)
 			// then we get part after decimal as integer
 			start = j + 1
 			// get number after the decimal point
@@ -341,14 +341,14 @@ func (dec *Decoder) getFloat32() (float32, error) {
 					continue
 				} else if (c == 'e' || c == 'E') && j < i-1 {
 					// we get the number before decimal
-					var afterDecimal int32
+					var afterDecimal int64
 					expI := end - start + 2
 					// if exp is too long, it means number is too long, just truncate the number
 					if expI >= 12 || expI < 0 {
 						expI = 10
-						afterDecimal = dec.atoi32(start, start+expI-2)
+						afterDecimal = dec.atoi64(start, start+expI-2)
 					} else {
-						afterDecimal = dec.atoi32(start, end)
+						afterDecimal = dec.atoi64(start, end)
 					}
 					dec.cursor = i + 1
 					pow := pow10uint64[expI]
@@ -377,23 +377,23 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			}
 			// then we add both integers
 			// then we divide the number by the power found
-			var afterDecimal int32
+			var afterDecimal int64
 			expI := end - start + 2
 			// if exp is too long, it means number is too long, just truncate the number
 			if expI >= 12 || expI < 0 {
 				expI = 10
-				afterDecimal = dec.atoi32(start, start+expI-2)
+				afterDecimal = dec.atoi64(start, start+expI-2)
 			} else {
 				// then we add both integers
 				// then we divide the number by the power found
-				afterDecimal = dec.atoi32(start, end)
+				afterDecimal = dec.atoi64(start, end)
 			}
 			pow := pow10uint64[expI]
 			return float32(beforeDecimal+afterDecimal) / float32(pow), nil
 		case 'e', 'E':
 			dec.cursor = j + 1
 			// we get part before decimal as integer
-			beforeDecimal := uint32(dec.atoi32(start, end))
+			beforeDecimal := dec.atoi64(start, end)
 			// get exponent
 			exp, err := dec.getExponent()
 			if err != nil {
@@ -410,12 +410,12 @@ func (dec *Decoder) getFloat32() (float32, error) {
 			return float32(beforeDecimal) * float32(pow10uint64[pExp]), nil
 		case ' ', '\n', '\t', '\r', ',', '}', ']': // does not have decimal
 			dec.cursor = j
-			return float32(dec.atoi32(start, end)), nil
+			return float32(dec.atoi64(start, end)), nil
 		}
 		// invalid json we expect numbers, dot (single one), comma, or spaces
 		return 0, dec.raiseInvalidJSONErr(dec.cursor)
 	}
-	return float32(dec.atoi32(start, end)), nil
+	return float32(dec.atoi64(start, end)), nil
 }
 
 // Add Values functions

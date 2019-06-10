@@ -874,6 +874,11 @@ func TestDecoderFloat32(t *testing.T) {
 			expectedResult: -0.1234,
 		},
 		{
+			name:           "float10-digit-decimal",
+			json:           "0.9833984375",
+			expectedResult: 0.9833984,
+		},
+		{
 			name:           "error",
 			json:           "83zez4",
 			expectedResult: 0,

@@ -1070,6 +1070,7 @@ func (dec *Decoder) atoi32(start, end int) int32 {
 	var ll = end + 1 - start
 	var val = int32(digits[dec.data[start]])
 	end = end + 1
+
 	// overflowing
 	if ll < maxInt32Length {
 		for i := start + 1; i < end; i++ {
