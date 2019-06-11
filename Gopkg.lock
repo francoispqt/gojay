@@ -2,20 +2,12 @@
 
 
 [[projects]]
-  digest = "1:3de22f0e7208f2e7fb8662fcab0aee360e3cae85d5f3649f3bf0b247f575d183"
+  digest = "1:1a37f9f2ae10d161d9688fb6008ffa14e1631e5068cc3e9698008b9e8d40d575"
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
   pruneopts = ""
-  revision = "f52f9bc132541d2aa914f42100c36d10b1ef7e0c"
-  version = "v0.37.0"
-
-[[projects]]
-  digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = ""
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
+  revision = "457ea5c15ccf3b87db582c450e80101989da35f7"
+  version = "v0.40.0"
 
 [[projects]]
   digest = "1:968d8903d598e3fae738325d3410f33f07ea6a2b9ee5591e9c262ee37df6845a"
@@ -35,7 +27,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b7ac1ad7d98781c0168803a258d7bf8b3544fd59f356a0e2dd65c43312cf6aac"
+  digest = "1:cae59d7b8243c671c9f544965522ba35c0fec48ee80adb9f1400cd2f33abbbec"
   name = "github.com/mailru/easyjson"
   packages = [
     ".",
@@ -44,7 +36,7 @@
     "jwriter",
   ]
   pruneopts = ""
-  revision = "1de009706dbeb9d05f18586f0735fcdb7c524481"
+  revision = "1ea4449da9834f4d333f1cc461c374aea217d249"
 
 [[projects]]
   digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
@@ -55,15 +47,15 @@
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:f6848760d34f35b10268f8aa3862181c19b4855dc0578a7b7144dc30e6f980f1"
+  digest = "1:8d4bbd8ab012efc77ab6b97286f2aff262bcdeac9803bb57d75cf7d0a5e6a877"
   name = "github.com/viant/assertly"
   packages = ["."]
   pruneopts = ""
-  revision = "3810e26d53c2543cb1024e6287fc2a66814f6764"
-  version = "v0.4.4"
+  revision = "04f45e0aeb6f3455884877b047a97bcc95dc9493"
+  version = "v0.4.8"
 
 [[projects]]
-  digest = "1:d9fb8cbd3cd93ee1d7358a060c0dcd6f737032f5261bf0185eb7e025066eb7c0"
+  digest = "1:5913451bc2d274673c0716efe226a137625740cd9380641f4d8300ff4f2d82a0"
   name = "github.com/viant/toolbox"
   packages = [
     ".",
@@ -73,12 +65,12 @@
     "url",
   ]
   pruneopts = ""
-  revision = "ead0bb31abed8480acfa8b80792d94593500d34b"
-  version = "v0.19.1"
+  revision = "1be8e4d172138324f40d55ea61a2aeab0c5ce864"
+  version = "v0.24.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:ab3e9a81a5ec54c5d1ed41d0d6898ba88c6799fa401b784b06bdee8e432d872b"
+  digest = "1:9d150270ca2c3356f2224a0878daa1652e4d0b25b345f18b4f6e156cc4b8ec5e"
   name = "golang.org/x/crypto"
   packages = [
     "blowfish",
@@ -91,11 +83,11 @@
     "ssh",
   ]
   pruneopts = ""
-  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
+  revision = "f99c8df09eb5bff426315721bfa5f16a99cad32c"
 
 [[projects]]
   branch = "master"
-  digest = "1:73e6624a8569db94b0d8f9b34052f73ef9598c380edbce36d89dbbc00941e976"
+  digest = "1:5a56f211e7c12a65c5585c629457a2fb91d8719844ee8fab92727ea8adb5721c"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -103,11 +95,11 @@
     "websocket",
   ]
   pruneopts = ""
-  revision = "9f648a60d9775ef5c977e7669d1673a7a67bef33"
+  revision = "461777fb6f67e8cb9d70cda16573678d085a74cf"
 
 [[projects]]
   branch = "master"
-  digest = "1:ffae4a89b63a2c845533a393b3340f8696898b11b71da1b187f82f08135c23a0"
+  digest = "1:01bdbbc604dcd5afb6f66a717f69ad45e9643c72d5bc11678d44ffa5c50f9e42"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -117,21 +109,18 @@
     "jwt",
   ]
   pruneopts = ""
-  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
+  revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
 
 [[projects]]
   branch = "master"
-  digest = "1:9f5e388a2e01d646e82dc420469e21a6e0e7a526954ef1638009bc87eacf578e"
+  digest = "1:8ddb956f67d4c176abbbc42b7514aaeaf9ea30daa24e27d2cf30ad82f9334a2c"
   name = "golang.org/x/sys"
-  packages = [
-    "cpu",
-    "unix",
-  ]
+  packages = ["cpu"]
   pruneopts = ""
-  revision = "a2f829d7f35f2ed1c3520c553a6226495455cae0"
+  revision = "1e42afee0f762ed3d76e6dd942e4181855fd1849"
 
 [[projects]]
-  digest = "1:bc09e719c4e2a15d17163f5272d9a3131c45d77542b7fdc53ff518815bc19ab3"
+  digest = "1:47f391ee443f578f01168347818cb234ed819521e49e4d2c8dd2fb80d48ee41a"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -146,8 +135,8 @@
     "urlfetch",
   ]
   pruneopts = ""
-  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
-  version = "v1.4.0"
+  revision = "b2f4a3cf3c67576a2ee09e1fe62656a5086ce880"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:cedccf16b71e86db87a24f8d4c70b0a855872eb967cb906a66b95de56aefbd0d"
@@ -161,7 +150,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/davecgh/go-spew/spew",
     "github.com/go-errors/errors",
     "github.com/mailru/easyjson",
     "github.com/mailru/easyjson/jlexer",
