@@ -511,6 +511,7 @@ func TestUnmarshalInterfaceError(t *testing.T) {
 func TestDecodeInterfacePoolError(t *testing.T) {
 	result := interface{}(1)
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

@@ -14,7 +14,12 @@ func (dec *Decoder) DecodeObject(j UnmarshalerJSONObject) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	_, err := dec.decodeObject(j)
+
+	var err error
+	dec.cursor, err = dec.decodeObject(j)
+
+	dec.reset()
+
 	return err
 }
 func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
@@ -74,12 +79,9 @@ func (dec *Decoder) decodeObject(j UnmarshalerJSONObject) (int, error) {
 			// will get to that point when keysDone is not lower than keys anymore
 			// in that case, we make sure cursor goes to the end of object, but we skip
 			// unmarshalling
-			if dec.child&1 != 0 {
-				end, err := dec.skipObject()
-				dec.cursor = end
-				return dec.cursor, err
-			}
-			return dec.cursor, nil
+			end, err := dec.skipObject()
+			dec.cursor = end
+			return dec.cursor, err
 		case 'n':
 			dec.cursor++
 			err := dec.assertNull()

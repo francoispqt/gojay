@@ -489,6 +489,7 @@ func TestDecoderBoolDecoderAPI(t *testing.T) {
 func TestDecoderBoolPoolError(t *testing.T) {
 	v := true
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

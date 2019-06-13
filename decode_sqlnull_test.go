@@ -45,6 +45,7 @@ func TestDecodeSQLNullString(t *testing.T) {
 		"should panic because decoder is pooled",
 		func(t *testing.T) {
 			dec := NewDecoder(nil)
+			dec.reset()
 			dec.Release()
 			defer func() {
 				err := recover()
@@ -93,6 +94,7 @@ func TestDecodeSQLNullInt64(t *testing.T) {
 		"should panic because decoder is pooled",
 		func(t *testing.T) {
 			dec := NewDecoder(nil)
+			dec.reset()
 			dec.Release()
 			defer func() {
 				err := recover()
@@ -141,6 +143,7 @@ func TestDecodeSQLNullFloat64(t *testing.T) {
 		"should panic because decoder is pooled",
 		func(t *testing.T) {
 			dec := NewDecoder(nil)
+			dec.reset()
 			dec.Release()
 			defer func() {
 				err := recover()
@@ -189,6 +192,7 @@ func TestDecodeSQLNullBool(t *testing.T) {
 		"should panic because decoder is pooled",
 		func(t *testing.T) {
 			dec := NewDecoder(nil)
+			dec.reset()
 			dec.Release()
 			defer func() {
 				err := recover()

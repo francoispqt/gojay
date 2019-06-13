@@ -7,7 +7,11 @@ func (dec *Decoder) DecodeSQLNullString(v *sql.NullString) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeSQLNullString(v)
+
+	err := dec.decodeSQLNullString(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeSQLNullString(v *sql.NullString) error {
@@ -25,7 +29,11 @@ func (dec *Decoder) DecodeSQLNullInt64(v *sql.NullInt64) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeSQLNullInt64(v)
+
+	err := dec.decodeSQLNullInt64(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeSQLNullInt64(v *sql.NullInt64) error {
@@ -43,7 +51,11 @@ func (dec *Decoder) DecodeSQLNullFloat64(v *sql.NullFloat64) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeSQLNullFloat64(v)
+
+	err := dec.decodeSQLNullFloat64(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeSQLNullFloat64(v *sql.NullFloat64) error {
@@ -61,7 +73,11 @@ func (dec *Decoder) DecodeSQLNullBool(v *sql.NullBool) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeSQLNullBool(v)
+
+	err := dec.decodeSQLNullBool(v)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeSQLNullBool(v *sql.NullBool) error {

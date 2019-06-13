@@ -11,7 +11,7 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func BenchmarkJsonIterDecodeObjMedium(b *testing.B) {
+func BenchmarkJSONIterDecodeObjMedium(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		result := benchmarks.MediumPayload{}
@@ -36,14 +36,14 @@ func BenchmarkJSONParserDecodeObjMedium(b *testing.B) {
 	}
 }
 
-func BenchmarkEncodingJsonStructMedium(b *testing.B) {
+func BenchmarkEncodingJSONDecodeObjMedium(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var data = benchmarks.MediumPayload{}
 		json.Unmarshal(benchmarks.MediumFixture, &data)
 	}
 }
 
-func BenchmarkEasyJsonDecodeObjMedium(b *testing.B) {
+func BenchmarkEasyJSONDecodeObjMedium(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.MediumPayload{}

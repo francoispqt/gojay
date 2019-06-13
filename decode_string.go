@@ -11,7 +11,11 @@ func (dec *Decoder) DecodeString(v *string) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeString(v)
+
+	err := dec.decodeString(v)
+	dec.reset()
+
+	return err
 }
 func (dec *Decoder) decodeString(v *string) error {
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {

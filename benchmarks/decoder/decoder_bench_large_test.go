@@ -10,7 +10,7 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func BenchmarkJsonParserDecodeObjLarge(b *testing.B) {
+func BenchmarkJSONParserDecodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		jsonparser.ArrayEach(benchmarks.LargeFixture, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -26,7 +26,7 @@ func BenchmarkJsonParserDecodeObjLarge(b *testing.B) {
 	}
 }
 
-func BenchmarkJsonIterDecodeObjLarge(b *testing.B) {
+func BenchmarkJSONIterDecodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.LargePayload{}
@@ -34,7 +34,7 @@ func BenchmarkJsonIterDecodeObjLarge(b *testing.B) {
 	}
 }
 
-func BenchmarkEasyJsonDecodeObjLarge(b *testing.B) {
+func BenchmarkEasyJSONDecodeObjLarge(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		result := benchmarks.LargePayload{}

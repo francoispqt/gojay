@@ -668,6 +668,7 @@ func TestDecoderStringPoolError(t *testing.T) {
 	}
 	result := ""
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

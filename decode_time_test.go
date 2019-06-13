@@ -130,6 +130,7 @@ func TestDecoderTimePoolError(t *testing.T) {
 		},
 	}
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

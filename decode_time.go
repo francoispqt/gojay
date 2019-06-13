@@ -9,7 +9,11 @@ func (dec *Decoder) DecodeTime(v *time.Time, format string) error {
 	if dec.isPooled == 1 {
 		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
 	}
-	return dec.decodeTime(v, format)
+
+	err := dec.decodeTime(v, format)
+	dec.reset()
+
+	return err
 }
 
 func (dec *Decoder) decodeTime(v *time.Time, format string) error {

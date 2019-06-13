@@ -1550,22 +1550,6 @@ func (j *jsonDecodePartial) NKeys() int {
 	return 2
 }
 
-func TestDecodeObjectPartial(t *testing.T) {
-	result := jsonDecodePartial{}
-	dec := NewDecoder(nil)
-	dec.data = []byte(`{
-		"test": "test",
-		"test2": "test",
-		"testArrSkip": ["test"],
-		"testSkipString": "test",
-		"testSkipNumber": 123.23
-	}`)
-	dec.length = len(dec.data)
-	err := dec.DecodeObject(&result)
-	assert.Nil(t, err, "err should be nil")
-	assert.NotEqual(t, len(dec.data), dec.cursor)
-}
-
 func TestDecoderObjectInvalidJSON(t *testing.T) {
 	result := jsonDecodePartial{}
 	dec := NewDecoder(nil)
@@ -1746,6 +1730,7 @@ func TestDecoderObjectDecoderInvalidJSONError4(t *testing.T) {
 func TestDecoderObjectPoolError(t *testing.T) {
 	result := jsonDecodePartial{}
 	dec := NewDecoder(nil)
+	dec.reset()
 	dec.Release()
 	defer func() {
 		err := recover()

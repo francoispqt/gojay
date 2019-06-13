@@ -14,18 +14,30 @@ type decUnsafe struct{}
 
 func (u decUnsafe) UnmarshalJSONArray(data []byte, v UnmarshalerJSONArray) error {
 	dec := borrowDecoder(nil, 0)
-	defer dec.Release()
+
+	defer func() {
+		dec.reset()
+		dec.Release()
+	}()
+
 	dec.data = data
 	dec.length = len(data)
+
 	_, err := dec.decodeArray(v)
 	return err
 }
 
 func (u decUnsafe) UnmarshalJSONObject(data []byte, v UnmarshalerJSONObject) error {
 	dec := borrowDecoder(nil, 0)
-	defer dec.Release()
+
+	defer func() {
+		dec.reset()
+		dec.Release()
+	}()
+
 	dec.data = data
 	dec.length = len(data)
+
 	_, err := dec.decodeObject(v)
 	return err
 }
@@ -112,9 +124,13 @@ func (u decUnsafe) Unmarshal(data []byte, v interface{}) error {
 	default:
 		return InvalidUnmarshalError(fmt.Sprintf(invalidUnmarshalErrorMsg, vt))
 	}
-	defer dec.Release()
-	if err != nil {
-		return err
+
+	if err == nil {
+		err = dec.err
 	}
-	return dec.err
+
+	dec.reset()
+	dec.Release()
+
+	return err
 }
