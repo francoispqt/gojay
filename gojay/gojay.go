@@ -7,6 +7,7 @@ import (
 )
 
 var pkg = flag.String("pkg", "", "the package name of the generated file")
+var imp = flag.String("imp", "", "the external package name and identifier to add into generated file")
 var dst = flag.String("o", "", "destination file to output generated code")
 var src = flag.String("s", "", "source dir or file (absolute or relative path)")
 var types = flag.String("t", "", "types to generate")

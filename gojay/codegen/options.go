@@ -58,20 +58,23 @@ func NewOptionsWithFlagSet(set *flag.FlagSet) *Options {
 	if result.Source == "" {
 		result.Source = url.NewResource(".").ParsedURL.Path
 	}
-	var extImportSlice = strings.Split(set.Lookup(optionKeyExtImports).Value.String(), ",")
-	result.ExtImports = make([]ExtImport, len(extImportSlice))
-	for _, impStr := range extImportSlice {
-		var imp = strings.Split(impStr, ":")
-		var extImp = ExtImport{
-			Path: imp[0],
-		}
-		if len(imp) > 1 {
-			extImp = ExtImport{
-				Identifier: imp[0],
-				Path:       imp[1],
+	var extImport = set.Lookup(optionKeyExtImports).Value.String()
+	if extImport != "" {
+		var extImportSlice = strings.Split(set.Lookup(optionKeyExtImports).Value.String(), ",")
+		result.ExtImports = []ExtImport{}
+		for _, impStr := range extImportSlice {
+			var imp = strings.Split(impStr, ":")
+			var extImp = ExtImport{
+				Path: imp[0],
 			}
+			if len(imp) > 1 {
+				extImp = ExtImport{
+					Identifier: imp[0],
+					Path:       imp[1],
+				}
+			}
+			result.ExtImports = append(result.ExtImports, extImp)
 		}
-		result.ExtImports = append(result.ExtImports, extImp)
 	}
 	return result
 }
