@@ -16,6 +16,12 @@ type Options struct {
 	PoolObjects bool
 	TagName     string
 	Pkg         string
+	ExtImports  []ExtImport
+}
+
+type ExtImport struct {
+	Identifier string
+	Path       string
 }
 
 func (o *Options) Validate() error {
@@ -35,6 +41,7 @@ const (
 	optionKeyTagName     = "a"
 	optionKeyPoolObjects = "p"
 	optionKeyPkg         = "pkg"
+	optionKeyExtImports  = "imp"
 )
 
 //NewOptionsWithFlagSet creates a new options for the supplide flagset
@@ -50,6 +57,24 @@ func NewOptionsWithFlagSet(set *flag.FlagSet) *Options {
 	result.Pkg = set.Lookup(optionKeyPkg).Value.String()
 	if result.Source == "" {
 		result.Source = url.NewResource(".").ParsedURL.Path
+	}
+	var extImport = set.Lookup(optionKeyExtImports).Value.String()
+	if extImport != "" {
+		var extImportSlice = strings.Split(set.Lookup(optionKeyExtImports).Value.String(), ",")
+		result.ExtImports = []ExtImport{}
+		for _, impStr := range extImportSlice {
+			var imp = strings.Split(impStr, ":")
+			var extImp = ExtImport{
+				Path: imp[0],
+			}
+			if len(imp) > 1 {
+				extImp = ExtImport{
+					Identifier: imp[0],
+					Path:       imp[1],
+				}
+			}
+			result.ExtImports = append(result.ExtImports, extImp)
+		}
 	}
 	return result
 }
