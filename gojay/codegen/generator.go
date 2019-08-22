@@ -2,12 +2,12 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/viant/toolbox"
 	"go/format"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/viant/toolbox"
 )
 
 const gojayPackage = "github.com/francoispqt/gojay"
@@ -39,6 +39,15 @@ func (g *Generator) addImport(pkg string) {
 	g.imports[`"`+pkg+`"`] = true
 }
 
+// addExtImport adds an external import package to be printed on the generated code
+func (g *Generator) addExtImport(pkg ExtImport) {
+	var identifier string
+	if pkg.Identifier != "" {
+		identifier = pkg.Identifier + " "
+	}
+	g.imports[identifier+`"`+pkg.Path+`"`] = true
+}
+
 // we initiate the variables containing the code to be generated
 func (g *Generator) init() {
 	g.filedInit = []string{}
@@ -52,6 +61,12 @@ func (g *Generator) init() {
 	if g.options.PoolObjects {
 		g.addImport("sync")
 	}
+	if g.options.ExtImports != nil {
+		for _, extImp := range g.options.ExtImports {
+			g.addExtImport(extImp)
+		}
+	}
+
 }
 
 // NewGenerator creates a new generator with the given options
