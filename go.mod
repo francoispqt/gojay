@@ -11,7 +11,7 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190312143242-1de009706dbe
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/modern-go/reflect2 v1.0.1
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/stretchr/testify v1.2.2
 	github.com/viant/assertly v0.4.8
