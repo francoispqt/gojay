@@ -166,12 +166,15 @@ type MarshalerJSONArray interface {
 
 // An Encoder writes JSON values to an output stream.
 type Encoder struct {
-	buf      []byte
-	isPooled byte
-	w        io.Writer
-	err      error
-	hasKeys  bool
-	keys     []string
+	bufFlushThreshold int
+	buf               []byte
+	prevRune          byte // zero if no flushes made
+	isPooled          byte
+	bytesFlushed      int
+	w                 io.Writer
+	err               error
+	hasKeys           bool
+	keys              []string
 }
 
 // AppendBytes allows a modular usage by appending bytes manually to the current state of the buffer.
@@ -189,14 +192,27 @@ func (enc *Encoder) Buf() []byte {
 	return enc.buf
 }
 
+// SetBufFlushThreshold sets a maximal internal buffer size before flushing it to writer.
+func (enc *Encoder) SetBufFlushThreshold(size int) {
+	enc.bufFlushThreshold = size
+}
+
 // Write writes to the io.Writer and resets the buffer.
 func (enc *Encoder) Write() (int, error) {
+	enc.prevRune = 0
+	if len(enc.buf) == 0 {
+		// this may happen when buffer flushed previously
+		return enc.bytesFlushed, nil
+	}
 	i, err := enc.w.Write(enc.buf)
 	enc.buf = enc.buf[:0]
-	return i, err
+	return enc.bytesFlushed + i, err
 }
 
 func (enc *Encoder) getPreviousRune() byte {
+	if enc.prevRune > 0 {
+		return enc.prevRune
+	}
 	last := len(enc.buf) - 1
 	return enc.buf[last]
 }

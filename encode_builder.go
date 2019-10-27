@@ -1,5 +1,9 @@
 package gojay
 
+import (
+	"github.com/modern-go/reflect2"
+)
+
 const hex = "0123456789abcdef"
 
 // grow grows b's capacity, if necessary, to guarantee space for
@@ -13,32 +17,46 @@ func (enc *Encoder) grow(n int) {
 	}
 }
 
+func (enc *Encoder) tryFlush() {
+	if enc.bufFlushThreshold > 0 && enc.w != nil && len(enc.buf) >= enc.bufFlushThreshold {
+		n, err := enc.w.Write(enc.buf)
+		enc.bytesFlushed += n
+		enc.err = err
+		enc.prevRune = enc.buf[len(enc.buf)-1]
+		enc.buf = enc.buf[:0]
+	}
+}
+
 // Write appends the contents of p to b's Buffer.
 // Write always returns len(p), nil.
 func (enc *Encoder) writeBytes(p []byte) {
 	enc.buf = append(enc.buf, p...)
+	enc.tryFlush()
 }
 
 func (enc *Encoder) writeTwoBytes(b1 byte, b2 byte) {
 	enc.buf = append(enc.buf, b1, b2)
+	enc.tryFlush()
 }
 
 // WriteByte appends the byte c to b's Buffer.
 // The returned error is always nil.
 func (enc *Encoder) writeByte(c byte) {
 	enc.buf = append(enc.buf, c)
+	enc.tryFlush()
 }
 
 // WriteString appends the contents of s to b's Buffer.
 // It returns the length of s and a nil error.
 func (enc *Encoder) writeString(s string) {
 	enc.buf = append(enc.buf, s...)
+	enc.tryFlush()
 }
 
-func (enc *Encoder) writeStringEscape(s string) {
-	l := len(s)
+func (enc *Encoder) writeBytesEscape(b []byte) {
+	l := len(b)
 	for i := 0; i < l; i++ {
-		c := s[i]
+		c := b[i]
 		if c >= 0x20 && c != '\\' && c != '"' {
 			enc.writeByte(c)
 			continue
@@ -62,4 +80,8 @@ func (enc *Encoder) writeStringEscape(s string) {
 		}
 		continue
 	}
+}
+
+func (enc *Encoder) writeStringEscape(s string) {
+	enc.writeBytesEscape(reflect2.UnsafeCastString(s))
 }

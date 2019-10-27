@@ -113,23 +113,28 @@ func (dec *Decoder) parseEscapedString() error {
 	case 't':
 		dec.data[dec.cursor] = '\t'
 	case 'u':
-		start := dec.cursor
+		start := dec.cursor - 1 // position of '\' for decoded string placement
 		dec.cursor++
 		str, err := dec.parseUnicode()
 		if err != nil {
 			return err
 		}
-		diff := dec.cursor - start
-		dec.data = append(append(dec.data[:start-1], str...), dec.data[dec.cursor:]...)
-		dec.length = len(dec.data)
-		dec.cursor += len(str) - diff - 1
+		// replace '\u...' with decoded runes
+		// it's possible to do it in-place (without appends) because size of encoded sequence (already in buffer)
+		// always greater than size of decoded one (encoding overhead at least 2 bytes ('\u') per one rune)
+		n := copy(dec.data[start:], str)
+		// and shift buffer left (on difference between length of encoded and decoded runes)
+		end := start + n
+		copy(dec.data[end:], dec.data[dec.cursor:])
+		dec.length -= dec.cursor - end
+		dec.cursor = end
 
 		return nil
 	default:
 		return dec.raiseInvalidJSONErr(dec.cursor)
 	}
 
-	dec.data = append(dec.data[:dec.cursor-1], dec.data[dec.cursor:]...)
+	copy(dec.data[dec.cursor-1:], dec.data[dec.cursor:])
 	dec.length--
 
 	// Since we've lost a character, our dec.cursor offset is now

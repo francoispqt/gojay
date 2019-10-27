@@ -36,6 +36,7 @@ func BorrowEncoder(w io.Writer) *Encoder {
 	enc := encPool.Get().(*Encoder)
 	enc.w = w
 	enc.buf = enc.buf[:0]
+	enc.prevRune = 0
 	enc.isPooled = 0
 	enc.err = nil
 	enc.hasKeys = false
