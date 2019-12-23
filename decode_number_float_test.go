@@ -170,6 +170,11 @@ func TestDecoderFloat64(t *testing.T) {
 			expectedResult: -0.000082,
 		},
 		{
+			name:           "basic-float-negative-zero",
+			json:           "-0.0",
+			expectedResult: 0.0,
+		},
+		{
 			name:           "basic-float",
 			json:           "2.4595",
 			expectedResult: 2.4595,
