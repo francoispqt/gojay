@@ -902,7 +902,7 @@ func (dec *Decoder) getInt64Negative() (int64, error) {
 	// look for following numbers
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
 		switch dec.data[dec.cursor] {
-		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			return dec.getInt64()
 		default:
 			return 0, dec.raiseInvalidJSONErr(dec.cursor)

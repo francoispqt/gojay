@@ -28,6 +28,11 @@ func TestDecoderInt(t *testing.T) {
 			expectedResult: 1039405,
 		},
 		{
+			name:           "basic-negative-zero",
+			json:           "-0",
+			expectedResult: 0,
+		},
+		{
 			name:           "basic-negative",
 			json:           "-2",
 			expectedResult: -2,
