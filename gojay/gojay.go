@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/francoispqt/gojay/gojay/codegen"
 	"log"
+
+	"github.com/francoispqt/gojay/gojay/codegen"
 )
 
 var pkg = flag.String("pkg", "", "the package name of the generated file")
@@ -12,6 +13,7 @@ var src = flag.String("s", "", "source dir or file (absolute or relative path)")
 var types = flag.String("t", "", "types to generate")
 var annotation = flag.String("a", "json", "annotation tag (default json)")
 var poolObjects = flag.String("p", "", "generate code to reuse objects using sync.Pool")
+var gofmt = flag.String("gofmt", "true", "format the generated code")
 
 func main() {
 	flag.Parse()

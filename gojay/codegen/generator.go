@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/viant/toolbox"
 )
 
@@ -118,10 +119,13 @@ func (g *Generator) writeCode() error {
 		return err
 	}
 
-	code, err := format.Source([]byte(expandedCode))
-
-	if err != nil {
-		return err
+	code := []byte(expandedCode)
+	if g.options.GoFmt {
+		codefmt, err := format.Source(code)
+		if err != nil {
+			return err
+		}
+		code = codefmt
 	}
 
 	// code destination is empty, we just print to stdout
