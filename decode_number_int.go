@@ -275,7 +275,7 @@ func (dec *Decoder) getInt16() (int16, error) {
 					}
 					val := floatVal * float64(pow10uint64[pExp])
 					return int16(val), nil
-				case ' ', '\t', '\n', ',', ']', '}':
+				case ' ', '\t', '\n', '\r', ',', ']', '}':
 					dec.cursor = j
 					return dec.atoi16(start, end), nil
 				default:
@@ -507,7 +507,7 @@ func (dec *Decoder) getInt8() (int8, error) {
 					}
 					val := floatVal * float64(pow10uint64[pExp])
 					return int8(val), nil
-				case ' ', '\t', '\n', ',', ']', '}':
+				case ' ', '\t', '\n', '\r', ',', ']', '}':
 					dec.cursor = j
 					return dec.atoi8(start, end), nil
 				default:
@@ -548,7 +548,7 @@ func (dec *Decoder) getInt8WithExp(init int8) (int8, error) {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					uintv := uint8(digits[dec.data[dec.cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
-				case ' ', '\t', '\n', '}', ',', ']':
+				case ' ', '\t', '\n', '\r', '}', ',', ']':
 					if exp+1 >= uint8(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
@@ -737,7 +737,7 @@ func (dec *Decoder) getInt32() (int32, error) {
 					}
 					val := floatVal * float64(pow10uint64[pExp])
 					return int32(val), nil
-				case ' ', '\t', '\n', ',', ']', '}':
+				case ' ', '\t', '\n', '\r', ',', ']', '}':
 					dec.cursor = j
 					return dec.atoi32(start, end), nil
 				default:
@@ -778,7 +778,7 @@ func (dec *Decoder) getInt32WithExp(init int32) (int32, error) {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					uintv := uint32(digits[dec.data[dec.cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
-				case ' ', '\t', '\n', '}', ',', ']':
+				case ' ', '\t', '\n', '\r', '}', ',', ']':
 					if exp+1 >= uint32(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
@@ -920,7 +920,7 @@ func (dec *Decoder) getInt64() (int64, error) {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			end = j
 			continue
-		case ' ', '\t', '\n', ',', '}', ']':
+		case ' ', '\t', '\n', '\r', ',', '}', ']':
 			dec.cursor = j
 			return dec.atoi64(start, end), nil
 		case '.':
@@ -971,7 +971,7 @@ func (dec *Decoder) getInt64() (int64, error) {
 					}
 					val := floatVal * float64(pow10uint64[pExp])
 					return int64(val), nil
-				case ' ', '\t', '\n', ',', ']', '}':
+				case ' ', '\t', '\n', '\r', ',', ']', '}':
 					dec.cursor = j
 					return dec.atoi64(start, end), nil
 				default:
@@ -1009,7 +1009,7 @@ func (dec *Decoder) getInt64WithExp(init int64) (int64, error) {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 					uintv := uint64(digits[dec.data[dec.cursor]])
 					exp = (exp << 3) + (exp << 1) + uintv
-				case ' ', '\t', '\n', '}', ',', ']':
+				case ' ', '\t', '\n', '\r', '}', ',', ']':
 					if exp+1 >= uint64(len(pow10uint64)) {
 						return 0, dec.raiseInvalidJSONErr(dec.cursor)
 					}
