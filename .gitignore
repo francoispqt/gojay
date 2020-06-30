@@ -4,3 +4,4 @@ vendor
 *.test
 .vscode
 .idea
+.DS_Store
