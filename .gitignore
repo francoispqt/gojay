@@ -3,3 +3,4 @@ vendor
 *.log
 *.test
 .vscode
+.idea
