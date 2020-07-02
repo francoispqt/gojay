@@ -92,7 +92,7 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
-	t.Run("escaped-control-char", func(t *testing.T) {
+	t.Run("escaped-control-char-should-be-empty", func(t *testing.T) {
 		str := "\u001b"
 		builder := &strings.Builder{}
 		enc := NewEncoder(builder)
@@ -100,7 +100,7 @@ func TestEncoderStringEncodeAPI(t *testing.T) {
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
-			`"\u001b"`,
+			`""`,
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
