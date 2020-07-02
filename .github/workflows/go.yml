@@ -1,0 +1,32 @@
+name: Go
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+    
+jobs:
+
+  test:
+    
+    name: Running Go Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.12
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+    
+#    - name: Configure git for private modules
+#      env:
+#        TOKEN: ${{ secrets.TOKEN }}
+#      run: git config --global url."https://YOUR_GITHUB_USERNAME:${TOKEN}@github.com".insteadOf "https://github.com"
+
+    - name: Run Test
+      run: go test ./... -race -cover -v -short
