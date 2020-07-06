@@ -3,3 +3,5 @@ vendor
 *.log
 *.test
 .vscode
+.idea
+.DS_Store

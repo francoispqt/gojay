@@ -56,7 +56,7 @@ func Test_writeStringEscape(t *testing.T) {
 				stringAsByte: 9,
 			},
 			want: "\\t",
-		},
+    },
 		{
 			name: "should write an at byte to a string",
 			args: args{
@@ -65,7 +65,7 @@ func Test_writeStringEscape(t *testing.T) {
 			want: "@",
 		},
 	}
-
+  
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := new(bytes.Buffer)
