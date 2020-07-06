@@ -3,7 +3,9 @@ package gojay
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -526,6 +528,30 @@ func TestUnmarshalJSONObjects(t *testing.T) {
 		t.Run(testCase.name, func(*testing.T) {
 			err := UnmarshalJSONObject(testCase.d, testCase.v)
 			testCase.expectations(err, testCase.v, t)
+		})
+	}
+}
+
+func TestDecoder_read(t *testing.T) {
+
+	tests := []struct {
+		name   string
+		r io.Reader
+		want   bool
+	}{
+		{
+			name: "should read in data",
+			r: strings.NewReader("foo bar"),
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dec := NewDecoder(tt.r)
+			dec.data = []byte{}
+			if got := dec.read(); got != tt.want {
+				t.Errorf("read() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
