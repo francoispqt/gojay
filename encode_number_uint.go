@@ -2,6 +2,25 @@ package gojay
 
 import "strconv"
 
+// EncodeUint encodes an uint to JSON
+func (enc *Encoder) EncodeUint(n uint) error {
+	if enc.isPooled == 1 {
+		panic(InvalidUsagePooledEncoderError("Invalid usage of pooled encoder"))
+	}
+	_, _ = enc.encodeUint(n)
+	_, err := enc.Write()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// encodeUint encodes an int to JSON
+func (enc *Encoder) encodeUint(n uint) ([]byte, error) {
+	enc.buf = strconv.AppendUint(enc.buf, uint64(n), 10)
+	return enc.buf, nil
+}
+
 // EncodeUint64 encodes an int64 to JSON
 func (enc *Encoder) EncodeUint64(n uint64) error {
 	if enc.isPooled == 1 {

@@ -1,8 +1,104 @@
 package gojay
 
 import (
+	"fmt"
 	"math"
 )
+
+// DecodeUint reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the int pointed to by v.
+//
+// See the documentation for Unmarshal for details about the conversion of JSON into a Go value.
+func (dec *Decoder) DecodeUint(v *uint) error {
+	if dec.isPooled == 1 {
+		panic(InvalidUsagePooledDecoderError("Invalid usage of pooled decoder"))
+	}
+	return dec.decodeUint(v)
+}
+func (dec *Decoder) decodeUint(v *uint) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getUint64()
+			if err != nil {
+				return err
+			}
+			*v = uint(val)
+			return nil
+		case '-':
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			return nil
+		default:
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+
+func (dec *Decoder) decodeUintNull(v **uint) error {
+	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
+		switch c := dec.data[dec.cursor]; c {
+		case ' ', '\n', '\t', '\r', ',':
+			continue
+		// we don't look for 0 as leading zeros are invalid per RFC
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			val, err := dec.getUint64()
+			if err != nil {
+				return err
+			}
+			if *v == nil {
+				*v = new(uint)
+			}
+			**v = uint(val)
+			return nil
+		case '-':
+			dec.err = dec.makeInvalidUnmarshalErr(v)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		case 'n':
+			dec.cursor++
+			err := dec.assertNull()
+			if err != nil {
+				return err
+			}
+			return nil
+		default:
+			dec.err = InvalidUnmarshalError(
+				fmt.Sprintf(
+					"Cannot unmarshall to uint, wrong char '%s' found at pos %d",
+					string(dec.data[dec.cursor]),
+					dec.cursor,
+				),
+			)
+			err := dec.skipData()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
 
 // DecodeUint8 reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the uint8 pointed to by v.
 //
