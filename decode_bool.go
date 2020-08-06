@@ -200,7 +200,6 @@ func (dec *Decoder) assertFalse() error {
 }
 
 // Add Values functions
-
 // AddBool decodes the JSON value within an object or an array to a *bool.
 // If next key is neither null nor a JSON boolean, an InvalidUnmarshalError will be returned.
 // If next key is null, bool will be false.
