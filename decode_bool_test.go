@@ -397,7 +397,7 @@ func TestDecoderBoolNull(t *testing.T) {
 		},
 		{
 			name: "null-error2",
-			json: "nual",
+			json: "nall1",
 			expectations: func(t *testing.T, v *bool, err error) {
 				assert.NotNil(t, err, "err should be nil")
 				assert.IsType(t, InvalidJSONError(""), err, "err should be of type InvalidJSONError")
