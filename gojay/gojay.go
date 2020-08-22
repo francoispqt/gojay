@@ -17,6 +17,7 @@ func main() {
 	flag.Parse()
 	options := codegen.NewOptionsWithFlagSet(flag.CommandLine)
 	gen := codegen.NewGenerator(options)
+	// generate error
 	if err := gen.Generate(); err != nil {
 		log.Fatal(err)
 	}

@@ -11,6 +11,7 @@ type message struct {
 	bar string
 }
 
+
 func (m *message) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 	switch k {
 	case "foo":

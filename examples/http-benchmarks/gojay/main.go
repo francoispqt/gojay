@@ -156,3 +156,6 @@ func (v *ints) MarshalJSONArray(enc *gojay.Encoder) {
 func (v *ints) IsNil() bool {
 	return v == nil || len(*v) == 0
 }
+func (v *ints) {
+	return v = v*2
+} 

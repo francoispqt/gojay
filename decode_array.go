@@ -76,6 +76,7 @@ func (dec *Decoder) decodeArrayNull(v interface{}) (int, error) {
 	vv := reflect.ValueOf(v)
 	vvt := vv.Type()
 	if vvt.Kind() != reflect.Ptr || vvt.Elem().Kind() != reflect.Ptr {
+		
 		dec.err = ErrUnmarshalPtrExpected
 		return 0, dec.err
 	}
