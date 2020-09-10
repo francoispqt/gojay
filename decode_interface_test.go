@@ -123,6 +123,13 @@ func TestDecodeInterfaceBasic(t *testing.T) {
 			errType:         InvalidJSONError(""),
 			skipCheckResult: true,
 		},
+		{
+			name:           "escaped-string",
+			json:           `"\"hola amigos!"`,
+			expectedResult: interface{}("\"hola amigos!"),
+			err:            false,
+		},
+
 	}
 
 	for _, testCase := range testCases {

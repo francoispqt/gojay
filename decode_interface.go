@@ -87,7 +87,7 @@ func (dec *Decoder) getObject() (start int, end int, err error) {
 		case '"':
 			start = dec.cursor
 			dec.cursor++
-			start, end, err = dec.getString()
+			start, end, err = dec.getString(true)
 			start--
 			dec.cursor = end
 			return

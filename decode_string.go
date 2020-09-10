@@ -21,7 +21,7 @@ func (dec *Decoder) decodeString(v *string) error {
 			continue
 		case '"':
 			dec.cursor++
-			start, end, err := dec.getString()
+			start, end, err := dec.getString(false)
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ func (dec *Decoder) decodeStringNull(v **string) error {
 			continue
 		case '"':
 			dec.cursor++
-			start, end, err := dec.getString()
+			start, end, err := dec.getString(false)
 
 			if err != nil {
 				return err
@@ -139,7 +139,7 @@ func (dec *Decoder) parseEscapedString() error {
 	return nil
 }
 
-func (dec *Decoder) getString() (int, int, error) {
+func (dec *Decoder) getString(raw bool) (int, int, error) {
 	// extract key
 	var keyStart = dec.cursor
 	// var str *Builder
@@ -152,9 +152,16 @@ func (dec *Decoder) getString() (int, int, error) {
 		// slash found
 		case '\\':
 			dec.cursor = dec.cursor + 1
-			err := dec.parseEscapedString()
-			if err != nil {
-				return 0, 0, err
+			if !raw {
+				err := dec.parseEscapedString()
+				if err != nil {
+					return 0, 0, err
+				}
+			} else {
+				if dec.cursor >= dec.length && !dec.read() {
+					return 0, 0, dec.raiseInvalidJSONErr(dec.cursor)
+				}
+				dec.cursor = dec.cursor + 1
 			}
 		default:
 			dec.cursor = dec.cursor + 1

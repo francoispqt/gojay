@@ -258,7 +258,7 @@ func (dec *Decoder) nextKey() (string, bool, error) {
 			continue
 		case '"':
 			dec.cursor = dec.cursor + 1
-			start, end, err := dec.getString()
+			start, end, err := dec.getString(false)
 			if err != nil {
 				return "", false, err
 			}
