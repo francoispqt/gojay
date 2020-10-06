@@ -41,8 +41,8 @@ func (enc *Encoder) AddUint64NullEmpty(v uint64) {
 // Uint64 adds an int to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Uint64(v uint64) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendUint(enc.buf, v, 10)
@@ -55,8 +55,8 @@ func (enc *Encoder) Uint64OmitEmpty(v uint64) {
 		return
 	}
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendUint(enc.buf, v, 10)
@@ -66,8 +66,8 @@ func (enc *Encoder) Uint64OmitEmpty(v uint64) {
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) Uint64NullEmpty(v uint64) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v == 0 {
@@ -102,8 +102,8 @@ func (enc *Encoder) Uint64Key(key string, v uint64) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -124,8 +124,8 @@ func (enc *Encoder) Uint64KeyOmitEmpty(key string, v uint64) {
 		return
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -143,8 +143,8 @@ func (enc *Encoder) Uint64KeyNullEmpty(key string, v uint64) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' && r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

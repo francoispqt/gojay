@@ -121,8 +121,8 @@ func (enc *Encoder) AddFloat64OmitEmpty(v float64) {
 // Float64 adds a float64 to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Float64(v float64) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendFloat(enc.buf, v, 'f', -1, 64)
@@ -135,8 +135,8 @@ func (enc *Encoder) Float64OmitEmpty(v float64) {
 		return
 	}
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendFloat(enc.buf, v, 'f', -1, 64)
@@ -146,8 +146,8 @@ func (enc *Encoder) Float64OmitEmpty(v float64) {
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) Float64NullEmpty(v float64) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v == 0 {
@@ -175,8 +175,8 @@ func (enc *Encoder) Float64Key(key string, value float64) {
 			return
 		}
 	}
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.grow(10)
@@ -198,8 +198,8 @@ func (enc *Encoder) Float64KeyOmitEmpty(key string, v float64) {
 		return
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -217,8 +217,8 @@ func (enc *Encoder) Float64KeyNullEmpty(key string, v float64) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -250,8 +250,8 @@ func (enc *Encoder) AddFloat32NullEmpty(v float32) {
 
 // Float32 adds a float32 to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Float32(v float32) {
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendFloat(enc.buf, float64(v), 'f', -1, 32)
@@ -264,8 +264,8 @@ func (enc *Encoder) Float32OmitEmpty(v float32) {
 		return
 	}
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.buf = strconv.AppendFloat(enc.buf, float64(v), 'f', -1, 32)
@@ -275,8 +275,8 @@ func (enc *Encoder) Float32OmitEmpty(v float32) {
 // must be used inside a slice or array encoding (does not encode a key).
 func (enc *Encoder) Float32NullEmpty(v float32) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v == 0 {
@@ -311,8 +311,8 @@ func (enc *Encoder) Float32Key(key string, v float32) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -334,8 +334,8 @@ func (enc *Encoder) Float32KeyOmitEmpty(key string, v float32) {
 		return
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -353,8 +353,8 @@ func (enc *Encoder) Float32KeyNullEmpty(key string, v float32) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
