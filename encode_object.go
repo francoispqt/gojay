@@ -102,8 +102,8 @@ func (enc *Encoder) AddObjectKeyNullEmpty(key string, v MarshalerJSONObject) {
 func (enc *Encoder) Object(v MarshalerJSONObject) {
 	if v.IsNil() {
 		enc.grow(2)
-		r := enc.getPreviousRune()
-		if r != '{' && r != '[' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('{')
@@ -111,8 +111,8 @@ func (enc *Encoder) Object(v MarshalerJSONObject) {
 		return
 	}
 	enc.grow(4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
@@ -135,8 +135,8 @@ func (enc *Encoder) Object(v MarshalerJSONObject) {
 func (enc *Encoder) ObjectWithKeys(v MarshalerJSONObject, keys []string) {
 	if v.IsNil() {
 		enc.grow(2)
-		r := enc.getPreviousRune()
-		if r != '{' && r != '[' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' && r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('{')
@@ -144,8 +144,8 @@ func (enc *Encoder) ObjectWithKeys(v MarshalerJSONObject, keys []string) {
 		return
 	}
 	enc.grow(4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
@@ -171,8 +171,8 @@ func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 		return
 	}
 	enc.grow(2)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('{')
@@ -195,8 +195,8 @@ func (enc *Encoder) ObjectOmitEmpty(v MarshalerJSONObject) {
 // value must implement MarshalerJSONObject
 func (enc *Encoder) ObjectNullEmpty(v MarshalerJSONObject) {
 	enc.grow(2)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v.IsNil() {
@@ -228,8 +228,8 @@ func (enc *Encoder) ObjectKey(key string, v MarshalerJSONObject) {
 	}
 	if v.IsNil() {
 		enc.grow(2 + len(key))
-		r := enc.getPreviousRune()
-		if r != '{' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -239,8 +239,8 @@ func (enc *Encoder) ObjectKey(key string, v MarshalerJSONObject) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -270,8 +270,8 @@ func (enc *Encoder) ObjectKeyWithKeys(key string, value MarshalerJSONObject, key
 	}
 	if value.IsNil() {
 		enc.grow(2 + len(key))
-		r := enc.getPreviousRune()
-		if r != '{' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -281,8 +281,8 @@ func (enc *Encoder) ObjectKeyWithKeys(key string, value MarshalerJSONObject, key
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -311,8 +311,8 @@ func (enc *Encoder) ObjectKeyOmitEmpty(key string, v MarshalerJSONObject) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -342,8 +342,8 @@ func (enc *Encoder) ObjectKeyNullEmpty(key string, v MarshalerJSONObject) {
 		}
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

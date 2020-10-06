@@ -62,8 +62,8 @@ func (enc *Encoder) AddBoolKeyNullEmpty(key string, v bool) {
 // Bool adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Bool(v bool) {
 	enc.grow(5)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v {
@@ -79,8 +79,8 @@ func (enc *Encoder) BoolOmitEmpty(v bool) {
 		return
 	}
 	enc.grow(5)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeString("true")
@@ -89,8 +89,8 @@ func (enc *Encoder) BoolOmitEmpty(v bool) {
 // BoolNullEmpty adds a bool to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) BoolNullEmpty(v bool) {
 	enc.grow(5)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v == false {
@@ -108,8 +108,8 @@ func (enc *Encoder) BoolKey(key string, value bool) {
 		}
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -130,8 +130,8 @@ func (enc *Encoder) BoolKeyOmitEmpty(key string, v bool) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -149,8 +149,8 @@ func (enc *Encoder) BoolKeyNullEmpty(key string, v bool) {
 		}
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

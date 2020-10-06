@@ -38,8 +38,8 @@ func (enc *Encoder) TimeKey(key string, t *time.Time, format string) {
 		}
 	}
 	enc.grow(10 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
@@ -58,8 +58,8 @@ func (enc *Encoder) AddTime(t *time.Time, format string) {
 // Time adds an *time.Time to be encoded with the given format, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) Time(t *time.Time, format string) {
 	enc.grow(10)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

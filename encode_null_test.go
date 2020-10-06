@@ -14,6 +14,11 @@ func TestEncodeNull(t *testing.T) {
 		expectedJSON string
 	}{
 		{
+			name:         "encode null",
+			baseJSON:     ``,
+			expectedJSON: `null,null`,
+		},
+		{
 			name:         "basic 1st element",
 			baseJSON:     `[`,
 			expectedJSON: `[null,null`,
@@ -44,6 +49,11 @@ func TestEncodeNullKey(t *testing.T) {
 		baseJSON     string
 		expectedJSON string
 	}{
+		{
+			name:         "encode null",
+			baseJSON:     ``,
+			expectedJSON: `"foo":null,"bar":null`,
+		},
 		{
 			name:         "basic 1st element",
 			baseJSON:     `{`,

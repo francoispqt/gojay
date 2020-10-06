@@ -25,8 +25,8 @@ func (enc *Encoder) encodeEmbeddedJSON(v *EmbeddedJSON) ([]byte, error) {
 // it expects the JSON to be of proper format.
 func (enc *Encoder) AddEmbeddedJSON(v *EmbeddedJSON) {
 	enc.grow(len(*v) + 4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeBytes(*v)
@@ -40,8 +40,8 @@ func (enc *Encoder) AddEmbeddedJSONOmitEmpty(v *EmbeddedJSON) {
 	if v == nil || len(*v) == 0 {
 		return
 	}
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeBytes(*v)
@@ -58,8 +58,8 @@ func (enc *Encoder) AddEmbeddedJSONKey(key string, v *EmbeddedJSON) {
 		}
 	}
 	enc.grow(len(key) + len(*v) + 5)
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -82,8 +82,8 @@ func (enc *Encoder) AddEmbeddedJSONKeyOmitEmpty(key string, v *EmbeddedJSON) {
 		return
 	}
 	enc.grow(len(key) + len(*v) + 5)
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

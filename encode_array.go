@@ -62,8 +62,8 @@ func (enc *Encoder) AddArrayKeyNullEmpty(key string, v MarshalerJSONArray) {
 func (enc *Encoder) Array(v MarshalerJSONArray) {
 	if v.IsNil() {
 		enc.grow(3)
-		r := enc.getPreviousRune()
-		if r != '[' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '[' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('[')
@@ -71,8 +71,8 @@ func (enc *Encoder) Array(v MarshalerJSONArray) {
 		return
 	}
 	enc.grow(100)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('[')
@@ -87,8 +87,8 @@ func (enc *Encoder) ArrayOmitEmpty(v MarshalerJSONArray) {
 		return
 	}
 	enc.grow(4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('[')
@@ -100,8 +100,8 @@ func (enc *Encoder) ArrayOmitEmpty(v MarshalerJSONArray) {
 // value must implement Marshaler
 func (enc *Encoder) ArrayNullEmpty(v MarshalerJSONArray) {
 	enc.grow(4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	if v.IsNil() {
@@ -123,8 +123,8 @@ func (enc *Encoder) ArrayKey(key string, v MarshalerJSONArray) {
 	}
 	if v.IsNil() {
 		enc.grow(2 + len(key))
-		r := enc.getPreviousRune()
-		if r != '{' {
+		r, ok := enc.getPreviousRune()
+		if ok && r != '{' {
 			enc.writeByte(',')
 		}
 		enc.writeByte('"')
@@ -134,8 +134,8 @@ func (enc *Encoder) ArrayKey(key string, v MarshalerJSONArray) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -157,8 +157,8 @@ func (enc *Encoder) ArrayKeyOmitEmpty(key string, v MarshalerJSONArray) {
 		return
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')
@@ -177,8 +177,8 @@ func (enc *Encoder) ArrayKeyNullEmpty(key string, v MarshalerJSONArray) {
 		}
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	if v.IsNil() {

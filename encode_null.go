@@ -8,8 +8,8 @@ func (enc *Encoder) AddNull() {
 // Null adds a `null` to be encoded. Must be used while encoding an array.`
 func (enc *Encoder) Null() {
 	enc.grow(5)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeByte(',')
 	}
 	enc.writeBytes(nullBytes)
@@ -28,8 +28,8 @@ func (enc *Encoder) NullKey(key string) {
 		}
 	}
 	enc.grow(5 + len(key))
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeByte(',')
 	}
 	enc.writeByte('"')

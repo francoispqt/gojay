@@ -67,8 +67,8 @@ func (enc *Encoder) AddStringKeyNullEmpty(key, v string) {
 // String adds a string to be encoded, must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) String(v string) {
 	enc.grow(len(v) + 4)
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
@@ -83,8 +83,8 @@ func (enc *Encoder) StringOmitEmpty(v string) {
 	if v == "" {
 		return
 	}
-	r := enc.getPreviousRune()
-	if r != '[' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '[' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
@@ -96,9 +96,9 @@ func (enc *Encoder) StringOmitEmpty(v string) {
 // StringNullEmpty adds a string to be encoded or skips it if it is zero value.
 // Must be used inside a slice or array encoding (does not encode a key)
 func (enc *Encoder) StringNullEmpty(v string) {
-	r := enc.getPreviousRune()
+	r, ok := enc.getPreviousRune()
 	if v == "" {
-		if r != '[' {
+		if ok && r != '[' {
 			enc.writeByte(',')
 			enc.writeBytes(nullBytes)
 		} else {
@@ -123,8 +123,8 @@ func (enc *Encoder) StringKey(key, v string) {
 		}
 	}
 	enc.grow(len(key) + len(v) + 5)
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
@@ -147,8 +147,8 @@ func (enc *Encoder) StringKeyOmitEmpty(key, v string) {
 		return
 	}
 	enc.grow(len(key) + len(v) + 5)
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
@@ -168,8 +168,8 @@ func (enc *Encoder) StringKeyNullEmpty(key, v string) {
 		}
 	}
 	enc.grow(len(key) + len(v) + 5)
-	r := enc.getPreviousRune()
-	if r != '{' {
+	r, ok := enc.getPreviousRune()
+	if ok && r != '{' {
 		enc.writeTwoBytes(',', '"')
 	} else {
 		enc.writeByte('"')
