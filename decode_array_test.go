@@ -1,6 +1,7 @@
 package gojay
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -717,4 +718,108 @@ func TestIndex(t *testing.T) {
 			}
 		})
 	}
+}
+
+type limitedIntArray struct {
+	SizeLimit   int
+	CurrentSize int
+	Array       []int
+}
+
+func (a *limitedIntArray) UnmarshalJSONArray(dec *Decoder) error {
+	var value int
+	if err := dec.Int(&value); err != nil {
+		return err
+	}
+
+	// it's important to call Int32 before bailing, else the cursor will not move
+	if a.SizeLimit > 0 && a.CurrentSize >= a.SizeLimit {
+		// trigger the cursor the rapid skip without decoding
+		dec.SkipArrayDataBlock()
+		return nil
+	}
+
+	a.Array = append(a.Array, value)
+	a.CurrentSize++
+	return nil
+}
+
+type array []int
+
+func (a *array) UnmarshalJSONArray(dec *Decoder) error {
+	var value int
+	if err := dec.Int(&value); err != nil {
+		return err
+	}
+	*a = append(*a, value)
+	return nil
+}
+
+type mockObj struct {
+	LimitedArray []int    `json:"limited_array"`
+	SArray       []string `json:"s_array"`
+	Array        []int    `json:"array"`
+}
+
+func (r *mockObj) UnmarshalJSONObject(dec *Decoder, k string) error {
+	switch k {
+	case "limited_array":
+		var aSlice = limitedIntArray{SizeLimit: 15}
+		err := dec.Array(&aSlice)
+		if err == nil && len(aSlice.Array) > 0 {
+			r.LimitedArray = aSlice.Array
+		}
+		return nil
+	case "s_array":
+		var aSlice = ArrayNull{}
+		err := dec.Array(&aSlice)
+		if err == nil && len(aSlice) > 0 {
+			r.SArray = aSlice
+		}
+		return nil
+	case "array":
+		var aSlice = array{}
+		err := dec.Array(&aSlice)
+		if err == nil && len(aSlice) > 0 {
+			r.Array = aSlice
+		}
+		return nil
+	}
+	return nil
+}
+
+func (r *mockObj) NKeys() int { return 0 }
+
+func TestUnmarshalJSONArrayLimitedArray(t *testing.T) {
+	testCases := []struct {
+		name           string
+		json           string
+		expectedResult mockObj
+	}{
+		{
+			name: "Limited Array Test",
+			json: `{"limited_array":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"s_array":["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],"array":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]}`,
+			expectedResult: mockObj{
+				LimitedArray: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+				SArray:       []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
+				Array:        []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			dec := BorrowDecoder(strings.NewReader(tt.json))
+			defer dec.Release()
+			var mockObject mockObj
+			err := dec.DecodeObject(&mockObject)
+			if err != nil {
+				t.Fatalf("TestUnmarshalJSONArrayLimitedArray() unexpected error %v", err)
+			}
+			if !reflect.DeepEqual(mockObject, tt.expectedResult) {
+				t.Fatalf("TestUnmarshalJSONArrayLimitedArray() regular arr did not match expected got %+v want %+v", mockObject, tt.expectedResult)
+			}
+		})
+	}
+
 }
