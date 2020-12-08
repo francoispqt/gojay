@@ -235,16 +235,17 @@ type UnmarshalerJSONArray interface {
 
 // A Decoder reads and decodes JSON values from an input stream.
 type Decoder struct {
-	r          io.Reader
-	data       []byte
-	err        error
-	isPooled   byte
-	called     byte
-	child      byte
-	cursor     int
-	length     int
-	keysDone   int
-	arrayIndex int
+	r                  io.Reader
+	data               []byte
+	err                error
+	isPooled           byte
+	called             byte
+	child              byte
+	cursor             int
+	length             int
+	keysDone           int
+	arrayIndex         int
+	skipArrayDataBlock bool
 }
 
 // Decode reads the next JSON-encoded value from the decoder's input (io.Reader) and stores it in the value pointed to by v.
@@ -326,6 +327,13 @@ func (dec *Decoder) Decode(v interface{}) error {
 		return err
 	}
 	return dec.err
+}
+
+
+// SkipArrayDataBlock allows the decoder to move the cursor forward quickly to the next key
+// useful to limiting the amount of data marshalled in arrays if some limit length is set
+func (dec *Decoder) SkipArrayDataBlock() {
+	dec.skipArrayDataBlock = true
 }
 
 // Non exported
