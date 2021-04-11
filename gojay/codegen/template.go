@@ -174,7 +174,11 @@ func ({{.Receiver}}) IsNil() bool {
 func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 {{.InitEmbedded}}
 	switch k {
-{{.DecodingCases}}	
+{{.DecodingCases}}
+{{if .ErrOnUnknown}}
+	default:
+		return dec.makeUnknownFieldErr({{.Alias}}, k)
+{{end}}
 	}
 	return nil
 }

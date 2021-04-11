@@ -46,6 +46,7 @@ func (s *Struct) generateEncoding(structInfo *toolbox.TypeInfo) (string, error) 
 		DecodingCases string
 		Reset         string
 		FieldCount    int
+		ErrOnUnknown  bool
 	}{
 		Receiver:      s.Alias + " *" + s.Name,
 		DecodingCases: strings.Join(decodingCases, "\n"),
@@ -54,6 +55,7 @@ func (s *Struct) generateEncoding(structInfo *toolbox.TypeInfo) (string, error) 
 		InitEmbedded:  initEmbedded,
 		Reset:         resetCode,
 		Alias:         s.Alias,
+		ErrOnUnknown:  s.options.ErrOnUnknown,
 	}
 	return expandBlockTemplate(encodingStructType, data)
 }

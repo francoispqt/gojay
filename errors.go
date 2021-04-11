@@ -86,3 +86,21 @@ func (err InvalidUsagePooledEncoderError) Error() string {
 // ErrUnmarshalPtrExpected is the error returned when unmarshal expects a pointer value,
 // When using `dec.ObjectNull` or `dec.ArrayNull` for example.
 var ErrUnmarshalPtrExpected = errors.New("Cannot unmarshal to given value, a pointer is expected")
+
+const unknownFieldErrorMsg = "Encountered unknown field %q while unmarshal JSON to type '%T'"
+
+// UnknownFieldError occurs when Decoding a object with a unknown field.
+type UnknownFieldError string
+
+func (err UnknownFieldError) Error() string {
+	return string(err)
+}
+func (dec *Decoder) makeUnknownFieldErr(v interface{}, key string) error {
+	return UnknownFieldError(
+		fmt.Sprintf(
+			unknownFieldErrorMsg,
+			key,
+			v,
+		),
+	)
+}
