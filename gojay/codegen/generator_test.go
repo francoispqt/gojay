@@ -55,6 +55,15 @@ func TestGenerator_Generate(t *testing.T) {
 				TagName:     "json",
 			},
 		},
+		{
+			description: "basic struct code generation with unknown field errors",
+			options: &Options{
+				Source:       path.Join(parent, "unknown_struct"),
+				Types:        []string{"Message"},
+				Dest:         path.Join(parent, "unknown_struct", "encoding.go"),
+				ErrOnUnknown: true,
+			},
+		},
 	}
 
 	for _, useCase := range useCases {
