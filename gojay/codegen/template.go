@@ -184,7 +184,13 @@ func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 }
 
 // NKeys returns the number of keys to unmarshal
-func ({{.Receiver}}) NKeys() int { return {{.FieldCount}} }
+func ({{.Receiver}}) NKeys() int {
+{{- if .ErrOnUnknown}}
+	return 0 // Unmarshal all keys so we can catch trailing unknown keys.
+{{else}}
+	return {{.FieldCount}}
+{{end -}}
+}
 
 {{.Reset}}
 
