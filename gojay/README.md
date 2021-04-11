@@ -23,7 +23,11 @@ If you just want to the output to stdout, omit the -o flag.
 - t Types to generate with all its dependencies (comma separated)
 - a Annotation tag used to read metadata (default: json)
 - o Output file (relative or absolute path)
+
+Flags that alter the generated code:
+
 - p Pool to reuse object (using sync.Pool)
+- e Return a error on unknown fields (default: false)
 
 Examples:
 

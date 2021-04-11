@@ -10,12 +10,13 @@ import (
 )
 
 type Options struct {
-	Source      string
-	Dest        string
-	Types       []string
-	PoolObjects bool
-	TagName     string
-	Pkg         string
+	Source       string
+	Dest         string
+	Types        []string
+	PoolObjects  bool
+	TagName      string
+	Pkg          string
+	ErrOnUnknown bool
 }
 
 func (o *Options) Validate() error {
@@ -29,12 +30,13 @@ func (o *Options) Validate() error {
 }
 
 const (
-	optionKeySource      = "s"
-	optionKeyDest        = "o"
-	optionKeyTypes       = "t"
-	optionKeyTagName     = "a"
-	optionKeyPoolObjects = "p"
-	optionKeyPkg         = "pkg"
+	optionKeySource       = "s"
+	optionKeyDest         = "o"
+	optionKeyTypes        = "t"
+	optionKeyTagName      = "a"
+	optionKeyPoolObjects  = "p"
+	optionKeyPkg          = "pkg"
+	optionKeyErrOnUnknown = "e"
 )
 
 //NewOptionsWithFlagSet creates a new options for the supplide flagset
@@ -48,6 +50,7 @@ func NewOptionsWithFlagSet(set *flag.FlagSet) *Options {
 	result.TagName = set.Lookup(optionKeyTagName).Value.String()
 	result.Types = strings.Split(set.Lookup(optionKeyTypes).Value.String(), ",")
 	result.Pkg = set.Lookup(optionKeyPkg).Value.String()
+	result.ErrOnUnknown = toolbox.AsBoolean(set.Lookup(optionKeyErrOnUnknown).Value.String())
 	if result.Source == "" {
 		result.Source = url.NewResource(".").ParsedURL.Path
 	}

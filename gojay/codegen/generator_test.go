@@ -1,11 +1,12 @@
 package codegen
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/viant/toolbox"
 	"log"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/viant/toolbox"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -45,13 +46,22 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 		},
 		{
-			description: "struct with json annotation and time/foarmat|layouat generation",
+			description: "struct with json annotation and time/format|layout generation",
 			options: &Options{
 				Source:      path.Join(parent, "annotated_struct"),
 				Types:       []string{"Message"},
 				Dest:        path.Join(parent, "annotated_struct", "encoding.go"),
 				PoolObjects: false,
 				TagName:     "json",
+			},
+		},
+		{
+			description: "basic struct code generation with unknown field errors",
+			options: &Options{
+				Source:       path.Join(parent, "unknown_struct"),
+				Types:        []string{"Message"},
+				Dest:         path.Join(parent, "unknown_struct", "encoding.go"),
+				ErrOnUnknown: true,
 			},
 		},
 	}

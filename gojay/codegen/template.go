@@ -174,13 +174,23 @@ func ({{.Receiver}}) IsNil() bool {
 func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 {{.InitEmbedded}}
 	switch k {
-{{.DecodingCases}}	
+{{.DecodingCases}}
+{{if .ErrOnUnknown}}
+	default:
+		return gojay.MakeUnknownFieldErr({{.Alias}}, k)
+{{end}}
 	}
 	return nil
 }
 
 // NKeys returns the number of keys to unmarshal
-func ({{.Receiver}}) NKeys() int { return {{.FieldCount}} }
+func ({{.Receiver}}) NKeys() int {
+{{- if .ErrOnUnknown}}
+	return 0 // Unmarshal all keys so we can catch trailing unknown keys.
+{{else}}
+	return {{.FieldCount}}
+{{end -}}
+}
 
 {{.Reset}}
 
@@ -305,7 +315,7 @@ func expandTemplate(namespace string, dictionary map[int]string, key int, data i
 	}
 	temlate, err := template.New(id).Parse(textTemplate)
 	if err != nil {
-		return "", fmt.Errorf("fiailed to parse template %v %v, due to %v", namespace, key, err)
+		return "", fmt.Errorf("failed to parse template %v %v, due to %v", namespace, key, err)
 	}
 	writer := new(bytes.Buffer)
 	err = temlate.Execute(writer, data)
