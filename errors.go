@@ -95,7 +95,7 @@ type UnknownFieldError string
 func (err UnknownFieldError) Error() string {
 	return string(err)
 }
-func (dec *Decoder) makeUnknownFieldErr(v interface{}, key string) error {
+func MakeUnknownFieldErr(v interface{}, key string) error {
 	return UnknownFieldError(
 		fmt.Sprintf(
 			unknownFieldErrorMsg,

@@ -177,7 +177,7 @@ func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
 {{.DecodingCases}}
 {{if .ErrOnUnknown}}
 	default:
-		return dec.makeUnknownFieldErr({{.Alias}}, k)
+		return gojay.MakeUnknownFieldErr({{.Alias}}, k)
 {{end}}
 	}
 	return nil
