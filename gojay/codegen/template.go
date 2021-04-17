@@ -171,9 +171,9 @@ func ({{.Receiver}}) IsNil() bool {
 }
 
 // UnmarshalJSONObject implements gojay's UnmarshalerJSONObject
-func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, k string) error {
+func ({{.Receiver}}) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 {{.InitEmbedded}}
-	switch k {
+	switch key {
 {{.DecodingCases}}	
 	}
 	return nil
