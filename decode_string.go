@@ -164,6 +164,7 @@ func (dec *Decoder) getString() (int, int, error) {
 	return 0, 0, dec.raiseInvalidJSONErr(dec.cursor)
 }
 
+// expecting the dec.cursor to be after the opening slash
 func (dec *Decoder) skipEscapedString() error {
 	start := dec.cursor
 	for ; dec.cursor < dec.length || dec.read(); dec.cursor++ {
@@ -173,9 +174,12 @@ func (dec *Decoder) skipEscapedString() error {
 			nSlash := dec.cursor - start
 			switch d {
 			case '"':
-				// nSlash must be odd
+				// since we expecting the start to be after the opening slash
+				// if nSlash is odd then the escaped string contains the quote
+				// if nSlash is even, the quote is outside the escaped string
 				if nSlash&1 != 1 {
-					return dec.raiseInvalidJSONErr(dec.cursor)
+					// return dec.raiseInvalidJSONErr(dec.cursor)
+					dec.cursor--
 				}
 				return nil
 			case 'u': // is unicode, we skip the following characters and place the cursor one one byte backward to avoid it breaking when returning to skipString
@@ -198,6 +202,7 @@ func (dec *Decoder) skipEscapedString() error {
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
 
+// expecting dec.cusror to be after the opening quote
 func (dec *Decoder) skipString() error {
 	for dec.cursor < dec.length || dec.read() {
 		switch dec.data[dec.cursor] {
