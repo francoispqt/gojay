@@ -45,7 +45,7 @@ Decoding is done through two different API similar to standard `encoding/json`:
 * [Decode](#decode-api)
 
 
-Example of basic stucture decoding with Unmarshal:
+Example of basic structure decoding with Unmarshal:
 ```go
 import "github.com/francoispqt/gojay"
 
