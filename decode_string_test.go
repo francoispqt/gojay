@@ -18,6 +18,12 @@ func TestDecoderString(t *testing.T) {
 		errType        interface{}
 	}{
 		{
+			name:           "windows paths escaped",
+			json:           `"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\"`,
+			expectedResult: `C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Data\\#innodb_temp\\`,
+			err:            false,
+		},
+		{
 			name:           "basic-string",
 			json:           `"string"`,
 			expectedResult: "string",
@@ -328,6 +334,12 @@ func TestDecoderStringNull(t *testing.T) {
 		errType        interface{}
 		resultIsNil    bool
 	}{
+		{
+			name:           "windows paths escaped",
+			json:           `"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\"`,
+			expectedResult: `C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Data\\#innodb_temp\\`,
+			err:            false,
+		},
 		{
 			name:           "basic-string",
 			json:           `"string"`,
@@ -690,8 +702,9 @@ func TestDecoderSkipEscapedStringError2(t *testing.T) {
 	dec := NewDecoder(strings.NewReader(`\"`))
 	defer dec.Release()
 	err := dec.skipEscapedString()
-	assert.NotNil(t, err, "Err must be nil")
-	assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+	assert.Nil(t, err, "Err must be nil")
+	// assert.IsType(t, InvalidJSONError(""), err, "err must be of type InvalidJSONError")
+	assert.Equal(t, 1, dec.cursor, "dec.cursor must be 2")
 }
 
 func TestDecoderSkipEscapedStringError3(t *testing.T) {
@@ -727,14 +740,14 @@ func TestSkipString(t *testing.T) {
 		errType        interface{}
 	}{
 		{
-			name:           "escape quote err",
+			name:           "escape quote err0",
 			json:           `test string \\" escaped"`,
 			expectedResult: ``,
-			err:            true,
-			errType:        InvalidJSONError(""),
+			err:            false,
+			// errType:        InvalidJSONError(""),
 		},
 		{
-			name:           "escape quote err",
+			name:           "escape quote err1",
 			json:           `test string \\\l escaped"`,
 			expectedResult: ``,
 			err:            true,

@@ -41,6 +41,18 @@ func TestDecodeEmbeddedJSONUnmarshalAPI(t *testing.T) {
 		err              bool
 	}{
 		{
+			name:             "windows paths escaped",
+			json:             []byte(`{"id":"someid","method":"getmydata","params":"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\", "more":123}`),
+			expectedEmbedded: `"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\"`,
+			err:              false,
+		},
+		{
+			name:             "windows paths escaped",
+			json:             []byte(`{"id":"someid","method":"getmydata","params":"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\jjjj", "more":123}`),
+			expectedEmbedded: `"C:\\\\ProgramData\\\\MySQL\\\\MySQL Server 8.0\\\\Data\\\\#innodb_temp\\\\jjjj"`,
+			err:              false,
+		},
+		{
 			name:             "decode-basic-string",
 			json:             []byte(`{"id":"someid","method":"getmydata","params":"raw data", "more":123}`),
 			expectedEmbedded: `"raw data"`,
