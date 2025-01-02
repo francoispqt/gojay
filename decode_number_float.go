@@ -115,12 +115,20 @@ func (dec *Decoder) getFloat() (float64, error) {
 			end = j
 			continue
 		case '.':
+			realEnd := dec.length - 1
+			for i := realEnd; i >= start; i-- {
+				if dec.data[i] == '0' {
+					realEnd = i
+				} else {
+					break
+				}
+			}
 			// we get part before decimal as integer
 			beforeDecimal := dec.atoi64(start, end)
 			// then we get part after decimal as integer
 			start = j + 1
 			// get number after the decimal point
-			for i := j + 1; i < dec.length || dec.read(); i++ {
+			for i := j + 1; i <= realEnd || dec.read(); i++ {
 				c := dec.data[i]
 				if isDigit(c) {
 					end = i

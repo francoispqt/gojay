@@ -20,6 +20,11 @@ func TestDecoderFloat64(t *testing.T) {
 		errType        interface{}
 	}{
 		{
+			name:           "basic-float10",
+			json:           "10.0000000000000000000",
+			expectedResult: 10,
+		},
+		{
 			name:           "basic-float",
 			json:           "1.1",
 			expectedResult: 1.1,
