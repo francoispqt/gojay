@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testSliceInts []int
+type testSliceInts []int64
 
 func (t *testSliceInts) UnmarshalJSONArray(dec *Decoder) error {
-	i := 0
-	if err := dec.AddInt(&i); err != nil {
+	var i int64
+	if err := dec.AddInt64(&i); err != nil {
 		return err
 	}
 	*t = append(*t, i)

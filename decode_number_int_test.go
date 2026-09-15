@@ -2,6 +2,7 @@ package gojay
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 	"testing"
@@ -67,8 +68,8 @@ func TestDecoderInt(t *testing.T) {
 		},
 		{
 			name:           "basic-big",
-			json:           "9223372036854775807",
-			expectedResult: 9223372036854775807,
+			json:           fmt.Sprintf("%d", math.MaxInt),
+			expectedResult: math.MaxInt,
 		},
 		{
 			name:           "basic-big-overflow",
@@ -135,8 +136,8 @@ func TestDecoderInt(t *testing.T) {
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp2",
-			json:           "5.01e+10",
-			expectedResult: 50100000000,
+			json:           "5.01e+08",
+			expectedResult: 501000000,
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp3",
@@ -369,8 +370,8 @@ func TestDecoderIntNull(t *testing.T) {
 		},
 		{
 			name:           "basic-big",
-			json:           "9223372036854775807",
-			expectedResult: 9223372036854775807,
+			json:           fmt.Sprintf("%d", math.MaxInt),
+			expectedResult: math.MaxInt,
 		},
 		{
 			name:           "basic-big-overflow",
@@ -437,8 +438,8 @@ func TestDecoderIntNull(t *testing.T) {
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp2",
-			json:           "5.01e+10",
-			expectedResult: 50100000000,
+			json:           "5.01e+08",
+			expectedResult: 501000000,
 		},
 		{
 			name:           "basic-exponent-positive-positive-exp3",
@@ -652,7 +653,7 @@ func TestDecoderInt64(t *testing.T) {
 		{
 			name:           "basic-big",
 			json:           "9223372036854775807",
-			expectedResult: 9223372036854775807,
+			expectedResult: math.MaxInt64,
 		},
 		{
 			name:           "basic-big-overflow",
@@ -981,7 +982,7 @@ func TestDecoderInt64Null(t *testing.T) {
 		{
 			name:           "basic-big",
 			json:           "9223372036854775807",
-			expectedResult: 9223372036854775807,
+			expectedResult: math.MaxInt64,
 		},
 		{
 			name:           "basic-big-overflow",

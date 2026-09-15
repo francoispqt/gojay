@@ -29,7 +29,7 @@ func TestEncoderNumberEncodeAPI(t *testing.T) {
 		assert.Nil(t, err, "Error should be nil")
 		assert.Equal(
 			t,
-			fmt.Sprintf("%d", math.MaxInt64),
+			fmt.Sprintf("%d", int64(math.MaxInt64)),
 			builder.String(),
 			"Result of marshalling is different as the one expected")
 	})
